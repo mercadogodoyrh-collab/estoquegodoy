@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#00532C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Contagem de Estoque — Mercado e Açougue Godoy</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    /* ============================================================
+       VERDE GODOY — trocar aqui muda o sistema inteiro.
+       Se o verde da marca for outro, substitua estes tres valores.
+       ============================================================ */
+    --brand:       #00713C;
+    --brand-dark:  #00532C;
+    --brand-soft:  #E3F1E8;
+
+    --paper: #F4F1E8; --paper-line: #E3DFD0; --ink: #1C1F1B; --ink-soft: #5B6259;
+    --panel: #FFFFFF; --border: #D9DCD3;
+
+    --venda: var(--brand); --venda-dark: var(--brand-dark); --venda-bg: var(--brand-soft);
+    --deposito: #9A6114; --deposito-dark: #74490F; --deposito-bg: #FAEEDC;
+    --danger: #A32626; --danger-bg: #FBE7E7; --ok: var(--brand); --ok-bg: var(--brand-soft);
+    --shadow: 0 1px 2px rgba(28,31,27,0.06), 0 6px 18px -10px rgba(28,31,27,0.28);
+
+    --tap: 48px;                       /* alvo minimo de toque */
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --nav-h: calc(60px + var(--safe-b));
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; overscroll-behavior-y:contain; }
+  body{
+    background: repeating-linear-gradient(180deg, transparent 0 27px, var(--paper-line) 27px 28px), var(--paper);
+    color:var(--ink); min-height:100vh; min-height:100dvh;
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  button, input, select{ font-family:inherit; touch-action:manipulation; }
+  .mono{ font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; letter-spacing:0.02em; }
+
+  /* ---------- Topo ---------- */
+  .topbar{ position:sticky; top:0; z-index:30; background:var(--brand-dark); color:#fff;
+    padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .brand{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .brand .name{ font-weight:800; letter-spacing:0.02em; text-transform:uppercase; font-size:15px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .brand .name .curto{ display:none; }
+  .brand .sub{ font-size:10.5px; color:#A9CDB8; letter-spacing:0.05em; text-transform:uppercase;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .conn-dot{ width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:5px; background:#8FA396; }
+  .conn-dot.ok{ background:#6FE39A; } .conn-dot.err{ background:#FF8A8A; }
+  .userbox{ display:flex; align-items:center; gap:8px; flex:none; }
+  .userbox .who{ text-align:right; line-height:1.25; font-size:11px; color:#A9CDB8; max-width:120px; }
+  .userbox .who b{ display:block; color:#fff; font-size:12.5px; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; }
+  .btn-logout{ background:rgba(255,255,255,0.14); color:#fff; border:none; border-radius:9px;
+    min-height:38px; padding:0 13px; font-size:12.5px; font-weight:700; cursor:pointer; flex:none; }
+
+  /* Abas: barra inferior no celular, topo no desktop */
+  .tabs{ display:flex; gap:4px; background:rgba(255,255,255,0.10); padding:4px; border-radius:11px; }
+  .tab-btn{ border:none; background:transparent; color:#C4DDCD; padding:9px 14px; border-radius:8px;
+    font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:7px; }
+  .tab-btn.active{ background:#fff; color:var(--brand-dark); }
+  .tab-btn svg{ width:17px; height:17px; flex:none; }
+  .tab-btn .rot{ display:inline; }
+
+  .wrap{ max-width:940px; margin:0 auto; padding:16px 14px 28px; }
+
+  /* ---------- Autenticação ---------- */
+  .auth-wrap{ max-width:420px; margin:0 auto; padding:28px 14px calc(40px + var(--safe-b)); }
+  .auth-card{ background:var(--panel); border:1px solid var(--border); border-radius:18px;
+    box-shadow:var(--shadow); overflow:hidden; border-top:5px solid var(--brand); }
+  .auth-head{ padding:22px 22px 4px; }
+  .auth-head .stage{ font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--brand); }
+  .auth-head h2{ margin:6px 0 5px; font-size:22px; }
+  .auth-head p{ margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.5; }
+  .auth-body{ padding:16px 22px calc(22px + var(--safe-b)); }
+  .field{ margin-bottom:14px; }
+  .field label{ font-size:12.5px; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:6px; }
+  /* 16px evita o zoom automatico do iOS ao focar */
+  .field input, .field select{ width:100%; min-height:var(--tap); padding:12px 13px;
+    border:1.5px solid var(--border); border-radius:11px; font-size:16px; color:var(--ink); background:#fff; }
+  .field select{ appearance:none; padding-right:38px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%235B6259' stroke-width='2' fill='none'/></svg>");
+    background-repeat:no-repeat; background-position:right 14px center; }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
+  .field .dica{ font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.45; }
+  .auth-msg{ font-size:13px; line-height:1.5; padding:11px 13px; border-radius:10px; margin-bottom:14px; display:none; }
+  .auth-msg.err{ display:block; background:var(--danger-bg); color:var(--danger); border:1px solid #EFCFCF; }
+  .auth-msg.ok{ display:block; background:var(--ok-bg); color:var(--brand-dark); border:1px solid #BFE0CC; }
+  .auth-switch{ text-align:center; font-size:13px; color:var(--ink-soft); margin-top:16px; }
+  .auth-switch a{ color:var(--brand); font-weight:700; cursor:pointer; text-decoration:underline;
+    display:inline-block; padding:8px 4px; }
+  .btn-full{ width:100%; min-height:var(--tap); padding:13px 14px; border-radius:12px; border:none;
+    font-weight:800; font-size:16px; cursor:pointer; background:var(--brand); color:#fff; }
+  .btn-full:active{ background:var(--brand-dark); }
+  .btn-full:disabled{ opacity:0.55; }
+
+  /* ---------- Busca + câmera ---------- */
+  .busca-sticky{ position:sticky; top:0; z-index:12; padding:12px 0 8px;
+    background:linear-gradient(var(--paper) 78%, rgba(244,241,232,0)); margin:-16px 0 0; }
+  .search-box{ background:var(--panel); border:1.5px solid var(--border); border-radius:14px;
+    padding:5px 5px 5px 13px; display:flex; align-items:center; gap:8px; box-shadow:var(--shadow); }
+  .search-box:focus-within{ border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
+  .search-box > .lupa{ flex:none; opacity:0.5; }
+  .search-box input{ flex:1; min-width:0; border:none; outline:none; background:transparent;
+    font-size:16px; padding:12px 2px; color:var(--ink); }
+  .clear-btn{ border:none; background:var(--paper-line); color:var(--ink-soft); width:30px; height:30px;
+    border-radius:50%; cursor:pointer; font-size:15px; display:none; flex:none; }
+  .scan-btn{ flex:none; width:var(--tap); height:var(--tap); border-radius:11px; border:none; cursor:pointer;
+    background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; }
+  .scan-btn:active{ background:var(--brand-dark); }
+  .search-meta{ font-size:12.5px; color:var(--ink-soft); margin:2px 2px 6px; }
+
+  /* ---------- Lista de produtos (cartão, não linha) ---------- */
+  .results{ display:flex; flex-direction:column; gap:10px; }
+  .prod{ background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:13px 14px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px; }
+  .prod-topo{ display:flex; align-items:flex-start; gap:10px; }
+  .prod .cod{ font-size:11px; color:#fff; background:var(--brand-dark); border-radius:6px;
+    padding:4px 7px; flex:none; font-weight:800; letter-spacing:0.03em; }
+  .prod .nome{ font-size:15.5px; font-weight:700; line-height:1.3; flex:1; min-width:0; }
+  .prod .meta{ font-size:12px; color:var(--ink-soft); display:flex; justify-content:space-between;
+    gap:10px; align-items:center; }
+  .prod .preco{ font-weight:800; color:var(--brand); font-size:13.5px; white-space:nowrap; }
+  .btn-contar{ width:100%; min-height:var(--tap); background:var(--brand); color:#fff; border:none;
+    border-radius:11px; font-size:15.5px; font-weight:800; cursor:pointer; letter-spacing:0.02em; }
+  .btn-contar:active{ background:var(--brand-dark); }
+  .empty-state{ text-align:center; padding:52px 22px; color:var(--ink-soft); font-size:13.5px; line-height:1.6; }
+  .empty-state .big{ font-size:16px; font-weight:700; color:var(--ink); margin-bottom:8px; }
+  .empty-state .ico{ font-size:34px; display:block; margin-bottom:10px; opacity:0.5; }
+
+  /* ---------- Modal / bottom sheet ---------- */
+  .overlay{ position:fixed; inset:0; background:rgba(16,20,17,0.55); z-index:100;
+    display:flex; align-items:flex-end; justify-content:center; }
+  .modal{ background:var(--panel); width:100%; max-width:520px; border-radius:20px 20px 0 0;
+    overflow:hidden; border-top:5px solid var(--brand); max-height:92dvh; overflow-y:auto;
+    animation:sobe 0.22s ease-out; padding-bottom:var(--safe-b); }
+  @keyframes sobe{ from{ transform:translateY(100%);} to{ transform:translateY(0);} }
+  .puxador{ width:40px; height:4px; border-radius:3px; background:var(--paper-line); margin:9px auto 0; }
+  .modal-head{ padding:14px 20px 10px; }
+  .modal-head .stage{ font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--brand); }
+  .modal-head h2{ margin:5px 0 3px; font-size:19px; line-height:1.3; }
+  .modal-head .barcode-line{ font-size:12px; color:var(--ink-soft); }
+  .modal-body{ padding:2px 20px 4px; }
+  .qty-grid{ display:grid; grid-template-columns:1fr; gap:6px; }
+  .qty-field{ margin:12px 0 4px; }
+  .qty-field label{ font-size:13px; font-weight:800; display:block; margin-bottom:8px; }
+  .qty-input-row{ display:flex; align-items:center; gap:9px; }
+  .qty-input-row button{ width:56px; height:56px; flex:none; border-radius:13px; border:1.5px solid var(--border);
+    background:#fff; font-size:26px; padding:0; cursor:pointer; color:var(--ink); font-weight:700; line-height:1; }
+  .qty-input-row button:active{ background:var(--paper-line); }
+  .qty-input-row input{ flex:1; min-width:0; text-align:center; font-size:26px; font-weight:800;
+    height:56px; padding:0 4px; border:1.5px solid var(--border); border-radius:13px;
+    font-family:"SFMono-Regular",Consolas,monospace; }
+  .qty-input-row input:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
+  .modal-foot{ display:flex; gap:10px; padding:16px 20px calc(18px + var(--safe-b)); }
+  .btn{ flex:1; min-height:var(--tap); padding:13px 14px; border-radius:12px; border:none;
+    font-weight:800; font-size:15.5px; cursor:pointer; }
+  .btn-ghost{ background:var(--paper-line); color:var(--ink); flex:0 0 34%; }
+  .btn-primary{ background:var(--brand); color:#fff; }
+  .btn-primary:active{ background:var(--brand-dark); }
+  .btn-primary:disabled{ opacity:0.55; }
+
+  .toast{ position:fixed; left:12px; right:12px; bottom:calc(16px + var(--safe-b)); background:var(--ink);
+    color:#fff; padding:13px 16px; border-radius:12px; font-size:14px; font-weight:600;
+    box-shadow:0 10px 30px rgba(0,0,0,0.32); opacity:0; transform:translateY(16px);
+    transition:all 0.22s ease; z-index:400; display:flex; gap:9px; align-items:center; pointer-events:none; }
+  .toast.show{ opacity:1; transform:translateY(0); }
+  .toast .dot{ width:9px; height:9px; border-radius:50%; background:#6FE39A; flex:none; }
+
+  /* ---------- Painéis admin ---------- */
+  .cards-row{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:14px; }
+  .card{ background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:12px 13px; box-shadow:var(--shadow); }
+  .card .label{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--ink-soft); font-weight:800; line-height:1.3; }
+  .card .value{ font-size:23px; font-weight:800; margin-top:3px; }
+  .card.venda .value{ color:var(--venda-dark); }
+  .card.deposito .value{ color:var(--deposito-dark); }
+  .card.alerta{ border-color:#EFCFCF; background:var(--danger-bg); }
+  .card.alerta .value{ color:var(--danger); }
+  .toolbar{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+  .btn-sm{ min-height:42px; padding:9px 14px; border-radius:10px; border:1px solid var(--border);
+    background:#fff; font-weight:700; font-size:13px; cursor:pointer; color:var(--ink); }
+  .btn-sm.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
+  .btn-sm.danger{ color:var(--danger); border-color:#EFCFCF; }
+  .btn-sm:disabled{ opacity:0.45; }
+  .toolbar input[type=date]{ min-height:42px; padding:8px 11px; border:1px solid var(--border);
+    border-radius:10px; font-size:14px; background:#fff; color:var(--ink); }
+  .table-wrap{ background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    overflow:hidden; box-shadow:var(--shadow); }
+  .table-scroll{ max-height:66vh; overflow:auto; -webkit-overflow-scrolling:touch; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  thead th{ text-align:left; padding:10px 12px; background:var(--brand-dark); color:#fff; font-size:10.5px;
+    text-transform:uppercase; letter-spacing:0.04em; position:sticky; top:0; white-space:nowrap; }
+  tbody td{ padding:10px 12px; border-top:1px solid var(--paper-line); }
+  tbody tr:nth-child(even){ background:rgba(0,0,0,0.014); }
+  tr.falta{ background:var(--danger-bg) !important; }
+  .pill{ display:inline-block; padding:3px 8px; border-radius:7px; font-size:11.5px; font-weight:800; }
+  .pill.venda{ background:var(--venda-bg); color:var(--venda-dark); }
+  .pill.deposito{ background:var(--deposito-bg); color:var(--deposito-dark); }
+  .pill.ok{ background:var(--ok-bg); color:var(--brand-dark); }
+  .pill.nao{ background:var(--danger-bg); color:var(--danger); }
+  .pill.admin{ background:var(--deposito-bg); color:var(--deposito-dark); }
+  .pill.neutro{ background:#ECEDE7; color:var(--ink-soft); }
+  .codigo-chip{ font-family:"SFMono-Regular",Consolas,monospace; font-weight:800; letter-spacing:0.14em;
+    background:var(--brand-soft); color:var(--brand-dark); padding:5px 9px; border-radius:8px; font-size:14px;
+    display:inline-block; }
+  .report-empty{ text-align:center; padding:46px 20px; color:var(--ink-soft); }
+  .spinner{ width:17px; height:17px; border-radius:50%; border:2.5px solid rgba(0,0,0,0.12);
+    border-top-color:var(--brand); animation:spin 0.8s linear infinite; display:inline-block; vertical-align:middle; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .hint{ font-size:13px; color:var(--ink-soft); line-height:1.6; margin:0 0 14px;
+    background:var(--brand-soft); border-radius:12px; padding:12px 14px; }
+  .hint b{ color:var(--brand-dark); }
+
+  /* ---------- Navegação inferior (admin, no celular) ---------- */
+  .bottom-nav{ display:none; position:fixed; left:0; right:0; bottom:0; z-index:40;
+    background:var(--panel); border-top:1px solid var(--border);
+    padding:6px 4px calc(6px + var(--safe-b)); }
+  .bottom-nav .tab-btn{ flex:1; flex-direction:column; gap:3px; padding:6px 2px; border-radius:10px;
+    color:var(--ink-soft); font-size:10.5px; min-height:52px; justify-content:center; }
+  .bottom-nav .tab-btn.active{ background:var(--brand-soft); color:var(--brand-dark); }
+  .bottom-nav .tab-btn svg{ width:21px; height:21px; }
+
+  /* ---------- Scanner ---------- */
+  .scanner-shell{ position:fixed; inset:0; background:#08120C; z-index:300; display:flex;
+    flex-direction:column; align-items:center; justify-content:center; }
+  .scanner-shell video{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
+  .scan-frame{ position:relative; width:min(84vw,340px); height:min(38vh,220px); border-radius:16px;
+    box-shadow:0 0 0 100vmax rgba(0,0,0,0.6); border:3px solid rgba(255,255,255,0.92); }
+  .scan-frame::after{ content:''; position:absolute; left:10px; right:10px; top:50%; height:2.5px;
+    background:#6FE39A; box-shadow:0 0 14px #6FE39A; animation:scanline 1.8s ease-in-out infinite; }
+  @keyframes scanline{ 0%,100%{ transform:translateY(-30%);} 50%{ transform:translateY(30%);} }
+  .scan-hud{ position:absolute; left:0; right:0; bottom:0; padding:20px 18px calc(28px + var(--safe-b));
+    text-align:center; color:#fff; z-index:2; }
+  .scan-hud p{ margin:0 0 14px; font-size:14px; line-height:1.5; text-shadow:0 1px 5px rgba(0,0,0,0.9); }
+  .scan-hud button{ background:rgba(255,255,255,0.18); color:#fff; border:1.5px solid rgba(255,255,255,0.4);
+    min-height:var(--tap); padding:12px 30px; border-radius:12px; font-weight:800; font-size:15px; cursor:pointer; }
+  .scan-erro{ position:relative; z-index:2; max-width:340px; margin:0 18px; background:var(--panel);
+    color:var(--ink); border-radius:16px; padding:22px 22px calc(22px + var(--safe-b)); text-align:center; }
+  .scan-erro h3{ margin:0 0 9px; font-size:17px; }
+  .scan-erro p{ margin:0 0 18px; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+
+  /* ================= CELULAR / RETRATO ================= */
+  @media (max-width:760px){
+    .brand .name .completo{ display:none; }
+    .brand .name .curto{ display:inline; }
+    .topbar .tabs{ display:none; }          /* abas vão para a barra inferior */
+    .bottom-nav.ligado{ display:flex; }
+    .wrap.com-nav{ padding-bottom:calc(var(--nav-h) + 16px); }
+    .cards-row{ gap:8px; }
+    .card .value{ font-size:21px; }
+
+    /* Tabelas viram cartões empilhados — tabela em retrato é ilegível */
+    .table-wrap{ background:transparent; border:none; box-shadow:none; border-radius:0; }
+    .table-scroll{ max-height:none; overflow:visible; }
+    table, tbody, tr, td{ display:block; width:100%; }
+    thead{ display:none; }
+    tbody tr{ background:var(--panel) !important; border:1px solid var(--border); border-radius:14px;
+      margin-bottom:10px; padding:6px 14px 10px; box-shadow:var(--shadow); }
+    tbody tr.falta{ border-color:#E5B4B4; border-left:5px solid var(--danger); }
+    tbody td{ border:none; border-top:1px solid var(--paper-line); padding:9px 0;
+      display:flex; justify-content:space-between; align-items:center; gap:14px; text-align:right; }
+    tbody td:first-child{ border-top:none; padding-top:10px; font-size:15px; }
+    tbody td::before{ content:attr(data-label); font-size:10.5px; font-weight:800; text-transform:uppercase;
+      letter-spacing:0.04em; color:var(--ink-soft); text-align:left; flex:none; }
+    tbody td.acoes{ flex-wrap:wrap; justify-content:flex-start; gap:8px; }
+    tbody td.acoes::before{ width:100%; margin-bottom:2px; }
+    tbody td.acoes .btn-sm{ flex:1; }
+  }
+  @media (min-width:761px){
+    .cards-row{ grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); }
+    .qty-grid{ grid-template-columns:1fr 1fr; gap:16px; }
+    .overlay{ align-items:center; padding:16px; }
+    .modal{ border-radius:18px; animation:none; }
+    .puxador{ display:none; }
+    .toast{ left:50%; right:auto; transform:translateX(-50%) translateY(16px); }
+    .toast.show{ transform:translateX(-50%) translateY(0); }
+    .busca-sticky{ position:static; background:none; margin:0; padding:0 0 8px; }
+  }
+  /* Paisagem em telas baixas: enxuga alturas para caber o teclado */
+  @media (max-height:520px) and (orientation:landscape){
+    .qty-input-row button, .qty-input-row input{ height:46px; }
+    .qty-input-row input{ font-size:21px; }
+    .auth-wrap{ padding-top:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="name">
+      <span class="completo">MERCADO E AÇOUGUE GODOY</span>
+      <span class="curto">MERCADO GODOY</span>
+    </span>
+    <span class="sub"><span class="conn-dot" id="connDot"></span><span id="connLabel">conectando…</span></span>
+  </div>
+  <div class="tabs" id="tabsBox" style="display:none;">
+    <button class="tab-btn active" id="tabLancT"  onclick="setView('lancamento')">Contagem</button>
+    <button class="tab-btn" id="tabRelT"   onclick="setView('relatorio')"     style="display:none;">Relatório</button>
+    <button class="tab-btn" id="tabMonT"   onclick="setView('monitoramento')" style="display:none;">Monitoramento</button>
+    <button class="tab-btn" id="tabColabT" onclick="setView('colaboradores')" style="display:none;">Colaboradores</button>
+  </div>
+  <div class="userbox" id="userBox" style="display:none;">
+    <div class="who"><b id="uName">—</b><span id="uRole">—</span></div>
+    <button class="btn-logout" onclick="doLogout()">Sair</button>
+  </div>
+</div>
+
+<!-- ================= AUTENTICAÇÃO ================= -->
+<div class="auth-wrap" id="viewAuth" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-head">
+      <div class="stage" id="authStage">Acesso</div>
+      <h2 id="authTitle">Entrar</h2>
+      <p id="authSubtitle">Escolha seu nome e digite sua senha.</p>
+    </div>
+    <div class="auth-body">
+      <div class="auth-msg" id="authMsg"></div>
+      <div class="field">
+        <label for="selNome">Colaborador</label>
+        <select id="selNome"><option value="">carregando…</option></select>
+      </div>
+      <div class="field" id="fieldCodigo" style="display:none;">
+        <label for="inCodigo">Código de administrador</label>
+        <input id="inCodigo" type="text" autocomplete="off" inputmode="text"
+               placeholder="Ex.: K7M2PQRT" style="text-transform:uppercase; letter-spacing:0.12em; font-weight:700;">
+        <div class="dica">Só a conta de administrador pede código. Ele serve uma vez.</div>
+      </div>
+      <div class="field">
+        <label for="inSenha" id="lblSenha">Senha</label>
+        <input id="inSenha" type="password" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <div class="field" id="fieldSenha2" style="display:none;">
+        <label for="inSenha2">Repita a senha</label>
+        <input id="inSenha2" type="password" autocomplete="new-password" placeholder="••••••••">
+      </div>
+      <button class="btn-full" id="btnAuth" onclick="submitAuth()">Entrar</button>
+      <div class="auth-switch" id="authSwitch"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div class="wrap" id="viewApp" style="display:none;">
+
+  <!-- ---- Contagem ---- -->
+  <div id="viewLancamento">
+    <div class="busca-sticky">
+      <div class="search-box">
+        <svg class="lupa" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+        <input id="searchInput" type="text" inputmode="search" enterkeyhint="search"
+               placeholder="Nome, código ou barras…" autocomplete="off" disabled>
+        <button class="clear-btn" id="clearBtn" onclick="clearSearch()" aria-label="Limpar">✕</button>
+        <button class="scan-btn" id="scanBtn" onclick="abrirScanner()" aria-label="Ler código de barras">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 8V6.5A2.5 2.5 0 0 1 5.5 4H7"/><path d="M17 4h1.5A2.5 2.5 0 0 1 21 6.5V8"/>
+            <path d="M21 16v1.5a2.5 2.5 0 0 1-2.5 2.5H17"/><path d="M7 20H5.5A2.5 2.5 0 0 1 3 17.5V16"/>
+            <circle cx="12" cy="12" r="3.2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="search-meta" id="searchMeta"></div>
+    </div>
+    <div class="results" id="resultsList"></div>
+  </div>
+
+  <!-- ---- Relatório (admin) ---- -->
+  <div id="viewRelatorio" style="display:none;">
+    <div class="cards-row">
+      <div class="card"><div class="label">Produtos contados</div><div class="value" id="repTotal">0</div></div>
+      <div class="card venda"><div class="label">Un. Área de Venda</div><div class="value" id="repVenda">0</div></div>
+      <div class="card deposito"><div class="label">Un. Depósito</div><div class="value" id="repDeposito">0</div></div>
+      <div class="card"><div class="label">Ainda pendentes</div><div class="value" id="repPend">—</div></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn-sm primary" onclick="exportCSV()">⬇ Exportar CSV</button>
+      <button class="btn-sm" onclick="refreshReport()">↻ Atualizar</button>
+      <button class="btn-sm danger" onclick="clearReport()">🗑 Limpar contagem</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Código</th><th>Produto</th><th>Barras</th><th>Venda</th><th>Depósito</th><th>Total</th><th>Contado por</th><th>Quando</th></tr></thead>
+          <tbody id="repBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="report-empty" id="repEmpty" style="display:none;">Nenhum produto contado ainda.</div>
+  </div>
+
+  <!-- ---- Monitoramento (admin) ---- -->
+  <div id="viewMonitoramento" style="display:none;">
+    <p class="hint">Meta: <b>no mínimo 1 contagem por colaborador por dia</b>. O painel zera sozinho à meia-noite
+       (horário de Brasília) — quem ainda não lançou nada aparece em vermelho.</p>
+    <div class="cards-row">
+      <div class="card"><div class="label">Colaboradores</div><div class="value" id="monTotal">0</div></div>
+      <div class="card"><div class="label">Cumpriram</div><div class="value" id="monOk" style="color:var(--brand);">0</div></div>
+      <div class="card alerta"><div class="label">Não lançaram</div><div class="value" id="monFalta">0</div></div>
+      <div class="card"><div class="label">Contagens no dia</div><div class="value" id="monContagens">0</div></div>
+    </div>
+    <div class="toolbar">
+      <input type="date" id="monData" onchange="refreshMonitor()" aria-label="Dia">
+      <button class="btn-sm" onclick="monHoje()">Hoje</button>
+      <button class="btn-sm" onclick="refreshMonitor()">↻ Atualizar</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Colaborador</th><th>Situação</th><th>Contagens</th><th>Unidades</th><th>Última</th><th>Senha</th></tr></thead>
+        <tbody id="monBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ---- Colaboradores (admin) ---- -->
+  <div id="viewColaboradores" style="display:none;">
+    <p class="hint">O nome já vem cadastrado. Entregue o <b>código de primeiro acesso</b> a cada pessoa —
+       ela escolhe o próprio nome, digita o código e cria a senha. O código some daqui assim que a senha for criada.</p>
+    <div class="toolbar"><button class="btn-sm" onclick="refreshColabs()">↻ Atualizar</button></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nome</th><th>Papel</th><th>Senha</th><th>Código 1º acesso</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody id="colabBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ================= NAV INFERIOR (admin no celular) ================= -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="tab-btn active" id="tabLancB" onclick="setView('lancamento')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+    <span>Contagem</span>
+  </button>
+  <button class="tab-btn" id="tabRelB" onclick="setView('relatorio')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 14v3M12 10v7M16 7v10"/></svg>
+    <span>Relatório</span>
+  </button>
+  <button class="tab-btn" id="tabMonB" onclick="setView('monitoramento')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 8-4-16-3 8H4"/></svg>
+    <span>Monitor</span>
+  </button>
+  <button class="tab-btn" id="tabColabB" onclick="setView('colaboradores')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.9M18 20a6.4 6.4 0 0 0-2-4.7"/></svg>
+    <span>Equipe</span>
+  </button>
+</nav>
+
+<!-- ================= SCANNER ================= -->
+<div class="scanner-shell" id="scannerShell" style="display:none;">
+  <video id="scanVideo" playsinline muted></video>
+  <div class="scan-frame" id="scanFrame"></div>
+  <div class="scan-hud" id="scanHud">
+    <p id="scanStatus">Aponte para o código de barras do produto</p>
+    <button onclick="fecharScanner()">Cancelar</button>
+  </div>
+  <div class="scan-erro" id="scanErro" style="display:none;">
+    <h3 id="scanErroTitulo">Câmera indisponível</h3>
+    <p id="scanErroTexto"></p>
+    <button class="btn-full" onclick="fecharScanner()">Fechar</button>
+  </div>
+</div>
+
+<!-- ================= MODAL DE CONTAGEM ================= -->
+<div class="overlay" id="modalLancamento" style="display:none;">
+  <div class="modal">
+    <div class="puxador"></div>
+    <div class="modal-head">
+      <div class="stage">Lançar contagem</div>
+      <h2 id="mvNome">—</h2>
+      <div class="barcode-line mono" id="mvBarcode">—</div>
+    </div>
+    <div class="modal-body">
+      <div class="qty-grid">
+        <div class="qty-field">
+          <label style="color:var(--venda-dark);">● Área de Venda</label>
+          <div class="qty-input-row">
+            <button onclick="stepQty('venda',-1)" aria-label="Menos">−</button>
+            <input id="qtyVenda" type="number" min="0" value="0" inputmode="numeric" pattern="[0-9]*">
+            <button onclick="stepQty('venda',1)" aria-label="Mais">+</button>
+          </div>
+        </div>
+        <div class="qty-field">
+          <label style="color:var(--deposito-dark);">● Depósito</label>
+          <div class="qty-input-row">
+            <button onclick="stepQty('deposito',-1)" aria-label="Menos">−</button>
+            <input id="qtyDeposito" type="number" min="0" value="0" inputmode="numeric" pattern="[0-9]*">
+            <button onclick="stepQty('deposito',1)" aria-label="Mais">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModals()">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirm" onclick="confirmLaunch()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // A chave publishable e publica por natureza e aqui e inofensiva: o RLS exige
+  // um colaborador ATIVO com acesso_estoque para ler ou escrever qualquer coisa.
+  // RH e Caixa ficam noutro modulo — contador nao alcanca aquelas tabelas.
+  var DEFAULT_SUPABASE_URL = "https://vieafcgghboxwhultile.supabase.co";
+  var DEFAULT_SUPABASE_KEY = "sb_publishable_HaMcgvr_2xmWYotvzetmVA_yscPz2eT";
+
+  var supa = null, me = null, currentProduct = null;
+  var authMode = 'login', searchDebounce = null;
+  var MAX_RESULTS = 100;
+  var nomesCache = [];
+
+  function el(id){ return document.getElementById(id); }
+  function fmtMoney(v){ if(v===null||v===undefined||isNaN(v)) return "-"; return "R$ " + Number(v).toFixed(2).replace('.', ','); }
+  function fmtBarcode(b){ return b ? b : "sem código"; }
+  function fmtDate(iso){ if(!iso) return "—"; var d=new Date(iso); return d.toLocaleDateString('pt-BR')+" "+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+  function fmtHora(iso){ if(!iso) return "—"; return new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+  function escapeHtml(s){ return (s||"").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function num(v){ return (v||0).toLocaleString('pt-BR'); }
+
+  // Contextos que bloqueiam localStorage (aba anonima, webview de app) fariam
+  // a pagina abrir em branco. Aqui o app cai para memoria e segue funcionando.
+  var memStore = {};
+  var hasLS = (function(){ try{ window.localStorage.setItem('__t','1'); window.localStorage.removeItem('__t'); return true; }catch(e){ return false; } })();
+  var store = {
+    getItem: function(k){ try{ return hasLS ? window.localStorage.getItem(k) : (k in memStore ? memStore[k] : null); }catch(e){ return null; } },
+    setItem: function(k,v){ try{ if(hasLS){ window.localStorage.setItem(k,v); } else { memStore[k]=String(v); } }catch(e){ memStore[k]=String(v); } },
+    removeItem: function(k){ try{ if(hasLS){ window.localStorage.removeItem(k); } else { delete memStore[k]; } }catch(e){ delete memStore[k]; } }
+  };
+
+  function setConn(ok, label){
+    el('connDot').className = 'conn-dot ' + (ok ? 'ok' : 'err');
+    el('connLabel').textContent = label;
+  }
+
+  (function initClient(){
+    // O app ANTIGO gravava a URL do banco nestas chaves via o banner "Conectar".
+    // Como os dois arquivos rodam em file:// e dividem o mesmo localStorage,
+    // um valor velho aqui sequestrava a conexao para o banco anterior — e nem
+    // recarregar resolvia. Este app nao tem mais esse banner, entao a chave so
+    // pode atrapalhar: limpa o resto e usa sempre as constantes acima.
+    try{
+      window.localStorage.removeItem('estoque_supabase_url');
+      window.localStorage.removeItem('estoque_supabase_key');
+    }catch(e){}
+
+    var url = DEFAULT_SUPABASE_URL;
+    var key = DEFAULT_SUPABASE_KEY;
+    try{
+      supa = window.supabase.createClient(url, key, {
+        auth: { storage: store, persistSession: true, autoRefreshToken: true }
+      });
+    }catch(e){ setConn(false, 'erro de configuração'); return; }
+    supa.auth.onAuthStateChange(function(_e, s){ routeSession(s); });
+    supa.auth.getSession().then(function(r){ routeSession(r.data ? r.data.session : null); });
+  })();
+
+  // ---------- Roteamento ----------
+  function showScreen(which){
+    el('viewAuth').style.display = which==='auth' ? 'block':'none';
+    el('viewApp').style.display  = which==='app'  ? 'block':'none';
+    el('userBox').style.display  = which==='app'  ? 'flex':'none';
+  }
+
+  function routeSession(session){
+    if(!session){
+      me = null;
+      setConn(false, 'não autenticado');
+      el('tabsBox').style.display = 'none';
+      el('bottomNav').classList.remove('ligado');
+      el('viewApp').classList.remove('com-nav');
+      showScreen('auth');
+      carregarNomes();
+      return;
+    }
+    supa.from('colaboradores').select('id,nome,papel,ativo').eq('user_id', session.user.id).maybeSingle()
+      .then(function(res){
+        if(res.error || !res.data || !res.data.ativo){
+          setConn(false, 'acesso não liberado');
+          showToast(res.error ? ('Erro: '+res.error.message) : 'Seu acesso está inativo. Fale com o administrador.', true);
+          supa.auth.signOut();
+          return;
+        }
+        me = res.data;
+        var admin = me.papel === 'admin';
+        el('uName').textContent = me.nome;
+        el('uRole').textContent = admin ? 'administrador' : 'contagem';
+
+        // Abas só existem para o administrador
+        el('tabsBox').style.display = admin ? 'flex' : 'none';
+        ['tabRelT','tabMonT','tabColabT'].forEach(function(id){
+          el(id).style.display = admin ? 'flex' : 'none';
+        });
+        el('bottomNav').classList.toggle('ligado', admin);
+        el('viewApp').classList.toggle('com-nav', admin);
+
+        setConn(true, admin ? 'administrador' : 'pronto para contar');
+        el('searchInput').disabled = false;
+        showScreen('app');
+        setView('lancamento');
+      });
+  }
+
+  // ---------- Autenticação ----------
+  function authMsg(text, kind){
+    var m = el('authMsg');
+    if(!text){ m.className='auth-msg'; m.textContent=''; return; }
+    m.className = 'auth-msg ' + (kind||'err');
+    m.textContent = text;
+  }
+
+  function carregarNomes(){
+    supa.rpc('nomes_login').then(function(res){
+      if(res.error){
+        var host = DEFAULT_SUPABASE_URL.replace(/^https?:\/\//,'').split('.')[0];
+        el('selNome').innerHTML = '<option value="">erro ao carregar</option>';
+        setConn(false, 'sem conexão — banco ' + host);
+        // Mostrar o banco no erro: se um dia o app apontar para o projeto
+        // errado, a mensagem entrega o culpado em vez de esconder.
+        authMsg('Não foi possível carregar a lista (banco ' + host + '): ' + res.error.message);
+        return;
+      }
+      nomesCache = res.data || [];
+      setConn(false, 'não autenticado');
+      // Enquanto ninguem tiver criado senha, a tela de "Entrar" abriria
+      // vazia e pareceria quebrada. Cai direto no primeiro acesso.
+      if(authMode === 'login' && !nomesCache.some(function(c){ return c.tem_senha; })){
+        setAuthMode('primeiro');
+        return;   // setAuthMode ja preenche o seletor
+      }
+      preencherSelect();
+    });
+  }
+
+  function preencherSelect(){
+    var sel = el('selNome');
+    var lista = authMode === 'primeiro'
+      ? nomesCache.filter(function(c){ return !c.tem_senha; })
+      : nomesCache.filter(function(c){ return c.tem_senha; });
+    if(!lista.length){
+      sel.innerHTML = '<option value="">' +
+        (authMode === 'primeiro'
+          ? 'todos já criaram senha — use Entrar'
+          : 'ninguém criou senha ainda — use Primeiro acesso') + '</option>';
+      return;
+    }
+    var html = '<option value="">selecione…</option>';
+    lista.forEach(function(c){
+      html += '<option value="'+escapeHtml(c.login)+'" data-nome="'+escapeHtml(c.nome)+'"' +
+              ' data-codigo="'+(c.exige_codigo ? '1' : '0')+'">'+escapeHtml(c.nome)+'</option>';
+    });
+    sel.innerHTML = html;
+    ajustarCampoCodigo();
+  }
+
+  // Contador nao usa codigo: escolhe o nome e cria a senha. So a conta de
+  // administrador exige codigo, porque e a que le relatorio e monitoramento.
+  function exigeCodigo(){
+    var sel = el('selNome');
+    if(authMode !== 'primeiro' || !sel.selectedOptions.length) return false;
+    return sel.selectedOptions[0].getAttribute('data-codigo') === '1';
+  }
+
+  function ajustarCampoCodigo(){
+    el('fieldCodigo').style.display = exigeCodigo() ? 'block' : 'none';
+  }
+
+  window.setAuthMode = function(mode){
+    authMode = mode;
+    authMsg('');
+    var p = mode === 'primeiro';
+    el('authStage').textContent    = p ? 'Primeiro acesso' : 'Acesso';
+    el('authTitle').textContent    = p ? 'Criar minha senha' : 'Entrar';
+    el('authSubtitle').textContent = p
+      ? 'Escolha seu nome e crie a sua senha. Você só faz isso uma vez.'
+      : 'Escolha seu nome e digite sua senha.';
+    el('fieldSenha2').style.display = p ? 'block':'none';
+    el('lblSenha').textContent = p ? 'Crie uma senha (mínimo 6 caracteres)' : 'Senha';
+    el('inSenha').setAttribute('autocomplete', p ? 'new-password' : 'current-password');
+    el('btnAuth').textContent = p ? 'Criar senha e entrar' : 'Entrar';
+    el('authSwitch').innerHTML = p
+      ? 'Já tem senha? <a onclick="setAuthMode(\'login\')">Entrar</a>'
+      : 'Primeiro acesso? <a onclick="setAuthMode(\'primeiro\')">Criar minha senha</a>';
+    el('inSenha').value=''; el('inSenha2').value=''; el('inCodigo').value='';
+    preencherSelect();
+  };
+
+  window.submitAuth = function(){
+    var sel = el('selNome'), login = sel.value;
+    var nome = sel.selectedOptions.length ? sel.selectedOptions[0].getAttribute('data-nome') : '';
+    var senha = el('inSenha').value, btn = el('btnAuth');
+
+    if(!login){ authMsg('Selecione seu nome.'); return; }
+    if(!senha){ authMsg('Digite a senha.'); return; }
+
+    if(authMode === 'primeiro'){
+      var codigo = el('inCodigo').value.trim().toUpperCase();
+      if(exigeCodigo() && !codigo){ authMsg('Digite o código de administrador.'); return; }
+      if(senha.length < 6){ authMsg('A senha precisa ter ao menos 6 caracteres.'); return; }
+      if(senha !== el('inSenha2').value){ authMsg('As duas senhas não conferem.'); return; }
+      btn.disabled = true; btn.textContent = 'Criando…';
+      supa.rpc('definir_senha', { p_nome:nome, p_senha:senha, p_codigo:(codigo || null) }).then(function(res){
+        if(res.error){
+          btn.disabled = false; btn.textContent = 'Criar senha e entrar';
+          authMsg(limparErro(res.error.message));
+          return;
+        }
+        entrar(res.data || login, senha, btn, 'Criar senha e entrar');
+      });
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'Entrando…';
+    entrar(login, senha, btn, 'Entrar');
+  };
+
+  function entrar(login, senha, btn, rotulo){
+    supa.auth.signInWithPassword({ email: login, password: senha }).then(function(res){
+      btn.disabled = false; btn.textContent = rotulo;
+      if(res.error){
+        var m = res.error.message || '';
+        authMsg(/Invalid login credentials/i.test(m) ? 'Senha incorreta.' : limparErro(m));
+        return;
+      }
+      el('inSenha').value=''; el('inSenha2').value=''; el('inCodigo').value='';
+    });
+  }
+
+  function limparErro(msg){
+    return String(msg || 'Erro inesperado.')
+      .replace(/^.*?(?:P0001|ERROR):\s*/i, '')
+      .replace(/\s*CONTEXT:[\s\S]*$/i, '');
+  }
+
+  window.doLogout = function(){
+    supa.auth.signOut().then(function(){
+      me = null; setAuthMode('login'); showScreen('auth'); carregarNomes();
+    });
+  };
+
+  ['inSenha','inSenha2','inCodigo'].forEach(function(id){
+    el(id).addEventListener('keydown', function(e){ if(e.key === 'Enter') submitAuth(); });
+  });
+  el('selNome').addEventListener('change', function(){ authMsg(''); ajustarCampoCodigo(); });
+
+  // ---------- Busca ----------
+  var searchInput = el('searchInput'), clearBtn = el('clearBtn');
+  searchInput.addEventListener('input', function(){
+    clearBtn.style.display = searchInput.value ? 'block' : 'none';
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(runSearch, 220);
+  });
+  searchInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); searchInput.blur(); runSearch(); }
+  });
+
+  window.clearSearch = function(){
+    searchInput.value=''; clearBtn.style.display='none'; runSearch(); searchInput.focus();
+  };
+
+  function runSearch(){
+    if(!supa || !me) return;
+    var raw = searchInput.value.trim();
+    var lista = el('resultsList'), meta = el('searchMeta');
+
+    if(raw.length < 2){
+      lista.innerHTML = '<div class="empty-state"><span class="ico">🔍</span>' +
+        '<div class="big">Busque o produto para contar</div>' +
+        'Digite ao menos 2 caracteres — ou toque na câmera para ler o código de barras.</div>';
+      meta.innerHTML = '';
+      return;
+    }
+
+    meta.innerHTML = '<span class="spinner"></span> buscando…';
+    var q = raw.replace(/[%,]/g, '');
+    var isNum = /^[0-9]+$/.test(q);
+    var orFilter = isNum
+      ? 'codigo.eq.'+q+',codigo_barras.ilike.%'+q+'%,nome.ilike.%'+q+'%'
+      : 'nome.ilike.%'+q+'%,codigo_barras.ilike.%'+q+'%';
+
+    supa.from('produtos')
+      .select('id,codigo,nome,codigo_barras,preco', {count:'exact'})
+      .eq('lancado', false).or(orFilter)
+      .order('nome', {ascending:true}).limit(MAX_RESULTS)
+      .then(function(res){
+        if(res.error){ meta.textContent = 'Erro na busca: ' + res.error.message; return; }
+        var total = res.count || res.data.length;
+        meta.textContent = total === 0 ? 'Nenhum produto pendente encontrado.'
+          : (total > MAX_RESULTS ? 'Mostrando '+MAX_RESULTS+' de '+num(total)+' — refine a busca.'
+                                 : num(total) + (total===1 ? ' resultado' : ' resultados'));
+        renderResults(res.data);
+      });
+  }
+
+  function renderResults(list){
+    var lista = el('resultsList');
+    if(!list.length){ lista.innerHTML = ''; return; }
+    var html = '';
+    for(var i=0;i<list.length;i++){
+      var p = list[i];
+      html += '<div class="prod">' +
+        '<div class="prod-topo">' +
+          '<span class="cod mono">'+escapeHtml(p.codigo)+'</span>' +
+          '<div class="nome">'+escapeHtml(p.nome)+'</div>' +
+        '</div>' +
+        '<div class="meta"><span class="mono">'+escapeHtml(fmtBarcode(p.codigo_barras))+'</span>' +
+        '<span class="preco">'+fmtMoney(p.preco)+'</span></div>' +
+        '<button class="btn-contar" data-idx="'+i+'">Contar</button>' +
+        '</div>';
+    }
+    lista.innerHTML = html;
+    lista.querySelectorAll('.btn-contar').forEach(function(b){
+      b.addEventListener('click', function(){
+        abrirModal(list[parseInt(this.getAttribute('data-idx'),10)]);
+      });
+    });
+  }
+
+  // ---------- Modal de contagem ----------
+  function abrirModal(p){
+    currentProduct = p;
+    el('qtyVenda').value = 0; el('qtyDeposito').value = 0;
+    el('mvNome').textContent = p.nome;
+    el('mvBarcode').textContent = 'Cód: '+p.codigo+'  ·  Barras: '+fmtBarcode(p.codigo_barras);
+    el('modalLancamento').style.display = 'flex';
+  }
+  window.closeModals = function(){ el('modalLancamento').style.display='none'; currentProduct=null; };
+  window.stepQty = function(which, d){
+    var e = el(which==='venda' ? 'qtyVenda' : 'qtyDeposito');
+    e.value = Math.max(0, (parseInt(e.value,10)||0) + d);
+  };
+
+  window.confirmLaunch = function(){
+    if(!currentProduct || !supa) return;
+    var qv = Math.max(0, parseInt(el('qtyVenda').value,10) || 0);
+    var qd = Math.max(0, parseInt(el('qtyDeposito').value,10) || 0);
+    var btn = el('btnConfirm');
+    btn.disabled = true; btn.textContent = 'Salvando…';
+    supa.rpc('lancar_contagem', { p_produto_id: currentProduct.id, p_venda: qv, p_deposito: qd })
+      .then(function(res){
+        btn.disabled = false; btn.textContent = 'Confirmar';
+        if(res.error){ showToast(limparErro(res.error.message), true); return; }
+        var nome = currentProduct.nome;
+        closeModals(); runSearch();
+        if(navigator.vibrate){ try{ navigator.vibrate(40); }catch(e){} }
+        showToast('Contado: ' + nome);
+      });
+  };
+
+  // ---------- Toast ----------
+  var toastTimer = null;
+  function showToast(msg, isErr){
+    var t = el('toast');
+    el('toastMsg').textContent = msg;
+    t.querySelector('.dot').style.background = isErr ? '#FF8A8A' : '#6FE39A';
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+  }
+
+  // ---------- Views ----------
+  window.setView = function(v){
+    if(v !== 'lancamento' && (!me || me.papel !== 'admin')) return;
+    el('viewLancamento').style.display    = v==='lancamento'    ? 'block':'none';
+    el('viewRelatorio').style.display     = v==='relatorio'     ? 'block':'none';
+    el('viewMonitoramento').style.display = v==='monitoramento' ? 'block':'none';
+    el('viewColaboradores').style.display = v==='colaboradores' ? 'block':'none';
+    [['lancamento','tabLanc'],['relatorio','tabRel'],['monitoramento','tabMon'],['colaboradores','tabColab']]
+      .forEach(function(par){
+        var on = v === par[0];
+        el(par[1]+'T').classList.toggle('active', on);
+        el(par[1]+'B').classList.toggle('active', on);
+      });
+    window.scrollTo(0,0);
+    if(v==='lancamento') runSearch();
+    if(v==='relatorio') refreshReport();
+    if(v==='monitoramento') refreshMonitor();
+    if(v==='colaboradores') refreshColabs();
+  };
+
+  // ---------- Relatório (admin) ----------
+  var repCache = [];
+
+  window.refreshReport = function(){
+    el('repBody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
+    supa.rpc('relatorio_contagem').then(function(res){
+      if(res.error){ el('repBody').innerHTML=''; showToast(limparErro(res.error.message), true); return; }
+      repCache = res.data || [];
+      renderReport();
+    });
+    supa.rpc('resumo_contagem').then(function(res){
+      if(res.error || !res.data || !res.data.length) return;
+      el('repPend').textContent = num(res.data[0].pendentes);
+    });
+  };
+
+  function renderReport(){
+    var tv=0, td=0, html='';
+    repCache.forEach(function(e){
+      tv += (e.qtd_venda||0); td += (e.qtd_deposito||0);
+      html += '<tr>' +
+        '<td data-label="Código" class="mono">'+escapeHtml(e.codigo)+'</td>' +
+        '<td data-label="Produto"><b>'+escapeHtml(e.nome)+'</b></td>' +
+        '<td data-label="Barras" class="mono">'+escapeHtml(fmtBarcode(e.codigo_barras))+'</td>' +
+        '<td data-label="Venda"><span class="pill venda">'+(e.qtd_venda||0)+'</span></td>' +
+        '<td data-label="Depósito"><span class="pill deposito">'+(e.qtd_deposito||0)+'</span></td>' +
+        '<td data-label="Total"><b>'+(e.total||0)+'</b></td>' +
+        '<td data-label="Contado por">'+escapeHtml(e.contado_por||'—')+'</td>' +
+        '<td data-label="Quando">'+fmtDate(e.lancado_em)+'</td></tr>';
+    });
+    el('repBody').innerHTML = html;
+    el('repTotal').textContent = num(repCache.length);
+    el('repVenda').textContent = num(tv);
+    el('repDeposito').textContent = num(td);
+    document.querySelector('#viewRelatorio .table-wrap').style.display = repCache.length ? 'block':'none';
+    el('repEmpty').style.display = repCache.length ? 'none':'block';
+  }
+
+  window.exportCSV = function(){
+    if(!repCache.length){ showToast('Nada para exportar.', true); return; }
+    var linhas = [['Codigo','Produto','CodigoBarras','QtdVenda','QtdDeposito','Total','PrecoUnit','ContadoPor','DataHora'].join(';')];
+    repCache.forEach(function(e){
+      linhas.push([ e.codigo, '"'+(e.nome||'').replace(/"/g,'""')+'"', e.codigo_barras||'',
+        e.qtd_venda||0, e.qtd_deposito||0, e.total||0,
+        e.preco!=null ? Number(e.preco).toFixed(2).replace('.',',') : '',
+        '"'+(e.contado_por||'').replace(/"/g,'""')+'"', fmtDate(e.lancado_em) ].join(';'));
+    });
+    var blob = new Blob(["﻿"+linhas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'contagem-estoque-'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  };
+
+  window.clearReport = function(){
+    if(!repCache.length){ showToast('Não há contagem para limpar.', true); return; }
+    if(!confirm('Isso zera a contagem de TODOS os '+repCache.length+' produtos já contados.\n\n'+
+                'O histórico de quem contou o quê é preservado no monitoramento.\n\nConfirma?')) return;
+    supa.rpc('limpar_lancamentos').then(function(res){
+      if(res.error){ showToast(limparErro(res.error.message), true); return; }
+      showToast(num(res.data)+' contagens zeradas.');
+      refreshReport();
+    });
+  };
+
+  // ---------- Monitoramento (admin) ----------
+  window.monHoje = function(){ el('monData').value=''; refreshMonitor(); };
+
+  window.refreshMonitor = function(){
+    var dia = el('monData').value || null;
+    el('monBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
+    supa.rpc('monitoramento_diario', dia ? { p_dia: dia } : {}).then(function(res){
+      if(res.error){ el('monBody').innerHTML=''; showToast(limparErro(res.error.message), true); return; }
+      var linhas = res.data || [], html='', ok=0, falta=0, cont=0;
+      linhas.forEach(function(r){
+        if(r.cumpriu){ ok++; } else { falta++; }
+        cont += Number(r.contagens_dia||0);
+        html += '<tr class="'+(r.cumpriu?'':'falta')+'">' +
+          '<td data-label="Colaborador"><b>'+escapeHtml(r.colaborador)+'</b></td>' +
+          '<td data-label="Situação"><span class="pill '+(r.cumpriu?'ok':'nao')+'">'+(r.cumpriu?'lançou':'NÃO LANÇOU')+'</span></td>' +
+          '<td data-label="Contagens">'+num(r.contagens_dia)+'</td>' +
+          '<td data-label="Unidades">'+num(r.un_contadas)+'</td>' +
+          '<td data-label="Última">'+fmtHora(r.ultima)+'</td>' +
+          '<td data-label="Senha">'+(r.tem_senha?'<span class="pill neutro">criada</span>':'<span class="pill nao">pendente</span>')+'</td>' +
+          '</tr>';
+      });
+      el('monBody').innerHTML = html || '<tr><td style="text-align:center;padding:24px;">Nenhum colaborador ativo.</td></tr>';
+      el('monTotal').textContent = num(linhas.length);
+      el('monOk').textContent = num(ok);
+      el('monFalta').textContent = num(falta);
+      el('monContagens').textContent = num(cont);
+    });
+  };
+
+  // ---------- Colaboradores (admin) ----------
+  var colabCache = [];
+
+  window.refreshColabs = function(){
+    el('colabBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
+    supa.rpc('listar_colaboradores').then(function(res){
+      if(res.error){ el('colabBody').innerHTML=''; showToast(limparErro(res.error.message), true); return; }
+      colabCache = res.data || [];
+      renderColabs();
+    });
+  };
+
+  function renderColabs(){
+    var html = '';
+    colabCache.forEach(function(c, i){
+      var eu = me && c.id === me.id;
+      html += '<tr>' +
+        '<td data-label="Nome"><b>'+escapeHtml(c.nome)+'</b>'+(eu?' <span class="pill neutro">você</span>':'')+'</td>' +
+        '<td data-label="Papel"><span class="pill '+(c.papel==='admin'?'admin':'neutro')+'">'+escapeHtml(c.papel)+'</span></td>' +
+        '<td data-label="Senha">'+(c.tem_senha?'<span class="pill ok">criada</span>':'<span class="pill nao">pendente</span>')+'</td>' +
+        '<td data-label="Código 1º acesso">'+(c.codigo_acesso?'<span class="codigo-chip">'+escapeHtml(c.codigo_acesso)+'</span>':'—')+'</td>' +
+        '<td data-label="Situação">'+(c.ativo?'<span class="pill ok">ativo</span>':'<span class="pill nao">inativo</span>')+'</td>' +
+        '<td data-label="Ações" class="acoes">' +
+          '<button class="btn-sm" data-act="reset" data-i="'+i+'">Resetar senha</button>' +
+          '<button class="btn-sm" data-act="ativo" data-i="'+i+'"'+(eu?' disabled':'')+'>'+(c.ativo?'Desativar':'Ativar')+'</button>' +
+        '</td></tr>';
+    });
+    el('colabBody').innerHTML = html;
+
+    el('colabBody').querySelectorAll('button[data-act]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var c = colabCache[parseInt(this.getAttribute('data-i'),10)];
+        if(this.getAttribute('data-act') === 'reset'){
+          if(!confirm('Resetar a senha de '+c.nome+'?\n\nA senha atual deixa de funcionar e um novo código de primeiro acesso é gerado.')) return;
+          supa.rpc('resetar_senha', { p_id: c.id }).then(function(res){
+            if(res.error){ showToast(limparErro(res.error.message), true); return; }
+            showToast('Novo código de '+c.nome+': '+res.data);
+            refreshColabs();
+          });
+        } else {
+          supa.rpc('definir_ativo', { p_id: c.id, p_ativo: !c.ativo }).then(function(res){
+            if(res.error){ showToast(limparErro(res.error.message), true); return; }
+            refreshColabs();
+          });
+        }
+      });
+    });
+  }
+
+  // ---------- Leitor de código de barras ----------
+  var scanStream = null, scanLoop = null, zxingReader = null;
+  var FORMATOS = ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf','codabar'];
+
+  function scanErro(titulo, texto){
+    el('scanFrame').style.display='none'; el('scanHud').style.display='none';
+    el('scanErroTitulo').textContent = titulo;
+    el('scanErroTexto').textContent = texto;
+    el('scanErro').style.display = 'block';
+  }
+
+  window.abrirScanner = function(){
+    el('scannerShell').style.display='flex';
+    el('scanErro').style.display='none';
+    el('scanFrame').style.display='block';
+    el('scanHud').style.display='block';
+    el('scanStatus').textContent = 'Abrindo a câmera…';
+
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      scanErro('Câmera indisponível',
+        location.protocol === 'file:'
+          ? 'O navegador só libera a câmera em páginas https. Este arquivo está aberto direto do aparelho (file://). Hospede o sistema em um endereço https para usar o leitor — a busca por nome e código continua funcionando normalmente.'
+          : 'Este navegador não permite acesso à câmera.');
+      return;
+    }
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal:'environment' }, width: { ideal:1280 } }, audio:false
+    }).then(function(stream){
+      scanStream = stream;
+      var v = el('scanVideo');
+      v.srcObject = stream; v.play();
+      el('scanStatus').textContent = 'Aponte para o código de barras do produto';
+      iniciarLeitura(v);
+    }).catch(function(err){
+      var nome = err && err.name ? err.name : '';
+      scanErro('Não foi possível abrir a câmera',
+        nome === 'NotAllowedError' ? 'A permissão de câmera foi negada. Libere o acesso nas configurações do navegador e tente de novo.'
+        : nome === 'NotFoundError' ? 'Nenhuma câmera encontrada neste aparelho.'
+        : 'Erro ao acessar a câmera: ' + (err && err.message ? err.message : nome));
+    });
+  };
+
+  function iniciarLeitura(video){
+    // Caminho rápido: detector nativo do navegador (Android/Chrome), sem download.
+    if('BarcodeDetector' in window){
+      window.BarcodeDetector.getSupportedFormats().then(function(sup){
+        var fmts = FORMATOS.filter(function(f){ return sup.indexOf(f) >= 0; });
+        var det = new window.BarcodeDetector({ formats: fmts.length ? fmts : sup });
+        scanLoop = setInterval(function(){
+          if(!scanStream) return;
+          det.detect(video).then(function(codes){
+            if(codes && codes.length && codes[0].rawValue) codigoLido(codes[0].rawValue);
+          }).catch(function(){});
+        }, 300);
+      }).catch(function(){ carregarZXing(video); });
+      return;
+    }
+    carregarZXing(video);
+  }
+
+  // Fallback para navegadores sem BarcodeDetector (iPhone/Safari, por exemplo).
+  function carregarZXing(video){
+    function usar(){
+      try{
+        zxingReader = new window.ZXing.BrowserMultiFormatReader();
+        zxingReader.decodeFromVideoElement(video, function(result){
+          if(result && result.getText) codigoLido(result.getText());
+        });
+      }catch(e){
+        scanErro('Leitor indisponível','Não foi possível iniciar o leitor de código de barras neste navegador.');
+      }
+    }
+    if(window.ZXing){ usar(); return; }
+    el('scanStatus').textContent = 'Carregando o leitor…';
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+    s.onload = function(){ el('scanStatus').textContent='Aponte para o código de barras do produto'; usar(); };
+    s.onerror = function(){ scanErro('Leitor indisponível','Não foi possível baixar o leitor. Verifique a conexão com a internet.'); };
+    document.head.appendChild(s);
+  }
+
+  function codigoLido(codigo){
+    var limpo = String(codigo).replace(/\D/g,'') || String(codigo);
+    fecharScanner();
+    if(navigator.vibrate){ try{ navigator.vibrate(60); }catch(e){} }
+    searchInput.value = limpo;
+    el('clearBtn').style.display = 'block';
+    showToast('Código lido: ' + limpo);
+    runSearch();
+  }
+
+  window.fecharScanner = function(){
+    if(scanLoop){ clearInterval(scanLoop); scanLoop=null; }
+    if(zxingReader){ try{ zxingReader.reset(); }catch(e){} zxingReader=null; }
+    if(scanStream){ scanStream.getTracks().forEach(function(t){ t.stop(); }); scanStream=null; }
+    var v = el('scanVideo'); v.pause(); v.srcObject=null;
+    el('scannerShell').style.display='none';
+  };
+
+  setAuthMode('login');
+
+})();
+</script>
+</body>
+</html>
