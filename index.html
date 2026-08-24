@@ -40,7 +40,9 @@
     --nav-h: calc(60px + var(--safe-b));
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body{ margin:0; padding:0; overscroll-behavior-y:contain; }
+  /* Rede de seguranca: nenhum elemento largo pode deslocar a pagina inteira.
+     clip (e nao hidden) preserva o position:sticky da barra de busca. */
+  html,body{ margin:0; padding:0; overscroll-behavior-y:contain; overflow-x:clip; max-width:100vw; }
   body{
     background:
       radial-gradient(1100px 380px at 50% -140px, rgba(0,113,60,0.10), transparent 70%),
@@ -78,7 +80,9 @@
     min-height:38px; padding:0 13px; font-size:12.5px; font-weight:700; cursor:pointer; flex:none; }
 
   /* Abas: barra inferior no celular, topo no desktop */
-  .tabs{ display:flex; gap:4px; background:rgba(255,255,255,0.10); padding:4px; border-radius:11px; }
+  /* display controlado SO por CSS. Estilo inline vence media query e foi
+     exatamente isso que quebrou o layout no celular. */
+  .tabs{ display:none; gap:4px; background:rgba(255,255,255,0.10); padding:4px; border-radius:11px; }
   .tab-btn{ border:none; background:transparent; color:#C4DDCD; padding:9px 14px; border-radius:8px;
     font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:7px; }
   .tab-btn.active{ background:#fff; color:var(--brand-dark); }
@@ -226,7 +230,7 @@
   .btn-sm.danger{ color:var(--danger); border-color:#EFCFCF; }
   .btn-sm:disabled{ opacity:0.45; }
   .toolbar input[type=date]{ min-height:42px; padding:8px 11px; border:1px solid var(--border);
-    border-radius:10px; font-size:14px; background:#fff; color:var(--ink); }
+    border-radius:10px; font-size:16px; background:#fff; color:var(--ink); }  /* 16px evita o zoom do iOS */
   .table-wrap{ background:var(--panel); border:1px solid var(--border); border-radius:14px;
     overflow:hidden; box-shadow:var(--shadow); }
   .table-scroll{ max-height:66vh; overflow:auto; -webkit-overflow-scrolling:touch; }
@@ -320,8 +324,12 @@
   /* contain, nao cover: mostra TODO o campo de visao da camera. Com cover, a
      imagem deitada da camera era cortada nas laterais para preencher a tela
      em pe — sumia exatamente a largura onde fica o codigo de barras. */
-  .scanner-shell video{ width:100%; height:100%; object-fit:contain; position:absolute; inset:0;
-    background:#08120C; }
+  /* Tamanho e rotacao vem do JS: pegamos o quadro NATIVO da camera (campo de
+     visao inteiro, sem recorte) e giramos para preencher a tela em pe. */
+  .scanner-shell video{ position:absolute; left:50%; top:50%; background:#08120C;
+    transform-origin:center center; }
+  .scan-info{ position:absolute; top:calc(10px + env(safe-area-inset-top,0px)); left:0; right:0;
+    text-align:center; z-index:3; font-size:11px; color:rgba(255,255,255,0.55); letter-spacing:0.04em; }
   .scan-frame{ position:relative; width:min(88vw,380px); height:min(30vh,170px); border-radius:16px;
     box-shadow:0 0 0 100vmax rgba(0,0,0,0.45); border:3px solid rgba(255,255,255,0.92); }
   .scan-frame::after{ content:''; position:absolute; left:10px; right:10px; top:50%; height:2.5px;
@@ -353,7 +361,7 @@
   @media (max-width:760px){
     .brand .name .completo{ display:none; }
     .brand .name .curto{ display:inline; }
-    .topbar .tabs{ display:none; }          /* abas vão para a barra inferior */
+    .userbox .who{ display:none; }   /* nome + papel ocupavam largura no topo */
     .bottom-nav.ligado{ display:flex; }
     .wrap.com-nav{ padding-bottom:calc(var(--nav-h) + 16px); }
     .cards-row{ gap:8px; }
@@ -377,6 +385,7 @@
     tbody td.acoes .btn-sm{ flex:1; }
   }
   @media (min-width:761px){
+    .tabs.visivel{ display:flex; }   /* abas no topo so no desktop */
     .cards-row{ grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); }
     .qty-grid{ grid-template-columns:1fr 1fr; gap:16px; }
     .overlay{ align-items:center; padding:16px; }
@@ -404,7 +413,7 @@
     </span>
     <span class="sub"><span class="conn-dot" id="connDot"></span><span id="connLabel">conectando…</span></span>
   </div>
-  <div class="tabs" id="tabsBox" style="display:none;">
+  <div class="tabs" id="tabsBox">
     <button class="tab-btn active" id="tabLancT"  onclick="setView('lancamento')">Contagem</button>
     <button class="tab-btn" id="tabRelT"   onclick="setView('relatorio')"     style="display:none;">Relatório</button>
     <button class="tab-btn" id="tabMonT"   onclick="setView('monitoramento')" style="display:none;">Monitoramento</button>
@@ -577,6 +586,7 @@
 <!-- ================= SCANNER ================= -->
 <div class="scanner-shell" id="scannerShell" style="display:none;">
   <video id="scanVideo" playsinline muted></video>
+  <div class="scan-info" id="scanInfo"></div>
   <div class="scan-frame" id="scanFrame"></div>
   <div class="scan-hud" id="scanHud">
     <p id="scanStatus">Aponte para o código de barras do produto</p>
@@ -710,7 +720,7 @@
     if(!session){
       me = null;
       setConn(false, 'não autenticado');
-      el('tabsBox').style.display = 'none';
+      el('tabsBox').classList.remove('visivel');
       el('bottomNav').classList.remove('ligado');
       el('viewApp').classList.remove('com-nav');
       showScreen('auth');
@@ -731,7 +741,7 @@
         el('uRole').textContent = admin ? 'administrador' : 'contagem';
 
         // Abas só existem para o administrador
-        el('tabsBox').style.display = admin ? 'flex' : 'none';
+        el('tabsBox').classList.toggle('visivel', admin);
         ['tabRelT','tabMonT','tabColabT'].forEach(function(id){
           el(id).style.display = admin ? 'flex' : 'none';
         });
@@ -1307,14 +1317,12 @@
       return;
     }
 
-    // O sistema e usado em retrato. Pedir 1280x720 (deitado) e depois encaixar
-    // numa tela em pe desperdica quase toda a altura. Aqui pedimos o video JA
-    // em pe — o navegador gira o sensor — e a imagem passa a ocupar a tela.
-    var emPe = window.innerHeight >= window.innerWidth;
+    // NAO pedir largura/altura: quando o navegador precisa entregar um tamanho
+    // especifico, ele RECORTA o sensor — e recorte de sensor e zoom. Pedindo o
+    // quadro nativo com resizeMode 'none', vem o campo de visao inteiro.
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal:'environment' },
-               width:  { ideal: emPe ?  720 : 1280 },
-               height: { ideal: emPe ? 1280 :  720 } }, audio:false
+               resizeMode: { ideal:'none' } }, audio:false
     }).then(function(stream){
       scanStream = stream;
       var v = el('scanVideo');
@@ -1346,22 +1354,45 @@
     }catch(e){}
   }
 
-  // Com object-fit:contain sobram faixas pretas. A moldura precisa caber
-  // DENTRO da area onde a imagem realmente aparece, senao ela promete um
-  // enquadramento que a camera nao esta vendo.
+  // A camera de celular entrega um quadro deitado. A tela e em pe. Em vez de
+  // recortar (que e o que causa a sensacao de zoom), giramos a imagem 90 graus
+  // e encaixamos inteira — campo de visao completo E tela preenchida.
+  // O leitor continua analisando o quadro original; girar e so exibicao.
   function ajustarMoldura(video){
     var vw = video.videoWidth, vh = video.videoHeight;
     if(!vw || !vh) return;
     var cw = window.innerWidth, ch = window.innerHeight;
-    var escala = Math.min(cw / vw, ch / vh);
-    var larguraVisivel = vw * escala, alturaVisivel = vh * escala;
+
+    var telaEmPe  = ch >= cw;
+    var videoEmPe = vh >= vw;
+    var girar = telaEmPe !== videoEmPe;
+
+    // Dimensoes que a imagem tera DEPOIS de girar
+    var dw = girar ? vh : vw;
+    var dh = girar ? vw : vh;
+    var escala = Math.min(cw / dw, ch / dh);   // encaixa inteira, sem cortar
+
+    video.style.width  = vw + 'px';
+    video.style.height = vh + 'px';
+    video.style.transform = 'translate(-50%,-50%) rotate(' + (girar ? 90 : 0) +
+                            'deg) scale(' + escala + ')';
+
     var f = el('scanFrame');
-    f.style.width  = Math.round(Math.min(larguraVisivel * 0.90, 420)) + 'px';
-    f.style.height = Math.round(Math.min(alturaVisivel  * 0.42, 190)) + 'px';
+    f.style.width  = Math.round(Math.min(dw * escala * 0.92, 440)) + 'px';
+    f.style.height = Math.round(Math.min(dh * escala * 0.40, 200)) + 'px';
+
+    var info = el('scanInfo');
+    if(info){
+      info.textContent = vw + '×' + vh + (girar ? ' · girado' : '') +
+                         ' · ' + Math.round(dw*escala) + '×' + Math.round(dh*escala) + ' na tela';
+    }
   }
 
   window.addEventListener('resize', function(){
     if(scanStream) ajustarMoldura(el('scanVideo'));
+  });
+  window.addEventListener('orientationchange', function(){
+    if(scanStream) setTimeout(function(){ ajustarMoldura(el('scanVideo')); }, 260);
   });
 
   function iniciarLeitura(video){
