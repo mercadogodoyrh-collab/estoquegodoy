@@ -317,9 +317,13 @@
   /* ---------- Scanner ---------- */
   .scanner-shell{ position:fixed; inset:0; background:#08120C; z-index:300; display:flex;
     flex-direction:column; align-items:center; justify-content:center; }
-  .scanner-shell video{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
-  .scan-frame{ position:relative; width:min(84vw,340px); height:min(38vh,220px); border-radius:16px;
-    box-shadow:0 0 0 100vmax rgba(0,0,0,0.6); border:3px solid rgba(255,255,255,0.92); }
+  /* contain, nao cover: mostra TODO o campo de visao da camera. Com cover, a
+     imagem deitada da camera era cortada nas laterais para preencher a tela
+     em pe — sumia exatamente a largura onde fica o codigo de barras. */
+  .scanner-shell video{ width:100%; height:100%; object-fit:contain; position:absolute; inset:0;
+    background:#08120C; }
+  .scan-frame{ position:relative; width:min(88vw,380px); height:min(30vh,170px); border-radius:16px;
+    box-shadow:0 0 0 100vmax rgba(0,0,0,0.45); border:3px solid rgba(255,255,255,0.92); }
   .scan-frame::after{ content:''; position:absolute; left:10px; right:10px; top:50%; height:2.5px;
     background:#6FE39A; box-shadow:0 0 14px #6FE39A; animation:scanline 1.8s ease-in-out infinite; }
   @keyframes scanline{ 0%,100%{ transform:translateY(-30%);} 50%{ transform:translateY(30%);} }
@@ -1303,12 +1307,21 @@
       return;
     }
 
+    // O sistema e usado em retrato. Pedir 1280x720 (deitado) e depois encaixar
+    // numa tela em pe desperdica quase toda a altura. Aqui pedimos o video JA
+    // em pe — o navegador gira o sensor — e a imagem passa a ocupar a tela.
+    var emPe = window.innerHeight >= window.innerWidth;
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal:'environment' }, width: { ideal:1280 } }, audio:false
+      video: { facingMode: { ideal:'environment' },
+               width:  { ideal: emPe ?  720 : 1280 },
+               height: { ideal: emPe ? 1280 :  720 } }, audio:false
     }).then(function(stream){
       scanStream = stream;
       var v = el('scanVideo');
       v.srcObject = stream; v.play();
+      afastarZoom(stream);
+      v.addEventListener('loadedmetadata', function(){ ajustarMoldura(v); });
+      ajustarMoldura(v);
       el('scanStatus').textContent = 'Aponte para o código de barras do produto';
       iniciarLeitura(v);
     }).catch(function(err){
@@ -1319,6 +1332,37 @@
         : 'Erro ao acessar a câmera: ' + (err && err.message ? err.message : nome));
     });
   };
+
+  // Alguns Android abrem a camera traseira ja com zoom digital aplicado.
+  // Se o aparelho permitir, volta para o menor zoom = maior campo de visao.
+  function afastarZoom(stream){
+    try{
+      var track = stream.getVideoTracks()[0];
+      if(!track || !track.getCapabilities || !track.applyConstraints) return;
+      var caps = track.getCapabilities();
+      if(caps && caps.zoom && typeof caps.zoom.min === 'number'){
+        track.applyConstraints({ advanced:[{ zoom: caps.zoom.min }] }).catch(function(){});
+      }
+    }catch(e){}
+  }
+
+  // Com object-fit:contain sobram faixas pretas. A moldura precisa caber
+  // DENTRO da area onde a imagem realmente aparece, senao ela promete um
+  // enquadramento que a camera nao esta vendo.
+  function ajustarMoldura(video){
+    var vw = video.videoWidth, vh = video.videoHeight;
+    if(!vw || !vh) return;
+    var cw = window.innerWidth, ch = window.innerHeight;
+    var escala = Math.min(cw / vw, ch / vh);
+    var larguraVisivel = vw * escala, alturaVisivel = vh * escala;
+    var f = el('scanFrame');
+    f.style.width  = Math.round(Math.min(larguraVisivel * 0.90, 420)) + 'px';
+    f.style.height = Math.round(Math.min(alturaVisivel  * 0.42, 190)) + 'px';
+  }
+
+  window.addEventListener('resize', function(){
+    if(scanStream) ajustarMoldura(el('scanVideo'));
+  });
 
   function iniciarLeitura(video){
     // Caminho rápido: detector nativo do navegador (Android/Chrome), sem download.
