@@ -24,7 +24,16 @@
     --venda: var(--brand); --venda-dark: var(--brand-dark); --venda-bg: var(--brand-soft);
     --deposito: #9A6114; --deposito-dark: #74490F; --deposito-bg: #FAEEDC;
     --danger: #A32626; --danger-bg: #FBE7E7; --ok: var(--brand); --ok-bg: var(--brand-soft);
-    --shadow: 0 1px 2px rgba(28,31,27,0.06), 0 6px 18px -10px rgba(28,31,27,0.28);
+
+    /* Sombras em camadas: uma rente ao objeto e uma difusa. Dois tons suaves
+       leem melhor que uma sombra forte, e custam o mesmo. */
+    --shadow-sm: 0 1px 2px rgba(28,31,27,0.05), 0 1px 3px rgba(28,31,27,0.05);
+    --shadow: 0 1px 2px rgba(28,31,27,0.05), 0 8px 20px -12px rgba(28,31,27,0.24);
+    --shadow-lg: 0 4px 8px rgba(28,31,27,0.06), 0 20px 44px -20px rgba(28,31,27,0.34);
+    /* Vidro: usado so na busca e no topo. backdrop-filter e caro — numa lista
+       longa ele derruba o FPS da rolagem em aparelho simples. */
+    --vidro: rgba(255,255,255,0.72);
+    --vidro-borda: rgba(255,255,255,0.66);
 
     --tap: 48px;                       /* alvo minimo de toque */
     --safe-b: env(safe-area-inset-bottom, 0px);
@@ -33,7 +42,11 @@
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; padding:0; overscroll-behavior-y:contain; }
   body{
-    background: repeating-linear-gradient(180deg, transparent 0 27px, var(--paper-line) 27px 28px), var(--paper);
+    background:
+      radial-gradient(1100px 380px at 50% -140px, rgba(0,113,60,0.10), transparent 70%),
+      repeating-linear-gradient(180deg, transparent 0 27px, rgba(227,223,208,0.55) 27px 28px),
+      var(--paper);
+    background-attachment: fixed, scroll, scroll;
     color:var(--ink); min-height:100vh; min-height:100dvh;
     font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     -webkit-text-size-adjust:100%;
@@ -42,9 +55,13 @@
   .mono{ font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; letter-spacing:0.02em; }
 
   /* ---------- Topo ---------- */
-  .topbar{ position:sticky; top:0; z-index:30; background:var(--brand-dark); color:#fff;
+  /* VIDRO 1 de 2 */
+  .topbar{ position:sticky; top:0; z-index:30; color:#fff;
+    background:linear-gradient(155deg, #016B3C 0%, var(--brand-dark) 62%, #00472595 100%), var(--brand-dark);
+    backdrop-filter:saturate(140%);
     padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;
-    display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    box-shadow:0 1px 0 rgba(255,255,255,0.10) inset, 0 6px 22px -10px rgba(0,50,28,0.75); }
   .brand{ display:flex; flex-direction:column; gap:1px; min-width:0; }
   .brand .name{ font-weight:800; letter-spacing:0.02em; text-transform:uppercase; font-size:15px;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -103,23 +120,36 @@
   /* ---------- Busca + câmera ---------- */
   .busca-sticky{ position:sticky; top:0; z-index:12; padding:12px 0 8px;
     background:linear-gradient(var(--paper) 78%, rgba(244,241,232,0)); margin:-16px 0 0; }
-  .search-box{ background:var(--panel); border:1.5px solid var(--border); border-radius:14px;
-    padding:5px 5px 5px 13px; display:flex; align-items:center; gap:8px; box-shadow:var(--shadow); }
-  .search-box:focus-within{ border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
+  /* VIDRO 2 de 2 — a busca fica fixa no topo, entao o desfoque acontece
+     numa superficie so, e nao repetido por item de lista. */
+  .search-box{ background:var(--vidro); border:1.5px solid var(--vidro-borda); border-radius:16px;
+    padding:5px 5px 5px 13px; display:flex; align-items:center; gap:8px;
+    backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%);
+    box-shadow:var(--shadow), 0 1px 0 rgba(255,255,255,0.9) inset;
+    transition:box-shadow .18s, border-color .18s; }
+  .search-box:focus-within{ border-color:var(--brand);
+    box-shadow:0 0 0 3px var(--brand-soft), var(--shadow-lg); }
   .search-box > .lupa{ flex:none; opacity:0.5; }
   .search-box input{ flex:1; min-width:0; border:none; outline:none; background:transparent;
     font-size:16px; padding:12px 2px; color:var(--ink); }
   .clear-btn{ border:none; background:var(--paper-line); color:var(--ink-soft); width:30px; height:30px;
     border-radius:50%; cursor:pointer; font-size:15px; display:none; flex:none; }
-  .scan-btn{ flex:none; width:var(--tap); height:var(--tap); border-radius:11px; border:none; cursor:pointer;
+  .scan-btn{ flex:none; width:var(--tap); height:var(--tap); border-radius:12px; border:none; cursor:pointer;
+    box-shadow:0 2px 0 var(--brand-dark), 0 6px 14px -6px rgba(0,113,60,0.5);
     background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; }
   .scan-btn:active{ background:var(--brand-dark); }
   .search-meta{ font-size:12.5px; color:var(--ink-soft); margin:2px 2px 6px; }
 
   /* ---------- Lista de produtos (cartão, não linha) ---------- */
   .results{ display:flex; flex-direction:column; gap:10px; }
-  .prod{ background:var(--panel); border:1px solid var(--border); border-radius:14px;
-    padding:13px 14px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px; }
+  /* Sem backdrop-filter aqui de proposito: sao muitos cartoes numa lista
+     rolavel. O relevo vem de gradiente + sombra, que o navegador desenha
+     uma vez e nao recalcula a cada quadro. */
+  .prod{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border);
+    border-radius:16px; padding:14px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:11px;
+    transition:transform .14s ease, box-shadow .14s ease; }
+  .prod:active{ transform:scale(0.993); box-shadow:var(--shadow-sm); }
   .prod-topo{ display:flex; align-items:flex-start; gap:10px; }
   .prod .cod{ font-size:11px; color:#fff; background:var(--brand-dark); border-radius:6px;
     padding:4px 7px; flex:none; font-weight:800; letter-spacing:0.03em; }
@@ -127,7 +157,9 @@
   .prod .meta{ font-size:12px; color:var(--ink-soft); display:flex; justify-content:space-between;
     gap:10px; align-items:center; }
   .prod .preco{ font-weight:800; color:var(--brand); font-size:13.5px; white-space:nowrap; }
-  .btn-contar{ width:100%; min-height:var(--tap); background:var(--brand); color:#fff; border:none;
+  .btn-contar{ width:100%; min-height:var(--tap); border:none; color:#fff;
+    background:linear-gradient(180deg,#01844A,var(--brand));
+    box-shadow:0 2px 0 var(--brand-dark), 0 8px 18px -8px rgba(0,113,60,0.55);
     border-radius:11px; font-size:15.5px; font-weight:800; cursor:pointer; letter-spacing:0.02em; }
   .btn-contar:active{ background:var(--brand-dark); }
   .empty-state{ text-align:center; padding:52px 22px; color:var(--ink-soft); font-size:13.5px; line-height:1.6; }
@@ -137,7 +169,7 @@
   /* ---------- Modal / bottom sheet ---------- */
   .overlay{ position:fixed; inset:0; background:rgba(16,20,17,0.55); z-index:100;
     display:flex; align-items:flex-end; justify-content:center; }
-  .modal{ background:var(--panel); width:100%; max-width:520px; border-radius:20px 20px 0 0;
+  .modal{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); width:100%; max-width:520px; border-radius:22px 22px 0 0; box-shadow:var(--shadow-lg);
     overflow:hidden; border-top:5px solid var(--brand); max-height:92dvh; overflow-y:auto;
     animation:sobe 0.22s ease-out; padding-bottom:var(--safe-b); }
   @keyframes sobe{ from{ transform:translateY(100%);} to{ transform:translateY(0);} }
@@ -147,14 +179,17 @@
   .modal-head h2{ margin:5px 0 3px; font-size:19px; line-height:1.3; }
   .modal-head .barcode-line{ font-size:12px; color:var(--ink-soft); }
   .modal-body{ padding:2px 20px 4px; }
-  .qty-grid{ display:grid; grid-template-columns:1fr; gap:6px; }
-  .qty-field{ margin:12px 0 4px; }
+  .qty-grid{ display:grid; grid-template-columns:1fr; gap:6px; min-width:0; }
+  /* min-width:0 e obrigatorio: item de grid nao encolhe abaixo do tamanho
+     natural do conteudo, e input[type=number] tem ~20 caracteres de largura
+     intrinseca — sem isso a linha estoura a tela do celular. */
+  .qty-field{ margin:12px 0 4px; min-width:0; }
   .qty-field label{ font-size:13px; font-weight:800; display:block; margin-bottom:8px; }
-  .qty-input-row{ display:flex; align-items:center; gap:9px; }
+  .qty-input-row{ display:flex; align-items:center; gap:9px; min-width:0; }
   .qty-input-row button{ width:56px; height:56px; flex:none; border-radius:13px; border:1.5px solid var(--border);
     background:#fff; font-size:26px; padding:0; cursor:pointer; color:var(--ink); font-weight:700; line-height:1; }
   .qty-input-row button:active{ background:var(--paper-line); }
-  .qty-input-row input{ flex:1; min-width:0; text-align:center; font-size:26px; font-weight:800;
+  .qty-input-row input{ flex:1 1 0; width:0; min-width:0; text-align:center; font-size:26px; font-weight:800;
     height:56px; padding:0 4px; border:1.5px solid var(--border); border-radius:13px;
     font-family:"SFMono-Regular",Consolas,monospace; }
   .qty-input-row input:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
@@ -175,7 +210,7 @@
 
   /* ---------- Painéis admin ---------- */
   .cards-row{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:14px; }
-  .card{ background:var(--panel); border:1px solid var(--border); border-radius:14px;
+  .card{ background:linear-gradient(180deg,#FFFFFF,#FBFBF7); border:1px solid var(--border); border-radius:16px;
     padding:12px 13px; box-shadow:var(--shadow); }
   .card .label{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em;
     color:var(--ink-soft); font-weight:800; line-height:1.3; }
@@ -212,6 +247,56 @@
     background:var(--brand-soft); color:var(--brand-dark); padding:5px 9px; border-radius:8px; font-size:14px;
     display:inline-block; }
   .report-empty{ text-align:center; padding:46px 20px; color:var(--ink-soft); }
+
+  /* Confirmacao de contagem: precisa ser inconfundivel a um metro de
+     distancia, com o celular na mao e barulho em volta. */
+  .ok-overlay{ position:fixed; inset:0; z-index:350; display:flex; align-items:center;
+    justify-content:center; padding:22px; background:rgba(0,83,44,0.86);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+  .ok-card{ text-align:center; color:#fff; max-width:420px; animation:okPop 0.28s cubic-bezier(.2,.9,.3,1.3); }
+  @keyframes okPop{ from{ transform:scale(0.75); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .ok-circulo{ width:104px; height:104px; border-radius:50%; background:#fff; margin:0 auto 18px;
+    display:flex; align-items:center; justify-content:center; }
+  .ok-circulo svg{ width:58px; height:58px; stroke:var(--brand); stroke-width:3.5; fill:none;
+    stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:40; stroke-dashoffset:40;
+    animation:okRisco 0.4s 0.12s ease-out forwards; }
+  @keyframes okRisco{ to{ stroke-dashoffset:0; } }
+  .ok-card h2{ margin:0 0 10px; font-size:26px; letter-spacing:0.01em; }
+  .ok-produto{ font-size:16px; font-weight:700; line-height:1.35; margin-bottom:16px;
+    color:#EAF6EE; word-break:break-word; }
+  .ok-total{ display:inline-block; background:#fff; color:var(--brand-dark); border-radius:14px;
+    padding:12px 26px; font-size:15px; font-weight:800; }
+  .ok-total b{ font-size:30px; display:block; line-height:1.1; }
+  .ok-dica{ margin-top:20px; font-size:13px; color:#BEDCC9; }
+
+  /* Lista de ja contados — logo abaixo da busca, sempre visivel */
+  .contados{ margin-top:4px; }
+  .contados-head{ display:flex; align-items:center; gap:9px; margin:2px 2px 10px; }
+  .contados-head h3{ margin:0; font-size:11.5px; font-weight:800; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--ink-soft); }
+  .contados-head .conta{ background:var(--brand); color:#fff; border-radius:20px;
+    padding:3px 11px; font-size:12.5px; font-weight:800;
+    box-shadow:0 4px 10px -4px rgba(0,113,60,0.6); }
+  .contados-head::after{ content:''; flex:1; height:1px;
+    background:linear-gradient(90deg, var(--border), transparent); }
+  .cont-item{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-sm);
+    padding:11px 13px; margin-bottom:8px; display:flex; align-items:center; gap:12px; }
+  .cont-item .txt{ flex:1; min-width:0; }
+  .cont-item .nome{ font-size:14px; font-weight:700; line-height:1.3; }
+  .cont-item .barras{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
+  .cont-item .qtd{ flex:none; background:var(--brand-soft); color:var(--brand-dark);
+    border-radius:10px; padding:8px 12px; text-align:center; min-width:62px; }
+  .cont-item .qtd b{ display:block; font-size:19px; line-height:1.1; }
+  .cont-item .qtd span{ font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; }
+  /* Controle de digitacao no SG */
+  .filtros{ display:flex; gap:4px; background:var(--panel); border:1px solid var(--border);
+    border-radius:11px; padding:4px; flex:1; }
+  .filtros button{ flex:1; border:none; background:transparent; min-height:40px; border-radius:8px;
+    font-weight:700; font-size:12.5px; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
+  .filtros button.ativo{ background:var(--brand); color:#fff; }
+  .sg-check{ width:24px; height:24px; accent-color:var(--brand); cursor:pointer; flex:none; }
+  tbody tr.sg-feito{ opacity:0.5; }
+  tbody tr.sg-feito td[data-label="Produto"] b{ text-decoration:line-through; }
   .spinner{ width:17px; height:17px; border-radius:50%; border:2.5px solid rgba(0,0,0,0.12);
     border-top-color:var(--brand); animation:spin 0.8s linear infinite; display:inline-block; vertical-align:middle; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
@@ -221,7 +306,8 @@
 
   /* ---------- Navegação inferior (admin, no celular) ---------- */
   .bottom-nav{ display:none; position:fixed; left:0; right:0; bottom:0; z-index:40;
-    background:var(--panel); border-top:1px solid var(--border);
+    background:var(--vidro); backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%);
+    border-top:1px solid var(--vidro-borda); box-shadow:0 -6px 22px -12px rgba(28,31,27,0.4);
     padding:6px 4px calc(6px + var(--safe-b)); }
   .bottom-nav .tab-btn{ flex:1; flex-direction:column; gap:3px; padding:6px 2px; border-radius:10px;
     color:var(--ink-soft); font-size:10.5px; min-height:52px; justify-content:center; }
@@ -246,6 +332,18 @@
     color:var(--ink); border-radius:16px; padding:22px 22px calc(22px + var(--safe-b)); text-align:center; }
   .scan-erro h3{ margin:0 0 9px; font-size:17px; }
   .scan-erro p{ margin:0 0 18px; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+
+  /* Sem suporte a backdrop-filter (webviews antigas), o vidro vira solido —
+     senao o texto fica sobre um fundo translucido e ilegivel. */
+  @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))){
+    .search-box, .bottom-nav{ background:var(--panel); }
+    .ok-overlay{ background:rgba(0,83,44,0.97); }
+  }
+  /* Celular configurado para reduzir animacao: corta tudo menos o essencial */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation-duration:0.01ms !important; animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important; }
+  }
 
   /* ================= CELULAR / RETRATO ================= */
   @media (max-width:760px){
@@ -369,6 +467,16 @@
       </div>
       <div class="search-meta" id="searchMeta"></div>
     </div>
+    <div class="contados" id="blocoContados" style="display:none;">
+      <div class="contados-head">
+        <h3>Já contados</h3>
+        <span class="conta" id="contadosQtd">0</span>
+      </div>
+      <div id="contadosLista"></div>
+      <button class="btn-sm" id="btnMaisContados" onclick="carregarContados(true)"
+              style="width:100%; display:none;">Carregar mais</button>
+    </div>
+
     <div class="results" id="resultsList"></div>
   </div>
 
@@ -378,17 +486,25 @@
       <div class="card"><div class="label">Produtos contados</div><div class="value" id="repTotal">0</div></div>
       <div class="card venda"><div class="label">Un. Área de Venda</div><div class="value" id="repVenda">0</div></div>
       <div class="card deposito"><div class="label">Un. Depósito</div><div class="value" id="repDeposito">0</div></div>
-      <div class="card"><div class="label">Ainda pendentes</div><div class="value" id="repPend">—</div></div>
+      <div class="card alerta"><div class="label">Falta lançar no SG</div><div class="value" id="repSgPend">—</div></div>
     </div>
     <div class="toolbar">
-      <button class="btn-sm primary" onclick="exportCSV()">⬇ Exportar CSV</button>
+      <div class="filtros" id="filtroSg">
+        <button data-f="pendente" class="ativo">Falta no SG</button>
+        <button data-f="feito">Já no SG</button>
+        <button data-f="todos">Todos</button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn-sm primary" onclick="marcarVisiveisSg()">✓ Marcar visíveis como lançados</button>
+      <button class="btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
       <button class="btn-sm" onclick="refreshReport()">↻ Atualizar</button>
       <button class="btn-sm danger" onclick="clearReport()">🗑 Limpar contagem</button>
     </div>
     <div class="table-wrap">
       <div class="table-scroll">
         <table>
-          <thead><tr><th>Código</th><th>Produto</th><th>Barras</th><th>Venda</th><th>Depósito</th><th>Total</th><th>Contado por</th><th>Quando</th></tr></thead>
+          <thead><tr><th>SG</th><th>Código</th><th>Produto</th><th>Barras</th><th>Venda</th><th>Depósito</th><th>Total</th><th>Contado por</th><th>Quando</th></tr></thead>
           <tbody id="repBody"></tbody>
         </table>
       </div>
@@ -502,6 +618,18 @@
       <button class="btn btn-ghost" onclick="closeModals()">Cancelar</button>
       <button class="btn btn-primary" id="btnConfirm" onclick="confirmLaunch()">Confirmar</button>
     </div>
+  </div>
+</div>
+
+<div class="ok-overlay" id="okOverlay" style="display:none;" onclick="fecharOk()">
+  <div class="ok-card">
+    <div class="ok-circulo">
+      <svg viewBox="0 0 24 24"><polyline points="4,12.5 9.5,18 20,6.5"/></svg>
+    </div>
+    <h2>Produto contado com sucesso</h2>
+    <div class="ok-produto" id="okProduto">—</div>
+    <div class="ok-total"><span>Total contado</span><b id="okTotal">0</b></div>
+    <div class="ok-dica">toque para continuar</div>
   </div>
 </div>
 
@@ -754,6 +882,10 @@
   });
   el('selNome').addEventListener('change', function(){ authMsg(''); ajustarCampoCodigo(); });
 
+  Array.prototype.forEach.call(el('filtroSg').children, function(b){
+    b.addEventListener('click', function(){ setFiltroSg(this.getAttribute('data-f')); });
+  });
+
   // ---------- Busca ----------
   var searchInput = el('searchInput'), clearBtn = el('clearBtn');
   searchInput.addEventListener('input', function(){
@@ -774,13 +906,15 @@
     var raw = searchInput.value.trim();
     var lista = el('resultsList'), meta = el('searchMeta');
 
+    // Sem busca ativa, a tela pertence a lista de ja contados — que fica
+    // logo abaixo da barra. Buscando, ela sai da frente dos resultados.
     if(raw.length < 2){
-      lista.innerHTML = '<div class="empty-state"><span class="ico">🔍</span>' +
-        '<div class="big">Busque o produto para contar</div>' +
-        'Digite ao menos 2 caracteres — ou toque na câmera para ler o código de barras.</div>';
+      lista.innerHTML = '';
       meta.innerHTML = '';
+      el('blocoContados').style.display = contadosTotal ? 'block' : 'none';
       return;
     }
+    el('blocoContados').style.display = 'none';
 
     meta.innerHTML = '<span class="spinner"></span> buscando…';
     var q = raw.replace(/[%,]/g, '');
@@ -852,9 +986,60 @@
         btn.disabled = false; btn.textContent = 'Confirmar';
         if(res.error){ showToast(limparErro(res.error.message), true); return; }
         var nome = currentProduct.nome;
-        closeModals(); runSearch();
-        if(navigator.vibrate){ try{ navigator.vibrate(40); }catch(e){} }
-        showToast('Contado: ' + nome);
+        closeModals(); runSearch(); carregarContados();
+        if(navigator.vibrate){ try{ navigator.vibrate([40,60,40]); }catch(e){} }
+        mostrarOk(nome, qv + qd);
+      });
+  };
+
+  // ---------- Confirmação de contagem ----------
+  var okTimer = null;
+
+  function mostrarOk(nome, total){
+    el('okProduto').textContent = nome;
+    el('okTotal').textContent = num(total);
+    el('okOverlay').style.display = 'flex';
+    clearTimeout(okTimer);
+    okTimer = setTimeout(fecharOk, 2600);
+  }
+
+  window.fecharOk = function(){
+    clearTimeout(okTimer);
+    el('okOverlay').style.display = 'none';
+    // Devolve o foco para a busca: o proximo produto ja pode ser digitado
+    if(!el('searchInput').disabled) el('searchInput').focus();
+  };
+
+  // ---------- Já contados ----------
+  var contadosOffset = 0, contadosTotal = 0;
+  var CONTADOS_PAGINA = 50;
+
+  window.carregarContados = function(maisUma){
+    if(!supa || !me) return;
+    if(!maisUma){ contadosOffset = 0; }
+    var buscando = el('searchInput').value.trim().length >= 2;
+
+    supa.rpc('contados_total').then(function(res){
+      if(res.error) return;
+      contadosTotal = res.data || 0;
+      el('contadosQtd').textContent = num(contadosTotal);
+      el('blocoContados').style.display = (contadosTotal && !buscando) ? 'block' : 'none';
+    });
+
+    supa.rpc('contados_lista', { p_limite: CONTADOS_PAGINA, p_offset: contadosOffset })
+      .then(function(res){
+        if(res.error){ showToast(limparErro(res.error.message), true); return; }
+        var html = '';
+        (res.data || []).forEach(function(p){
+          html += '<div class="cont-item">' +
+            '<div class="txt"><div class="nome">'+escapeHtml(p.nome)+'</div>' +
+            '<div class="barras mono">'+escapeHtml(fmtBarcode(p.codigo_barras))+'</div></div>' +
+            '<div class="qtd"><b>'+num(p.total)+'</b><span>total</span></div></div>';
+        });
+        if(maisUma){ el('contadosLista').insertAdjacentHTML('beforeend', html); }
+        else       { el('contadosLista').innerHTML = html; }
+        contadosOffset += (res.data || []).length;
+        el('btnMaisContados').style.display = contadosOffset < contadosTotal ? 'block' : 'none';
       });
   };
 
@@ -883,7 +1068,7 @@
         el(par[1]+'B').classList.toggle('active', on);
       });
     window.scrollTo(0,0);
-    if(v==='lancamento') runSearch();
+    if(v==='lancamento'){ runSearch(); carregarContados(); }
     if(v==='relatorio') refreshReport();
     if(v==='monitoramento') refreshMonitor();
     if(v==='colaboradores') refreshColabs();
@@ -891,9 +1076,10 @@
 
   // ---------- Relatório (admin) ----------
   var repCache = [];
+  var filtroSg = 'pendente';   // o padrao e mostrar o que falta digitar no SG
 
   window.refreshReport = function(){
-    el('repBody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
+    el('repBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
     supa.rpc('relatorio_contagem').then(function(res){
       if(res.error){ el('repBody').innerHTML=''; showToast(limparErro(res.error.message), true); return; }
       repCache = res.data || [];
@@ -901,15 +1087,34 @@
     });
     supa.rpc('resumo_contagem').then(function(res){
       if(res.error || !res.data || !res.data.length) return;
-      el('repPend').textContent = num(res.data[0].pendentes);
+      el('repSgPend').textContent = num(res.data[0].sg_pendentes);
     });
   };
 
+  function listaFiltrada(){
+    if(filtroSg === 'pendente') return repCache.filter(function(e){ return !e.sg_lancado; });
+    if(filtroSg === 'feito')    return repCache.filter(function(e){ return  e.sg_lancado; });
+    return repCache;
+  }
+
+  window.setFiltroSg = function(f){
+    filtroSg = f;
+    Array.prototype.forEach.call(el('filtroSg').children, function(b){
+      b.classList.toggle('ativo', b.getAttribute('data-f') === f);
+    });
+    renderReport();
+  };
+
   function renderReport(){
-    var tv=0, td=0, html='';
-    repCache.forEach(function(e){
-      tv += (e.qtd_venda||0); td += (e.qtd_deposito||0);
-      html += '<tr>' +
+    // Os totais somam a contagem inteira, nao so o que esta filtrado
+    var tv=0, td=0;
+    repCache.forEach(function(e){ tv += (e.qtd_venda||0); td += (e.qtd_deposito||0); });
+
+    var lista = listaFiltrada(), html='';
+    lista.forEach(function(e){
+      html += '<tr class="'+(e.sg_lancado ? 'sg-feito' : '')+'">' +
+        '<td data-label="SG"><input type="checkbox" class="sg-check" data-id="'+e.id+'"'+
+          (e.sg_lancado ? ' checked' : '')+' title="Marcar como lançado no SG"></td>' +
         '<td data-label="Código" class="mono">'+escapeHtml(e.codigo)+'</td>' +
         '<td data-label="Produto"><b>'+escapeHtml(e.nome)+'</b></td>' +
         '<td data-label="Barras" class="mono">'+escapeHtml(fmtBarcode(e.codigo_barras))+'</td>' +
@@ -920,21 +1125,61 @@
         '<td data-label="Quando">'+fmtDate(e.lancado_em)+'</td></tr>';
     });
     el('repBody').innerHTML = html;
+
     el('repTotal').textContent = num(repCache.length);
     el('repVenda').textContent = num(tv);
     el('repDeposito').textContent = num(td);
-    document.querySelector('#viewRelatorio .table-wrap').style.display = repCache.length ? 'block':'none';
-    el('repEmpty').style.display = repCache.length ? 'none':'block';
+    el('repSgPend').textContent = num(repCache.filter(function(e){ return !e.sg_lancado; }).length);
+
+    var vazio = !lista.length;
+    document.querySelector('#viewRelatorio .table-wrap').style.display = vazio ? 'none':'block';
+    el('repEmpty').style.display = vazio ? 'block':'none';
+    el('repEmpty').textContent = !repCache.length
+      ? 'Nenhum produto contado ainda.'
+      : (filtroSg === 'pendente'
+          ? 'Tudo que foi contado já está lançado no SG.'
+          : 'Nada aqui com esse filtro.');
+
+    el('repBody').querySelectorAll('.sg-check').forEach(function(chk){
+      chk.addEventListener('change', function(){
+        var id = parseInt(this.getAttribute('data-id'), 10), marcado = this.checked, self = this;
+        self.disabled = true;
+        supa.rpc('marcar_sg', { p_ids:[id], p_lancado:marcado }).then(function(res){
+          self.disabled = false;
+          if(res.error){ self.checked = !marcado; showToast(limparErro(res.error.message), true); return; }
+          var item = repCache.filter(function(e){ return e.id === id; })[0];
+          if(item) item.sg_lancado = marcado;
+          renderReport();   // some da lista quando o filtro e "falta no SG"
+        });
+      });
+    });
   }
+
+  window.marcarVisiveisSg = function(){
+    var lista = listaFiltrada().filter(function(e){ return !e.sg_lancado; });
+    if(!lista.length){ showToast('Nada visível para marcar.', true); return; }
+    if(!confirm('Marcar os ' + lista.length + ' produtos visíveis como já lançados no SG?')) return;
+    var ids = lista.map(function(e){ return e.id; });
+    supa.rpc('marcar_sg', { p_ids:ids, p_lancado:true }).then(function(res){
+      if(res.error){ showToast(limparErro(res.error.message), true); return; }
+      showToast(num(res.data)+' marcados como lançados no SG.');
+      refreshReport();
+    });
+  };
 
   window.exportCSV = function(){
     if(!repCache.length){ showToast('Nada para exportar.', true); return; }
-    var linhas = [['Codigo','Produto','CodigoBarras','QtdVenda','QtdDeposito','Total','PrecoUnit','ContadoPor','DataHora'].join(';')];
-    repCache.forEach(function(e){
+    // Exporta o que esta na tela: com o filtro "Falta no SG", sai a lista
+    // exata do que ainda precisa ser digitado la.
+    var lista = listaFiltrada();
+    if(!lista.length){ showToast('Nada visível para exportar.', true); return; }
+    var linhas = [['Codigo','Produto','CodigoBarras','QtdVenda','QtdDeposito','Total','PrecoUnit','ContadoPor','DataHora','LancadoNoSG'].join(';')];
+    lista.forEach(function(e){
       linhas.push([ e.codigo, '"'+(e.nome||'').replace(/"/g,'""')+'"', e.codigo_barras||'',
         e.qtd_venda||0, e.qtd_deposito||0, e.total||0,
         e.preco!=null ? Number(e.preco).toFixed(2).replace('.',',') : '',
-        '"'+(e.contado_por||'').replace(/"/g,'""')+'"', fmtDate(e.lancado_em) ].join(';'));
+        '"'+(e.contado_por||'').replace(/"/g,'""')+'"', fmtDate(e.lancado_em),
+        e.sg_lancado ? 'SIM' : 'NAO' ].join(';'));
     });
     var blob = new Blob(["﻿"+linhas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
     var url = URL.createObjectURL(blob), a = document.createElement('a');
