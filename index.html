@@ -166,7 +166,8 @@
     box-shadow:0 2px 0 var(--brand-dark), 0 8px 18px -8px rgba(0,113,60,0.55);
     border-radius:11px; font-size:15.5px; font-weight:800; cursor:pointer; letter-spacing:0.02em; }
   .btn-contar:active{ background:var(--brand-dark); }
-  .empty-state{ text-align:center; padding:52px 22px; color:var(--ink-soft); font-size:13.5px; line-height:1.6; }
+  .empty-state{ text-align:center; padding:40px 22px; color:var(--ink-soft); font-size:13.5px; line-height:1.6;
+    background:var(--panel); border:1px dashed var(--border); border-radius:16px; margin-top:4px; }
   .empty-state .big{ font-size:16px; font-weight:700; color:var(--ink); margin-bottom:8px; }
   .empty-state .ico{ font-size:34px; display:block; margin-bottom:10px; opacity:0.5; }
 
@@ -295,7 +296,7 @@
 
   /* ---------- Bloco de contagem (a "nota" do colaborador) ---------- */
   .bloco-painel{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border);
-    border-radius:16px; box-shadow:var(--shadow-sm); padding:13px 15px; margin-bottom:12px; }
+    border-radius:16px; box-shadow:var(--shadow-sm); padding:12px 14px; margin-bottom:10px; }
   .bloco-painel.aberta{ border-color:var(--brand); background:linear-gradient(180deg,#FFFFFF,var(--brand-soft)); }
   .bloco-painel.travada{ border-color:#EFCFCF; background:linear-gradient(180deg,#FFFFFF,var(--danger-bg)); }
   .bp-linha{ display:flex; align-items:center; gap:9px; }
@@ -309,19 +310,19 @@
   .bloco-painel.travada .bp-ponto{ background:var(--danger); }
   @keyframes pulsa{ 0%,100%{ opacity:1; } 50%{ opacity:0.25; } }
   .bp-hora{ margin-left:auto; font-size:11.5px; color:var(--ink-soft); font-weight:700; }
-  .bp-texto{ font-size:13px; color:var(--ink-soft); line-height:1.55; margin-top:7px; }
+  .bp-texto{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-top:5px; }
   .bp-texto b{ color:var(--ink); }
 
-  .bp-nums{ display:flex; gap:8px; margin-top:11px; }
+  .bp-nums{ display:flex; gap:7px; margin-top:9px; }
   .bp-num{ flex:1; background:var(--panel); border:1px solid var(--border); border-radius:12px;
-    padding:8px 10px; text-align:center; }
-  .bp-num b{ display:block; font-size:20px; font-weight:800; line-height:1.15; }
+    padding:7px 8px; text-align:center; }
+  .bp-num b{ display:block; font-size:19px; font-weight:800; line-height:1.3; }
   .bp-num span{ font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em;
     font-weight:800; color:var(--ink-soft); }
   .bp-num.venda b{ color:var(--venda-dark); }
   .bp-num.deposito b{ color:var(--deposito-dark); }
 
-  .btn-bloco{ width:100%; min-height:var(--tap); margin-top:11px; border:none; border-radius:12px;
+  .btn-bloco{ width:100%; min-height:var(--tap); margin-top:10px; border:none; border-radius:12px;
     font-weight:800; font-size:15.5px; cursor:pointer; background:var(--brand); color:#fff;
     display:flex; align-items:center; justify-content:center; gap:8px; }
   .btn-bloco:active{ background:var(--brand-dark); }
@@ -363,9 +364,9 @@
   .ok-overlay.alerta .ok-total{ color:var(--danger); }
 
   /* Histórico do colaborador */
-  .bp-acoes{ margin-top:10px; text-align:center; }
-  .bp-link{ background:none; border:none; color:var(--ink-soft); font-size:12.5px; font-weight:800;
-    letter-spacing:0.03em; padding:8px 10px; cursor:pointer; text-decoration:underline;
+  .bp-acoes{ margin-top:8px; text-align:center; }
+  .bp-link{ background:none; border:none; color:var(--ink-soft); font-size:12px; font-weight:800;
+    letter-spacing:0.03em; padding:7px 10px; cursor:pointer; text-decoration:underline;
     text-underline-offset:3px; }
   .hist-lista{ max-height:52vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
   .hist-bloco{ border:1px solid var(--border); border-radius:14px; background:var(--panel);
@@ -672,6 +673,14 @@
     </div>
 
     <div class="results" id="resultsList"></div>
+
+    <!-- Ocupa o vazio embaixo da busca: sem isso sobra meia tela de papel
+         pautado, que parece defeito em vez de tela vazia. -->
+    <div class="empty-state" id="lancVazio" style="display:none;">
+      <span class="ico" id="lvIcone">🔍</span>
+      <div class="big" id="lvTitulo">—</div>
+      <div id="lvTexto">—</div>
+    </div>
   </div>
 
   <!-- ---- Relatório (admin) ---- -->
@@ -1168,6 +1177,7 @@
       lista.innerHTML = '';
       meta.innerHTML = '';
       carregarContados();   // volta a mostrar a lista do bloco aberto
+      atualizarVazio();
       return;
     }
     el('blocoContados').style.display = 'none';
@@ -1194,6 +1204,7 @@
                                  : num(total) + (total===1 ? ' resultado' : ' resultados'));
         renderResults(res.data);
         avisarSeJaContado(res.data);
+        atualizarVazio(res.data.length);
       });
   }
 
@@ -1345,7 +1356,9 @@
     var travado = !aberto && !bloco.pode_iniciar;
     p.style.display = 'block';
     p.className = 'bloco-painel' + (aberto ? ' aberta' : (travado ? ' travada' : ''));
-    el('bpNums').style.display = aberto ? 'flex' : 'none';
+    // Tres zeros nao informam nada e comem uma faixa da tela no celular: os
+    // contadores so entram depois do primeiro produto.
+    el('bpNums').style.display = (aberto && bloco.itens) ? 'flex' : 'none';
 
     var btn = el('bpBotao');
     btn.disabled = false;
@@ -1354,8 +1367,8 @@
       el('bpTitulo').textContent = 'Contagem aberta';
       el('bpHora').textContent   = 'iniciada às ' + fmtHora(bloco.iniciado_em);
       el('bpTexto').innerHTML    = bloco.itens
-        ? 'Vá lançando os produtos. Ao terminar, finalize para fechar o bloco.'
-        : 'Nenhum produto lançado ainda — busque ou bipe o primeiro.';
+        ? 'Ao terminar, finalize para fechar a contagem.'
+        : 'Busque ou bipe o primeiro produto.';
       el('bpItens').textContent    = num(bloco.itens);
       el('bpVenda').textContent    = num(bloco.un_venda);
       el('bpDeposito').textContent = num(bloco.un_deposito);
@@ -1368,16 +1381,16 @@
       el('bpHora').textContent   = '';
       el('bpTexto').innerHTML    = bloco.liberado
         ? 'O administrador <b>liberou</b> uma nova contagem para você.'
-        : 'Inicie a contagem para começar a lançar os produtos.';
+        : 'Inicie a contagem para lançar os produtos.';
       btn.style.display = 'flex';
       btn.className     = 'btn-bloco';
       btn.textContent   = '▶ Iniciar contagem';
       btn.onclick       = iniciarContagem;
     } else {
-      el('bpTitulo').textContent = 'Contagem de hoje finalizada';
+      el('bpTitulo').textContent = 'Contagem finalizada';
       el('bpHora').textContent   = 'às ' + fmtHora(bloco.ultimo_finalizado_em);
-      el('bpTexto').innerHTML    = 'Você fechou <b>' + num(bloco.ultimo_itens) + ' produto(s)</b> · <b>' +
-        num(bloco.ultimo_total) + '</b> unidades. Para abrir outra contagem hoje, ' +
+      el('bpTexto').innerHTML    = '<b>' + num(bloco.ultimo_itens) + ' produto(s)</b> · <b>' +
+        num(bloco.ultimo_total) + '</b> unidades. Para contar de novo hoje, ' +
         'peça a liberação ao administrador.';
       btn.style.display = 'none';
     }
@@ -1390,6 +1403,35 @@
     if(!aberto && busca.value){
       busca.value = ''; el('clearBtn').style.display = 'none'; runSearch();
     }
+    atualizarVazio();
+  }
+
+  // O que aparece embaixo da busca quando nao ha resultado nem lista: sem isso
+  // sobra meia tela de papel pautado, que parece defeito.
+  function atualizarVazio(qtdResultados){
+    var caixa = el('lancVazio');
+    var buscando = el('searchInput').value.trim().length >= 2;
+    var mostrar = false, ico = '🔍', titulo = '', texto = '';
+
+    if(buscando){
+      if(qtdResultados === 0){
+        mostrar = true; ico = '🔍';
+        titulo = 'Nada encontrado';
+        texto  = 'Confira o nome ou o código. Se o produto não estiver no cadastro, avise o administrador.';
+      }
+    } else if(!blocoAberto()){
+      mostrar = false;                     // o painel acima ja explica o que fazer
+    } else if(!bloco.itens){
+      mostrar = true; ico = '📦';
+      titulo = 'Contagem vazia';
+      texto  = 'Busque o produto pelo nome ou código, ou toque no leitor para bipar o código de barras.';
+    }
+
+    caixa.style.display = mostrar ? 'block' : 'none';
+    if(!mostrar) return;
+    el('lvIcone').textContent  = ico;
+    el('lvTitulo').textContent = titulo;
+    el('lvTexto').textContent  = texto;
   }
 
   window.iniciarContagem = function(){
@@ -1465,7 +1507,7 @@
     if(!supa || !me) return;
     var caixa = el('blocoContados');
     if(!blocoAberto() || !bloco.itens){
-      meusItens = {}; caixa.style.display = 'none'; el('contadosLista').innerHTML = ''; return;
+      meusItens = {}; caixa.style.display = 'none'; el('contadosLista').innerHTML = ''; atualizarVazio(); return;
     }
     // A busca a esconde, mas os itens sao carregados de qualquer jeito: e deles
     // que sai o meusItens, usado para marcar "você contou" nos resultados.
