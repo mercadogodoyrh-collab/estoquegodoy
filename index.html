@@ -292,6 +292,98 @@
     border-radius:10px; padding:8px 12px; text-align:center; min-width:62px; }
   .cont-item .qtd b{ display:block; font-size:19px; line-height:1.1; }
   .cont-item .qtd span{ font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; }
+
+  /* ---------- Bloco de contagem (a "nota" do colaborador) ---------- */
+  .bloco-painel{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border);
+    border-radius:16px; box-shadow:var(--shadow-sm); padding:13px 15px; margin-bottom:12px; }
+  .bloco-painel.aberta{ border-color:var(--brand); background:linear-gradient(180deg,#FFFFFF,var(--brand-soft)); }
+  .bloco-painel.travada{ border-color:#EFCFCF; background:linear-gradient(180deg,#FFFFFF,var(--danger-bg)); }
+  .bp-linha{ display:flex; align-items:center; gap:9px; }
+  .bp-stage{ font-size:11px; font-weight:800; letter-spacing:0.07em; text-transform:uppercase;
+    color:var(--ink-soft); display:flex; align-items:center; gap:6px; }
+  .bloco-painel.aberta .bp-stage{ color:var(--brand-dark); }
+  .bloco-painel.travada .bp-stage{ color:var(--danger); }
+  /* O ponto pulsa so quando ha contagem aberta: e o unico aviso de "esta valendo" */
+  .bp-ponto{ width:9px; height:9px; border-radius:50%; background:var(--ink-soft); flex:none; }
+  .bloco-painel.aberta .bp-ponto{ background:var(--brand); animation:pulsa 1.8s ease-in-out infinite; }
+  .bloco-painel.travada .bp-ponto{ background:var(--danger); }
+  @keyframes pulsa{ 0%,100%{ opacity:1; } 50%{ opacity:0.25; } }
+  .bp-hora{ margin-left:auto; font-size:11.5px; color:var(--ink-soft); font-weight:700; }
+  .bp-texto{ font-size:13px; color:var(--ink-soft); line-height:1.55; margin-top:7px; }
+  .bp-texto b{ color:var(--ink); }
+
+  .bp-nums{ display:flex; gap:8px; margin-top:11px; }
+  .bp-num{ flex:1; background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:8px 10px; text-align:center; }
+  .bp-num b{ display:block; font-size:20px; font-weight:800; line-height:1.15; }
+  .bp-num span{ font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em;
+    font-weight:800; color:var(--ink-soft); }
+  .bp-num.venda b{ color:var(--venda-dark); }
+  .bp-num.deposito b{ color:var(--deposito-dark); }
+
+  .btn-bloco{ width:100%; min-height:var(--tap); margin-top:11px; border:none; border-radius:12px;
+    font-weight:800; font-size:15.5px; cursor:pointer; background:var(--brand); color:#fff;
+    display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn-bloco:active{ background:var(--brand-dark); }
+  .btn-bloco:disabled{ opacity:0.55; }
+  .btn-bloco.encerrar{ background:var(--ink); }
+  .btn-bloco.encerrar:active{ background:#000; }
+  .scan-btn:disabled{ opacity:0.32; }
+
+  /* Resumo dentro do modal de finalizar */
+  .resumo-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+  .resumo-grid .bp-num{ background:linear-gradient(180deg,#FFFFFF,#FBFBF7); }
+  .resumo-itens{ max-height:34vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    border:1px solid var(--border); border-radius:12px; background:var(--panel); }
+  .resumo-itens .ri{ display:flex; align-items:center; gap:10px; padding:9px 12px;
+    border-bottom:1px solid var(--paper-line); font-size:13.5px; }
+  .resumo-itens .ri:last-child{ border-bottom:none; }
+  .resumo-itens .ri .n{ flex:1; min-width:0; font-weight:700; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap; }
+  .resumo-itens .ri .q{ flex:none; font-weight:800; color:var(--brand-dark); }
+  .resumo-cab{ font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 2px 7px; }
+
+  /* Produto que ja foi contado nesta rodada: continua aparecendo na busca,
+     mas marcado — antes ele sumia e bipar dava "nada encontrado". */
+  .prod.contado{ background:linear-gradient(180deg,#FFFFFF,#F6F5F0); border-style:dashed; }
+  .prod.contado .nome{ color:var(--ink-soft); }
+  .prod .selo{ font-size:10.5px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;
+    border-radius:6px; padding:4px 8px; flex:none; }
+  .prod .selo.contado{ background:var(--danger-bg); color:var(--danger); }
+  .prod .selo.meu{ background:var(--brand-soft); color:var(--brand-dark); }
+  .btn-contar.bloqueado{ background:var(--paper-line); color:var(--ink-soft); box-shadow:none; cursor:default; }
+  .aviso-recontagem{ margin-top:6px; color:var(--deposito-dark); font-weight:700; }
+
+  /* Aviso em tela cheia ao bipar algo ja contado — mesma linguagem do "ok" */
+  .ok-overlay.alerta{ background:rgba(120,25,25,0.88); }
+  .ok-overlay.alerta .ok-circulo svg{ stroke:var(--danger); }
+  .ok-overlay.alerta .ok-produto{ color:#F6DEDE; }
+  .ok-overlay.alerta .ok-dica{ color:#E3B6B6; }
+  .ok-overlay.alerta .ok-total{ color:var(--danger); }
+
+  /* Histórico do colaborador */
+  .bp-acoes{ margin-top:10px; text-align:center; }
+  .bp-link{ background:none; border:none; color:var(--ink-soft); font-size:12.5px; font-weight:800;
+    letter-spacing:0.03em; padding:8px 10px; cursor:pointer; text-decoration:underline;
+    text-underline-offset:3px; }
+  .hist-lista{ max-height:52vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .hist-bloco{ border:1px solid var(--border); border-radius:14px; background:var(--panel);
+    margin-bottom:9px; overflow:hidden; }
+  .hist-cab{ display:flex; align-items:center; gap:10px; padding:11px 13px; cursor:pointer; }
+  .hist-cab .dia{ font-size:14px; font-weight:800; }
+  .hist-cab .hora{ font-size:11.5px; color:var(--ink-soft); }
+  .hist-cab .tot{ margin-left:auto; text-align:right; font-size:11px; color:var(--ink-soft);
+    font-weight:800; text-transform:uppercase; letter-spacing:0.04em; }
+  .hist-cab .tot b{ display:block; font-size:17px; color:var(--brand-dark); letter-spacing:0; }
+  .hist-itens{ border-top:1px solid var(--paper-line); background:var(--paper); display:none; }
+  .hist-bloco.aberto .hist-itens{ display:block; }
+  .hist-itens .ri{ display:flex; gap:10px; padding:8px 13px; font-size:13px;
+    border-bottom:1px solid var(--paper-line); }
+  .hist-itens .ri:last-child{ border-bottom:none; }
+  .hist-itens .ri .n{ flex:1; min-width:0; font-weight:700; }
+  .hist-itens .ri .q{ flex:none; font-weight:800; color:var(--brand-dark); }
+  .hist-vazio{ text-align:center; padding:34px 18px; color:var(--ink-soft); font-size:13.5px; }
   /* Controle de digitacao no SG */
   .filtros{ display:flex; gap:4px; background:var(--panel); border:1px solid var(--border);
     border-radius:11px; padding:4px; flex:1; }
@@ -401,6 +493,80 @@
     .qty-input-row input{ font-size:21px; }
     .auth-wrap{ padding-top:12px; }
   }
+
+  /* ============================================================
+     IMPRESSAO — folha A4 retrato, DUAS COLUNAS por folha.
+     Cada linha carrega so codigo + nome + quantidade total, entao
+     cabem duas listas lado a lado e a folha rende o dobro.
+     As alturas abaixo estao em mm de proposito: o imprimirRelatorio()
+     usa exatamente os mesmos numeros para saber quantas linhas cabem
+     em cada coluna. Mexeu aqui, mexe la (bloco MEDIDAS).
+     ============================================================ */
+  @page{ size:A4 portrait; margin:11mm 9mm 12mm; }
+  #printArea{ display:none; }
+
+  @media print{
+    html, body{ background:#fff !important; color:#000; margin:0; padding:0; }
+    body > *{ display:none !important; }
+    #printArea{ display:block !important; }
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+    #printArea{ font-family:Arial, Helvetica, sans-serif; color:#000; }
+
+    /* Cada .pr-pag e uma folha inteira: altura fixa e quebra depois. */
+    .pr-pag{ height:274mm; display:flex; flex-direction:column; page-break-after:always;
+             break-after:page; overflow:hidden; }
+    .pr-pag:last-child{ page-break-after:auto; break-after:auto; }
+
+    .pr-topo{ height:13mm; box-sizing:border-box; display:flex; justify-content:space-between;
+              align-items:flex-end; border-bottom:2.5pt solid var(--brand-dark);
+              padding-bottom:2pt; margin-bottom:2.5mm; }
+    .pr-topo.mini{ height:8mm; border-bottom-width:1.5pt; }
+    .pr-marca{ font-size:14pt; font-weight:800; letter-spacing:.2pt; color:var(--brand-dark); line-height:1.05; }
+    .pr-topo.mini .pr-marca{ font-size:10pt; }
+    .pr-titulo{ font-size:10pt; font-weight:700; margin-top:1pt; }
+    .pr-topo.mini .pr-titulo{ font-size:7.5pt; font-weight:600; color:#444; }
+    .pr-emissao{ text-align:right; font-size:7.6pt; line-height:1.4; color:#333; }
+    .pr-emissao b{ color:#000; }
+
+    .pr-cards{ height:12mm; box-sizing:border-box; display:flex; gap:4pt; margin-bottom:2.5mm; }
+    .pr-card{ flex:1; border:0.8pt solid #999; border-radius:3pt; padding:2.5pt 5pt; }
+    .pr-card .r{ font-size:6.6pt; text-transform:uppercase; letter-spacing:.3pt; color:#444; }
+    .pr-card .v{ font-size:12.5pt; font-weight:800; line-height:1.15; }
+    .pr-card.venda{ border-color:var(--brand); } .pr-card.venda .v{ color:var(--brand-dark); }
+    .pr-card.dep{ border-color:var(--deposito); } .pr-card.dep .v{ color:var(--deposito-dark); }
+    .pr-card.alerta{ border-color:var(--danger); } .pr-card.alerta .v{ color:var(--danger); }
+
+    /* As duas colunas grandes */
+    /* flex:0 0 auto para que, na ultima folha, os totais e as assinaturas
+       venham logo abaixo da lista em vez de boiar no pe da pagina. */
+    .pr-cols{ flex:0 0 auto; display:flex; gap:6mm; align-items:flex-start; }
+    .pr-col{ flex:1; min-width:0; }
+
+    .pr-cab, .pr-lin{ display:flex; align-items:center; box-sizing:border-box; }
+    .pr-cab{ height:5.2mm; background:var(--brand-dark); color:#fff; font-size:7pt;
+             text-transform:uppercase; letter-spacing:.4pt; font-weight:700; padding:0 1.5mm; }
+    .pr-lin{ height:4.6mm; font-size:8.2pt; padding:0 1.5mm; border-bottom:0.4pt solid #CFCFCF; }
+    .pr-lin:nth-child(odd){ background:#ECECEC; }   /* :nth-child conta o cabecalho */
+    .pr-lin.feito .pr-nom{ color:#555; }
+
+    .pr-cod{ width:14mm; flex:none; font-family:"Courier New", monospace; font-size:8pt; }
+    .pr-nom{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+             font-weight:600; padding-right:1.5mm; }
+    .pr-qtd{ width:10mm; flex:none; text-align:right; font-weight:800; font-size:9pt; }
+    .pr-cab .pr-qtd{ font-size:7pt; font-weight:700; }
+
+    .pr-fecho{ height:28mm; box-sizing:border-box; padding-top:3mm; }
+    .pr-totais{ display:flex; justify-content:space-between; align-items:center;
+                border-top:1.2pt solid #555; border-bottom:0.5pt solid #999;
+                background:#E8E8E8; padding:2.5pt 5pt; font-size:8.5pt; font-weight:800; }
+    .pr-assina{ display:flex; gap:20pt; margin-top:14mm; }
+    .pr-assina div{ flex:1; border-top:0.8pt solid #000; padding-top:2pt;
+                    font-size:7.5pt; text-align:center; color:#333; }
+
+    .pr-rodape{ height:6mm; box-sizing:border-box; margin-top:auto; padding-top:2mm; border-top:0.5pt solid #CCC;
+                font-size:6.8pt; color:#666; display:flex; justify-content:space-between; }
+  }
 </style>
 </head>
 <body>
@@ -464,6 +630,23 @@
 
   <!-- ---- Contagem ---- -->
   <div id="viewLancamento">
+    <!-- Bloco de contagem: enquanto nao houver um aberto, a busca fica travada -->
+    <div class="bloco-painel" id="blocoPainel" style="display:none;">
+      <div class="bp-linha">
+        <span class="bp-stage"><span class="bp-ponto"></span><span id="bpTitulo">—</span></span>
+        <span class="bp-hora" id="bpHora"></span>
+      </div>
+      <div class="bp-texto" id="bpTexto"></div>
+      <div class="bp-nums" id="bpNums" style="display:none;">
+        <div class="bp-num"><b id="bpItens">0</b><span>Produtos</span></div>
+        <div class="bp-num venda"><b id="bpVenda">0</b><span>Venda</span></div>
+        <div class="bp-num deposito"><b id="bpDeposito">0</b><span>Depósito</span></div>
+      </div>
+      <button class="btn-bloco" id="bpBotao" style="display:none;"></button>
+      <div class="bp-acoes">
+        <button class="bp-link" onclick="abrirHistorico()">🕘 Ver meus lançamentos anteriores</button>
+      </div>
+    </div>
     <div class="busca-sticky">
       <div class="search-box">
         <svg class="lupa" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
@@ -482,12 +665,10 @@
     </div>
     <div class="contados" id="blocoContados" style="display:none;">
       <div class="contados-head">
-        <h3>Já contados</h3>
+        <h3>Nesta contagem</h3>
         <span class="conta" id="contadosQtd">0</span>
       </div>
       <div id="contadosLista"></div>
-      <button class="btn-sm" id="btnMaisContados" onclick="carregarContados(true)"
-              style="width:100%; display:none;">Carregar mais</button>
     </div>
 
     <div class="results" id="resultsList"></div>
@@ -510,6 +691,7 @@
     </div>
     <div class="toolbar">
       <button class="btn-sm primary" onclick="marcarVisiveisSg()">✓ Marcar visíveis como lançados</button>
+      <button class="btn-sm" onclick="imprimirRelatorio()">🖨 Imprimir (A4)</button>
       <button class="btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
       <button class="btn-sm" onclick="refreshReport()">↻ Atualizar</button>
       <button class="btn-sm danger" onclick="clearReport()">🗑 Limpar contagem</button>
@@ -528,7 +710,9 @@
   <!-- ---- Monitoramento (admin) ---- -->
   <div id="viewMonitoramento" style="display:none;">
     <p class="hint">Meta: <b>no mínimo 1 contagem por colaborador por dia</b>. O painel zera sozinho à meia-noite
-       (horário de Brasília) — quem ainda não lançou nada aparece em vermelho.</p>
+       (horário de Brasília) — quem ainda não lançou nada aparece em vermelho.<br>
+       Cada pessoa <b>abre uma contagem</b>, lança os produtos e <b>finaliza</b>. Depois de finalizar, ela só
+       abre outra contagem no mesmo dia se você clicar em <b>Liberar</b> — e a liberação vale para um bloco só.</p>
     <div class="cards-row">
       <div class="card"><div class="label">Colaboradores</div><div class="value" id="monTotal">0</div></div>
       <div class="card"><div class="label">Cumpriram</div><div class="value" id="monOk" style="color:var(--brand);">0</div></div>
@@ -542,7 +726,7 @@
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Colaborador</th><th>Situação</th><th>Contagens</th><th>Unidades</th><th>Última</th><th>Senha</th></tr></thead>
+        <thead><tr><th>Colaborador</th><th>Situação</th><th>Contagem</th><th>Contagens</th><th>Unidades</th><th>Última</th><th>Senha</th><th>Nova contagem</th></tr></thead>
         <tbody id="monBody"></tbody>
       </table>
     </div>
@@ -599,6 +783,51 @@
   </div>
 </div>
 
+
+
+<!-- ================= MODAL DE HISTÓRICO (do próprio colaborador) ================= -->
+<div class="overlay" id="modalHistorico" style="display:none;">
+  <div class="modal">
+    <div class="puxador"></div>
+    <div class="modal-head">
+      <div class="stage">Meus lançamentos</div>
+      <h2>Contagens que você fez</h2>
+      <div class="barcode-line" id="mhSub">Toque em uma contagem para ver os produtos.</div>
+    </div>
+    <div class="modal-body">
+      <div class="hist-lista" id="mhLista"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="fecharHistorico()">Fechar</button>
+    </div>
+  </div>
+</div>
+<!-- ================= MODAL DE FINALIZAR CONTAGEM ================= -->
+<div class="overlay" id="modalFinalizar" style="display:none;">
+  <div class="modal">
+    <div class="puxador"></div>
+    <div class="modal-head">
+      <div class="stage">Finalizar contagem</div>
+      <h2>Tem certeza?</h2>
+      <div class="barcode-line" id="mfSub">Confira o resumo antes de encerrar.</div>
+    </div>
+    <div class="modal-body">
+      <div class="resumo-grid">
+        <div class="bp-num"><b id="mfItens">0</b><span>Produtos</span></div>
+        <div class="bp-num"><b id="mfTotal">0</b><span>Total de unidades</span></div>
+        <div class="bp-num venda"><b id="mfVenda">0</b><span>Área de venda</span></div>
+        <div class="bp-num deposito"><b id="mfDeposito">0</b><span>Depósito</span></div>
+      </div>
+      <div class="resumo-cab" id="mfCab">Produtos lançados</div>
+      <div class="resumo-itens" id="mfItensLista"></div>
+      <div class="bp-texto" id="mfAviso"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="fecharFinalizar()">Voltar</button>
+      <button class="btn btn-primary" id="btnFinalizar" onclick="confirmarFinalizar()">Finalizar</button>
+    </div>
+  </div>
+</div>
 <!-- ================= MODAL DE CONTAGEM ================= -->
 <div class="overlay" id="modalLancamento" style="display:none;">
   <div class="modal">
@@ -607,6 +836,7 @@
       <div class="stage">Lançar contagem</div>
       <h2 id="mvNome">—</h2>
       <div class="barcode-line mono" id="mvBarcode">—</div>
+      <div class="barcode-line aviso-recontagem" id="mvAviso" style="display:none;">Você já lançou este produto nesta contagem — confirmando, vale o novo número.</div>
     </div>
     <div class="modal-body">
       <div class="qty-grid">
@@ -638,12 +868,15 @@
 <div class="ok-overlay" id="okOverlay" style="display:none;" onclick="fecharOk()">
   <div class="ok-card">
     <div class="ok-circulo">
-      <svg viewBox="0 0 24 24"><polyline points="4,12.5 9.5,18 20,6.5"/></svg>
+      <svg id="okIconeOk" viewBox="0 0 24 24"><polyline points="4,12.5 9.5,18 20,6.5"/></svg>
+      <svg id="okIconeAviso" viewBox="0 0 24 24" style="display:none;">
+        <line x1="12" y1="4.5" x2="12" y2="13.6"/><line x1="12" y1="18.7" x2="12" y2="18.9"/>
+      </svg>
     </div>
-    <h2>Produto contado com sucesso</h2>
+    <h2 id="okTitulo">Produto contado com sucesso</h2>
     <div class="ok-produto" id="okProduto">—</div>
-    <div class="ok-total"><span>Total contado</span><b id="okTotal">0</b></div>
-    <div class="ok-dica">toque para continuar</div>
+    <div class="ok-total" id="okTotalBox"><span>Total contado</span><b id="okTotal">0</b></div>
+    <div class="ok-dica" id="okDica">toque para continuar</div>
   </div>
 </div>
 
@@ -669,6 +902,16 @@
   function fmtBarcode(b){ return b ? b : "sem código"; }
   function fmtDate(iso){ if(!iso) return "—"; var d=new Date(iso); return d.toLocaleDateString('pt-BR')+" "+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
   function fmtHora(iso){ if(!iso) return "—"; return new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+  // A data vem como 'AAAA-MM-DD'. Passar isso por new Date() a leria como UTC e
+  // no Brasil ela voltaria um dia — por isso a formatacao e na unha.
+  function fmtDia(d){
+    if(!d) return "—";
+    var p = String(d).split('-');
+    if(p.length !== 3) return String(d);
+    var h = new Date();
+    var hoje = h.getFullYear()+'-'+('0'+(h.getMonth()+1)).slice(-2)+'-'+('0'+h.getDate()).slice(-2);
+    return (String(d) === hoje ? 'Hoje · ' : '') + p[2]+'/'+p[1]+'/'+p[0];
+  }
   function escapeHtml(s){ return (s||"").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function num(v){ return (v||0).toLocaleString('pt-BR'); }
 
@@ -749,7 +992,6 @@
         el('viewApp').classList.toggle('com-nav', admin);
 
         setConn(true, admin ? 'administrador' : 'pronto para contar');
-        el('searchInput').disabled = false;
         showScreen('app');
         setView('lancamento');
       });
@@ -920,12 +1162,12 @@
     var raw = searchInput.value.trim();
     var lista = el('resultsList'), meta = el('searchMeta');
 
-    // Sem busca ativa, a tela pertence a lista de ja contados — que fica
+    // Sem busca ativa, a tela pertence a lista do bloco aberto — que fica
     // logo abaixo da barra. Buscando, ela sai da frente dos resultados.
     if(raw.length < 2){
       lista.innerHTML = '';
       meta.innerHTML = '';
-      el('blocoContados').style.display = contadosTotal ? 'block' : 'none';
+      carregarContados();   // volta a mostrar a lista do bloco aberto
       return;
     }
     el('blocoContados').style.display = 'none';
@@ -937,18 +1179,34 @@
       ? 'codigo.eq.'+q+',codigo_barras.ilike.%'+q+'%,nome.ilike.%'+q+'%'
       : 'nome.ilike.%'+q+'%,codigo_barras.ilike.%'+q+'%';
 
+    // O produto ja contado CONTINUA vindo na busca (antes ele era filtrado
+    // fora, e bipar um codigo ja contado dava "nada encontrado", que parecia
+    // defeito). Ele vem marcado, e quem decide o que fazer e o renderResults.
     supa.from('produtos')
-      .select('id,codigo,nome,codigo_barras,preco', {count:'exact'})
-      .eq('lancado', false).or(orFilter)
-      .order('nome', {ascending:true}).limit(MAX_RESULTS)
+      .select('id,codigo,nome,codigo_barras,preco,lancado', {count:'exact'})
+      .or(orFilter)
+      .order('lancado', {ascending:true}).order('nome', {ascending:true}).limit(MAX_RESULTS)
       .then(function(res){
         if(res.error){ meta.textContent = 'Erro na busca: ' + res.error.message; return; }
         var total = res.count || res.data.length;
-        meta.textContent = total === 0 ? 'Nenhum produto pendente encontrado.'
+        meta.textContent = total === 0 ? 'Nenhum produto encontrado.'
           : (total > MAX_RESULTS ? 'Mostrando '+MAX_RESULTS+' de '+num(total)+' — refine a busca.'
                                  : num(total) + (total===1 ? ' resultado' : ' resultados'));
         renderResults(res.data);
+        avisarSeJaContado(res.data);
       });
+  }
+
+  // Bipou um codigo e o produto ja foi contado nesta rodada? avisa na cara,
+  // do mesmo jeito que o "contado com sucesso" avisa. So dispara na leitura
+  // por camera, para nao atrapalhar quem esta so navegando na busca.
+  function avisarSeJaContado(lista){
+    if(!veioDoScanner) return;
+    veioDoScanner = false;
+    if(lista.length !== 1 || !lista[0].lancado) return;
+    if(meuItem(lista[0].id)) return;         // esta na contagem aberta: pode recontar
+    if(navigator.vibrate){ try{ navigator.vibrate([90,70,90]); }catch(e){} }
+    mostrarAviso(lista[0].nome, 'Este produto já foi contado — não conte de novo.');
   }
 
   function renderResults(list){
@@ -957,14 +1215,20 @@
     var html = '';
     for(var i=0;i<list.length;i++){
       var p = list[i];
-      html += '<div class="prod">' +
+      var meu   = meuItem(p.id);                  // esta na contagem que EU abri
+      var trava = p.lancado && !meu;              // fora da minha contagem: nao mexe
+      var selo  = meu   ? '<span class="selo meu">nesta contagem</span>'
+                : p.lancado ? '<span class="selo contado">já contado</span>' : '';
+      html += '<div class="prod'+(trava ? ' contado' : '')+'">' +
         '<div class="prod-topo">' +
           '<span class="cod mono">'+escapeHtml(p.codigo)+'</span>' +
-          '<div class="nome">'+escapeHtml(p.nome)+'</div>' +
+          '<div class="nome">'+escapeHtml(p.nome)+'</div>' + selo +
         '</div>' +
         '<div class="meta"><span class="mono">'+escapeHtml(fmtBarcode(p.codigo_barras))+'</span>' +
         '<span class="preco">'+fmtMoney(p.preco)+'</span></div>' +
-        '<button class="btn-contar" data-idx="'+i+'">Contar</button>' +
+        '<button class="btn-contar'+(trava ? ' bloqueado' : '')+'" data-idx="'+i+'"'+
+          (trava ? ' disabled' : '')+'>' + (trava ? 'Produto já contado' : 'Contar') +
+        '</button>' +
         '</div>';
     }
     lista.innerHTML = html;
@@ -978,9 +1242,15 @@
   // ---------- Modal de contagem ----------
   function abrirModal(p){
     currentProduct = p;
-    el('qtyVenda').value = 0; el('qtyDeposito').value = 0;
+    // Produto que ja esta na contagem aberta reabre com o que foi lancado: e
+    // assim que se conserta um numero errado — contando de novo, sem sair da
+    // contagem. Depois que ela fecha, o produto nao volta mais.
+    var meu = meuItem(p.id);
+    el('qtyVenda').value    = meu ? (meu.qtd_venda||0)    : 0;
+    el('qtyDeposito').value = meu ? (meu.qtd_deposito||0) : 0;
     el('mvNome').textContent = p.nome;
     el('mvBarcode').textContent = 'Cód: '+p.codigo+'  ·  Barras: '+fmtBarcode(p.codigo_barras);
+    el('mvAviso').style.display = meu ? 'block' : 'none';
     el('modalLancamento').style.display = 'flex';
   }
   window.closeModals = function(){ el('modalLancamento').style.display='none'; currentProduct=null; };
@@ -1000,7 +1270,7 @@
         btn.disabled = false; btn.textContent = 'Confirmar';
         if(res.error){ showToast(limparErro(res.error.message), true); return; }
         var nome = currentProduct.nome;
-        closeModals(); runSearch(); carregarContados();
+        closeModals(); runSearch(); refreshBloco();
         if(navigator.vibrate){ try{ navigator.vibrate([40,60,40]); }catch(e){} }
         mostrarOk(nome, qv + qd);
       });
@@ -1010,11 +1280,30 @@
   var okTimer = null;
 
   function mostrarOk(nome, total){
+    el('okOverlay').classList.remove('alerta');
+    el('okIconeOk').style.display = 'block';
+    el('okIconeAviso').style.display = 'none';
+    el('okTitulo').textContent = 'Produto contado com sucesso';
+    el('okTotalBox').style.display = 'inline-block';
+    el('okDica').textContent = 'toque para continuar';
     el('okProduto').textContent = nome;
     el('okTotal').textContent = num(total);
     el('okOverlay').style.display = 'flex';
     clearTimeout(okTimer);
     okTimer = setTimeout(fecharOk, 2600);
+  }
+
+  function mostrarAviso(nome, dica){
+    el('okOverlay').classList.add('alerta');
+    el('okIconeOk').style.display = 'none';
+    el('okIconeAviso').style.display = 'block';
+    el('okTitulo').textContent = 'Produto já contado';
+    el('okTotalBox').style.display = 'none';
+    el('okDica').textContent = dica || 'toque para continuar';
+    el('okProduto').textContent = nome;
+    el('okOverlay').style.display = 'flex';
+    clearTimeout(okTimer);
+    okTimer = setTimeout(fecharOk, 3600);
   }
 
   window.fecharOk = function(){
@@ -1024,38 +1313,239 @@
     if(!el('searchInput').disabled) el('searchInput').focus();
   };
 
-  // ---------- Já contados ----------
-  var contadosOffset = 0, contadosTotal = 0;
-  var CONTADOS_PAGINA = 50;
 
-  window.carregarContados = function(maisUma){
+  // ---------- Bloco de contagem ----------
+  // O colaborador abre um bloco, lanca os produtos dentro dele e finaliza —
+  // como quem monta uma nota. Sem bloco aberto a busca fica travada, que e o
+  // que impede lancamento solto. Finalizado o bloco do dia, so o administrador
+  // libera outro (funcao liberar_contagem, no Monitoramento).
+  var bloco = null;         // ultimo retorno de contagem_estado()
+  var meusItens = {};       // produto_id -> {qtd_venda, qtd_deposito} do bloco aberto
+  var veioDoScanner = false;
+
+  function blocoAberto(){ return !!(bloco && bloco.bloco_id); }
+  // O produto esta na contagem que EU abri agora? so ai da para recontar.
+  function meuItem(id){ return meusItens[id] || null; }
+
+  window.refreshBloco = function(){
     if(!supa || !me) return;
-    if(!maisUma){ contadosOffset = 0; }
-    var buscando = el('searchInput').value.trim().length >= 2;
-
-    supa.rpc('contados_total').then(function(res){
-      if(res.error) return;
-      contadosTotal = res.data || 0;
-      el('contadosQtd').textContent = num(contadosTotal);
-      el('blocoContados').style.display = (contadosTotal && !buscando) ? 'block' : 'none';
+    supa.rpc('contagem_estado').then(function(res){
+      if(res.error){ showToast(limparErro(res.error.message), true); return; }
+      bloco = (res.data && res.data[0]) || null;
+      renderBloco();
+      carregarContados();
     });
-
-    supa.rpc('contados_lista', { p_limite: CONTADOS_PAGINA, p_offset: contadosOffset })
-      .then(function(res){
-        if(res.error){ showToast(limparErro(res.error.message), true); return; }
-        var html = '';
-        (res.data || []).forEach(function(p){
-          html += '<div class="cont-item">' +
-            '<div class="txt"><div class="nome">'+escapeHtml(p.nome)+'</div>' +
-            '<div class="barras mono">'+escapeHtml(fmtBarcode(p.codigo_barras))+'</div></div>' +
-            '<div class="qtd"><b>'+num(p.total)+'</b><span>total</span></div></div>';
-        });
-        if(maisUma){ el('contadosLista').insertAdjacentHTML('beforeend', html); }
-        else       { el('contadosLista').innerHTML = html; }
-        contadosOffset += (res.data || []).length;
-        el('btnMaisContados').style.display = contadosOffset < contadosTotal ? 'block' : 'none';
-      });
   };
+
+  function renderBloco(){
+    var p = el('blocoPainel');
+    if(!bloco){ p.style.display = 'none'; return; }
+
+    var aberto  = blocoAberto();
+    var travado = !aberto && !bloco.pode_iniciar;
+    p.style.display = 'block';
+    p.className = 'bloco-painel' + (aberto ? ' aberta' : (travado ? ' travada' : ''));
+    el('bpNums').style.display = aberto ? 'flex' : 'none';
+
+    var btn = el('bpBotao');
+    btn.disabled = false;
+
+    if(aberto){
+      el('bpTitulo').textContent = 'Contagem aberta';
+      el('bpHora').textContent   = 'iniciada às ' + fmtHora(bloco.iniciado_em);
+      el('bpTexto').innerHTML    = bloco.itens
+        ? 'Vá lançando os produtos. Ao terminar, finalize para fechar o bloco.'
+        : 'Nenhum produto lançado ainda — busque ou bipe o primeiro.';
+      el('bpItens').textContent    = num(bloco.itens);
+      el('bpVenda').textContent    = num(bloco.un_venda);
+      el('bpDeposito').textContent = num(bloco.un_deposito);
+      btn.style.display = 'flex';
+      btn.className     = 'btn-bloco encerrar';
+      btn.textContent   = '✓ Finalizar contagem';
+      btn.onclick       = abrirFinalizar;
+    } else if(bloco.pode_iniciar){
+      el('bpTitulo').textContent = 'Nenhuma contagem aberta';
+      el('bpHora').textContent   = '';
+      el('bpTexto').innerHTML    = bloco.liberado
+        ? 'O administrador <b>liberou</b> uma nova contagem para você.'
+        : 'Inicie a contagem para começar a lançar os produtos.';
+      btn.style.display = 'flex';
+      btn.className     = 'btn-bloco';
+      btn.textContent   = '▶ Iniciar contagem';
+      btn.onclick       = iniciarContagem;
+    } else {
+      el('bpTitulo').textContent = 'Contagem de hoje finalizada';
+      el('bpHora').textContent   = 'às ' + fmtHora(bloco.ultimo_finalizado_em);
+      el('bpTexto').innerHTML    = 'Você fechou <b>' + num(bloco.ultimo_itens) + ' produto(s)</b> · <b>' +
+        num(bloco.ultimo_total) + '</b> unidades. Para abrir outra contagem hoje, ' +
+        'peça a liberação ao administrador.';
+      btn.style.display = 'none';
+    }
+
+    // Busca e leitor de barras so respondem com bloco aberto
+    var busca = el('searchInput');
+    busca.disabled = !aberto;
+    el('scanBtn').disabled = !aberto;
+    busca.placeholder = aberto ? 'Nome, código ou barras…' : 'Inicie a contagem para buscar';
+    if(!aberto && busca.value){
+      busca.value = ''; el('clearBtn').style.display = 'none'; runSearch();
+    }
+  }
+
+  window.iniciarContagem = function(){
+    var btn = el('bpBotao'), rotulo = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Abrindo…';
+    supa.rpc('iniciar_contagem').then(function(res){
+      btn.textContent = rotulo;
+      if(res.error){ showToast(limparErro(res.error.message), true); refreshBloco(); return; }
+      showToast('Contagem iniciada. Pode lançar os produtos.');
+      refreshBloco();
+      setTimeout(function(){ if(!el('searchInput').disabled) el('searchInput').focus(); }, 150);
+    });
+  };
+
+  // ---------- Finalizar: o "tem certeza?" com o resumo do bloco ----------
+  window.abrirFinalizar = function(){
+    if(!blocoAberto()) return;
+    var temItens = bloco.itens > 0;
+
+    el('mfItens').textContent    = num(bloco.itens);
+    el('mfTotal').textContent    = num((bloco.un_venda||0) + (bloco.un_deposito||0));
+    el('mfVenda').textContent    = num(bloco.un_venda);
+    el('mfDeposito').textContent = num(bloco.un_deposito);
+    el('mfSub').textContent      = 'Aberta às ' + fmtHora(bloco.iniciado_em) +
+                                   ' · ' + num(bloco.itens) + ' produto(s) lançado(s)';
+    el('mfAviso').innerHTML = temItens
+      ? 'Depois de finalizar, só o administrador libera uma nova contagem hoje.'
+      : 'Você não lançou nenhum produto — a contagem será <b>descartada</b> e você poderá iniciar outra.';
+    el('btnFinalizar').textContent = temItens ? 'Finalizar' : 'Descartar';
+    el('mfCab').style.display        = temItens ? 'block' : 'none';
+    el('mfItensLista').style.display = temItens ? 'block' : 'none';
+    el('modalFinalizar').style.display = 'flex';
+
+    if(!temItens) return;
+    el('mfItensLista').innerHTML =
+      '<div class="ri"><span class="n"><span class="spinner"></span> carregando…</span></div>';
+    supa.rpc('bloco_itens', { p_bloco_id: bloco.bloco_id }).then(function(res){
+      if(res.error){ el('mfItensLista').innerHTML = ''; showToast(limparErro(res.error.message), true); return; }
+      var html = '';
+      (res.data || []).forEach(function(it){
+        html += '<div class="ri"><span class="n">' + escapeHtml(it.nome) + '</span>' +
+                '<span class="q">' + num(it.total) + '</span></div>';
+      });
+      el('mfItensLista').innerHTML = html;
+    });
+  };
+
+  window.fecharFinalizar = function(){ el('modalFinalizar').style.display = 'none'; };
+
+  window.confirmarFinalizar = function(){
+    var btn = el('btnFinalizar'), rotulo = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Finalizando…';
+    supa.rpc('finalizar_contagem').then(function(res){
+      btn.disabled = false; btn.textContent = rotulo;
+      if(res.error){ showToast(limparErro(res.error.message), true); return; }
+      var r = (res.data && res.data[0]) || {};
+      fecharFinalizar();
+      if(r.descartado){
+        showToast('Contagem descartada: nenhum produto lançado.');
+      } else {
+        showToast('Contagem finalizada: ' + num(r.itens) + ' produto(s), ' +
+                  num((r.un_venda||0) + (r.un_deposito||0)) + ' unidades.');
+        if(navigator.vibrate){ try{ navigator.vibrate([40,60,40]); }catch(e){} }
+      }
+      refreshBloco();
+    });
+  };
+
+  // ---------- Itens desta contagem ----------
+  // A lista da tela e o proprio bloco aberto: o colaborador so ve o que ele
+  // acabou de lancar, nunca a contagem dos outros.
+  window.carregarContados = function(){
+    if(!supa || !me) return;
+    var caixa = el('blocoContados');
+    if(!blocoAberto() || !bloco.itens){
+      meusItens = {}; caixa.style.display = 'none'; el('contadosLista').innerHTML = ''; return;
+    }
+    // A busca a esconde, mas os itens sao carregados de qualquer jeito: e deles
+    // que sai o meusItens, usado para marcar "você contou" nos resultados.
+    var buscando = el('searchInput').value.trim().length >= 2;
+    caixa.style.display = buscando ? 'none' : 'block';
+    el('contadosQtd').textContent = num(bloco.itens);
+
+    supa.rpc('bloco_itens', { p_bloco_id: bloco.bloco_id }).then(function(res){
+      if(res.error){ showToast(limparErro(res.error.message), true); return; }
+      var html = '', novos = {};
+      (res.data || []).forEach(function(p){
+        novos[p.produto_id] = { qtd_venda:p.qtd_venda, qtd_deposito:p.qtd_deposito };
+        html += '<div class="cont-item">' +
+          '<div class="txt"><div class="nome">' + escapeHtml(p.nome) + '</div>' +
+          '<div class="barras mono">' + escapeHtml(fmtBarcode(p.codigo_barras)) + '</div></div>' +
+          '<div class="qtd"><b>' + num(p.total) + '</b><span>total</span></div></div>';
+      });
+      meusItens = novos;
+      el('contadosLista').innerHTML = html;
+    });
+  };
+
+  // ---------- Histórico do próprio colaborador ----------
+  // "Cada um vê os seus lançamentos": minhas_contagens() so devolve os blocos
+  // de quem esta logado, e bloco_itens() so abre bloco do proprio dono.
+  window.abrirHistorico = function(){
+    el('mhLista').innerHTML = '<div class="hist-vazio"><span class="spinner"></span> carregando…</div>';
+    el('modalHistorico').style.display = 'flex';
+    supa.rpc('minhas_contagens').then(function(res){
+      if(res.error){ el('mhLista').innerHTML = ''; showToast(limparErro(res.error.message), true); return; }
+      var linhas = res.data || [];
+      if(!linhas.length){
+        el('mhSub').textContent = 'Você ainda não finalizou nenhuma contagem.';
+        el('mhLista').innerHTML = '<div class="hist-vazio">Nada por aqui ainda.<br>' +
+          'Assim que você finalizar uma contagem, ela aparece nesta lista.</div>';
+        return;
+      }
+      var totItens = 0;
+      linhas.forEach(function(b){ totItens += Number(b.itens||0); });
+      el('mhSub').textContent = num(linhas.length) + ' contagem(ns) · ' + num(totItens) +
+                                ' produto(s) lançados por você. Toque para ver os produtos.';
+      var html = '';
+      linhas.forEach(function(b){
+        var aberta = b.status === 'aberto';
+        html += '<div class="hist-bloco" data-id="'+b.id+'">' +
+          '<div class="hist-cab">' +
+            '<div><div class="dia">' + fmtDia(b.dia) +
+              (aberta ? ' <span class="pill ok">aberta</span>' : '') + '</div>' +
+              '<div class="hora">' + fmtHora(b.iniciado_em) +
+              (b.finalizado_em ? ' às ' + fmtHora(b.finalizado_em) : '') + '</div></div>' +
+            '<div class="tot"><b>' + num(b.itens) + '</b>produtos · ' +
+              num((b.un_venda||0) + (b.un_deposito||0)) + ' un.</div>' +
+          '</div><div class="hist-itens"></div></div>';
+      });
+      el('mhLista').innerHTML = html;
+
+      el('mhLista').querySelectorAll('.hist-cab').forEach(function(cab){
+        cab.addEventListener('click', function(){
+          var caixa = this.parentNode, itens = caixa.querySelector('.hist-itens');
+          if(caixa.classList.contains('aberto')){ caixa.classList.remove('aberto'); return; }
+          caixa.classList.add('aberto');
+          if(itens.getAttribute('data-carregado')) return;
+          itens.innerHTML = '<div class="ri"><span class="n"><span class="spinner"></span> carregando…</span></div>';
+          supa.rpc('bloco_itens', { p_bloco_id: parseInt(caixa.getAttribute('data-id'),10) })
+            .then(function(res){
+              if(res.error){ itens.innerHTML = '<div class="ri"><span class="n">Não foi possível carregar.</span></div>'; return; }
+              var h = '';
+              (res.data || []).forEach(function(it){
+                h += '<div class="ri"><span class="n">' + escapeHtml(it.nome) + '</span>' +
+                     '<span class="q">' + num(it.total) + '</span></div>';
+              });
+              itens.innerHTML = h || '<div class="ri"><span class="n">Sem produtos.</span></div>';
+              itens.setAttribute('data-carregado', '1');
+            });
+        });
+      });
+    });
+  };
+
+  window.fecharHistorico = function(){ el('modalHistorico').style.display = 'none'; };
 
   // ---------- Toast ----------
   var toastTimer = null;
@@ -1082,7 +1572,7 @@
         el(par[1]+'B').classList.toggle('active', on);
       });
     window.scrollTo(0,0);
-    if(v==='lancamento'){ runSearch(); carregarContados(); }
+    if(v==='lancamento'){ runSearch(); refreshBloco(); }
     if(v==='relatorio') refreshReport();
     if(v==='monitoramento') refreshMonitor();
     if(v==='colaboradores') refreshColabs();
@@ -1202,6 +1692,160 @@
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
   };
 
+  // ---------- Impressao A4 do relatorio ----------
+  // Folha A4 retrato dividida em DUAS colunas grandes. Cada linha traz so
+  // codigo + nome + quantidade total, que e o que serve para conferir na
+  // gondola e digitar no SG. O detalhe completo (venda/deposito, quem contou,
+  // quando) continua saindo no CSV.
+  //
+  // MEDIDAS — em mm, iguais as do bloco @media print la em cima. Sao elas que
+  // dizem quantas linhas cabem por coluna. Mexeu no CSS, mexe aqui tambem.
+  var PR = {
+    pagina:    274,   // 297 da folha - 11 de margem no topo - 12 embaixo
+    linha:     4.6,   // .pr-lin
+    cabColuna: 5.2,   // .pr-cab
+    topo:      15.5,  // .pr-topo (13) + margem (2.5)
+    topoMini:  10.5,  // .pr-topo.mini (8) + margem (2.5)
+    cards:     14.5,  // .pr-cards (12) + margem (2.5)
+    rodape:    6,     // .pr-rodape
+    fecho:     28     // .pr-fecho (totais + assinaturas), so na ultima folha
+  };
+
+  // Quantas linhas cabem em UMA coluna desta folha.
+  function prLinhasPorColuna(primeira, ultima){
+    var livre = PR.pagina - PR.rodape - PR.cabColuna
+              - (primeira ? PR.topo + PR.cards : PR.topoMini)
+              - (ultima ? PR.fecho : 0);
+    return Math.max(1, Math.floor(livre / PR.linha));
+  }
+
+  // Fatia a lista em folhas. A ultima leva o bloco de totais e assinaturas —
+  // se nao sobrar espaco para ele, ganha uma folha so para si.
+  function prPaginar(total){
+    var pags = [], i = 0;
+    while(i < total){
+      var primeira = (pags.length === 0);
+      var capUlt   = prLinhasPorColuna(primeira, true)  * 2;
+      var capMeio  = prLinhasPorColuna(primeira, false) * 2;
+      if(total - i <= capUlt){ pags.push({ ini:i, fim:total, ultima:true }); i = total; }
+      else { pags.push({ ini:i, fim:i + capMeio, ultima:false }); i += capMeio; }
+    }
+    if(!pags.length || !pags[pags.length-1].ultima){
+      pags.push({ ini:total, fim:total, ultima:true });   // folha so do fecho
+    }
+    return pags;
+  }
+
+  window.imprimirRelatorio = function(){
+    if(!repCache.length){ showToast('Não há contagem para imprimir.', true); return; }
+    var lista = listaFiltrada();
+    if(!lista.length){ showToast('Nada visível para imprimir.', true); return; }
+
+    var rotulo = filtroSg === 'pendente' ? 'Falta lançar no SG'
+               : filtroSg === 'feito'    ? 'Já lançado no SG'
+               :                           'Todos os produtos contados';
+
+    // Cartoes do topo: sempre a contagem inteira, nao so o recorte impresso
+    var gv=0, gd=0; repCache.forEach(function(e){ gv += (e.qtd_venda||0); gd += (e.qtd_deposito||0); });
+    var pend = repCache.filter(function(e){ return !e.sg_lancado; }).length;
+
+    var lt=0; lista.forEach(function(e){ lt += (e.total||0); });
+
+    var agora = new Date();
+    var dia   = agora.toLocaleDateString('pt-BR');
+    var hora  = agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+
+    function linha(e){
+      return '<div class="pr-lin' + (e.sg_lancado ? ' feito' : '') + '">'
+           +   '<span class="pr-cod">' + escapeHtml(e.codigo) + '</span>'
+           +   '<span class="pr-nom">' + escapeHtml(e.nome) + '</span>'
+           +   '<span class="pr-qtd">' + (e.total||0) + '</span>'
+           + '</div>';
+    }
+    function coluna(itens){
+      var c = '<div class="pr-col"><div class="pr-cab">'
+            +   '<span class="pr-cod">Código</span>'
+            +   '<span class="pr-nom">Produto</span>'
+            +   '<span class="pr-qtd">Qtd</span>'
+            + '</div>';
+      itens.forEach(function(e){ c += linha(e); });
+      return c + '</div>';
+    }
+
+    var pags = prPaginar(lista.length), h = '';
+
+    pags.forEach(function(p, idx){
+      var primeira = (idx === 0);
+      h += '<div class="pr-pag">';
+
+      if(primeira){
+        h += '<div class="pr-topo">'
+          +    '<div>'
+          +      '<div class="pr-marca">MERCADO E AÇOUGUE GODOY</div>'
+          +      '<div class="pr-titulo">Relatório de Contagem de Estoque — ' + dia + '</div>'
+          +    '</div>'
+          +    '<div class="pr-emissao">'
+          +      'Emitido em <b>' + dia + '</b> às <b>' + hora + '</b><br>'
+          +      'Responsável: <b>' + escapeHtml((me && me.nome) || '—') + '</b><br>'
+          +      'Filtro: <b>' + rotulo + '</b> · <b>' + num(lista.length) + '</b> de ' + num(repCache.length) + ' itens'
+          +    '</div>'
+          +  '</div>'
+          +  '<div class="pr-cards">'
+          +    '<div class="pr-card"><div class="r">Produtos contados</div><div class="v">' + num(repCache.length) + '</div></div>'
+          +    '<div class="pr-card venda"><div class="r">Un. área de venda</div><div class="v">' + num(gv) + '</div></div>'
+          +    '<div class="pr-card dep"><div class="r">Un. depósito</div><div class="v">' + num(gd) + '</div></div>'
+          +    '<div class="pr-card"><div class="r">Total de unidades</div><div class="v">' + num(gv + gd) + '</div></div>'
+          +    '<div class="pr-card alerta"><div class="r">Falta no SG</div><div class="v">' + num(pend) + '</div></div>'
+          +  '</div>';
+      } else {
+        h += '<div class="pr-topo mini">'
+          +    '<div>'
+          +      '<div class="pr-marca">MERCADO E AÇOUGUE GODOY</div>'
+          +      '<div class="pr-titulo">Contagem de ' + dia + ' · ' + rotulo + ' (continuação)</div>'
+          +    '</div>'
+          +    '<div class="pr-emissao"><b>' + num(lista.length) + '</b> itens no total</div>'
+          +  '</div>';
+      }
+
+      var itens = lista.slice(p.ini, p.fim);
+      var corte = Math.ceil(itens.length / 2);
+      h += '<div class="pr-cols">'
+        +    coluna(itens.slice(0, corte))
+        +    coluna(itens.slice(corte))
+        +  '</div>';
+
+      if(p.ultima){
+        h += '<div class="pr-fecho">'
+          +    '<div class="pr-totais">'
+          +      '<span>TOTAL — ' + num(lista.length) + ' produto(s)</span>'
+          +      '<span>' + num(lt) + ' unidades</span>'
+          +    '</div>'
+          +    '<div class="pr-assina">'
+          +      '<div>Conferido por</div><div>Lançado no SG por</div><div>Visto do responsável</div>'
+          +    '</div>'
+          +  '</div>';
+      }
+
+      h += '<div class="pr-rodape">'
+        +    '<span>Contagem de Estoque — Mercado e Açougue Godoy · gerado em ' + dia + ' ' + hora + '</span>'
+        +    '<span>Página ' + (idx+1) + ' de ' + pags.length + '</span>'
+        +  '</div>'
+        + '</div>';
+    });
+
+    el('printArea').innerHTML = h;
+
+    // O navegador imprime o title no cabecalho da folha; deixa um nome util
+    // no papel e no PDF, e devolve o original assim que termina.
+    var titleOrig = document.title;
+    document.title = 'Contagem de estoque — ' + agora.toISOString().slice(0,10);
+    var restaurar = function(){ document.title = titleOrig; };
+    window.addEventListener('afterprint', function once(){
+      window.removeEventListener('afterprint', once); restaurar();
+    });
+    setTimeout(function(){ window.print(); setTimeout(restaurar, 1500); }, 60);
+  };
+
   window.clearReport = function(){
     if(!repCache.length){ showToast('Não há contagem para limpar.', true); return; }
     if(!confirm('Isso zera a contagem de TODOS os '+repCache.length+' produtos já contados.\n\n'+
@@ -1214,31 +1858,64 @@
   };
 
   // ---------- Monitoramento (admin) ----------
+  var monCache = [];
   window.monHoje = function(){ el('monData').value=''; refreshMonitor(); };
 
   window.refreshMonitor = function(){
     var dia = el('monData').value || null;
-    el('monBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
+    el('monBody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
     supa.rpc('monitoramento_diario', dia ? { p_dia: dia } : {}).then(function(res){
       if(res.error){ el('monBody').innerHTML=''; showToast(limparErro(res.error.message), true); return; }
       var linhas = res.data || [], html='', ok=0, falta=0, cont=0;
-      linhas.forEach(function(r){
+      monCache = linhas;
+      linhas.forEach(function(r, i){
         if(r.cumpriu){ ok++; } else { falta++; }
         cont += Number(r.contagens_dia||0);
+
+        // Estado do bloco: aberta > finalizada > nem comecou
+        var estado = r.bloco_aberto ? '<span class="pill ok">aberta</span>'
+                   : r.finalizou    ? '<span class="pill neutro">finalizada</span>'
+                                    : '<span class="pill nao">não abriu</span>';
+        if(Number(r.blocos||0) > 1) estado += ' <span class="pill neutro">'+num(r.blocos)+'×</span>';
+
         html += '<tr class="'+(r.cumpriu?'':'falta')+'">' +
           '<td data-label="Colaborador"><b>'+escapeHtml(r.colaborador)+'</b></td>' +
           '<td data-label="Situação"><span class="pill '+(r.cumpriu?'ok':'nao')+'">'+(r.cumpriu?'lançou':'NÃO LANÇOU')+'</span></td>' +
+          '<td data-label="Contagem">'+estado+'</td>' +
           '<td data-label="Contagens">'+num(r.contagens_dia)+'</td>' +
           '<td data-label="Unidades">'+num(r.un_contadas)+'</td>' +
           '<td data-label="Última">'+fmtHora(r.ultima)+'</td>' +
           '<td data-label="Senha">'+(r.tem_senha?'<span class="pill neutro">criada</span>':'<span class="pill nao">pendente</span>')+'</td>' +
-          '</tr>';
+          '<td data-label="Nova contagem" class="acoes">' +
+            (r.liberacao_pendente
+              ? '<span class="pill ok">liberado</span>' +
+                '<button class="btn-sm danger" data-lib="0" data-i="'+i+'">Cancelar</button>'
+              : '<button class="btn-sm primary" data-lib="1" data-i="'+i+'"'+
+                (r.bloco_aberto ? ' disabled title="Já tem uma contagem aberta"' : '')+'>🔓 Liberar</button>') +
+          '</td></tr>';
       });
       el('monBody').innerHTML = html || '<tr><td style="text-align:center;padding:24px;">Nenhum colaborador ativo.</td></tr>';
       el('monTotal').textContent = num(linhas.length);
       el('monOk').textContent = num(ok);
       el('monFalta').textContent = num(falta);
       el('monContagens').textContent = num(cont);
+
+      el('monBody').querySelectorAll('button[data-lib]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var r = monCache[parseInt(this.getAttribute('data-i'),10)];
+          var liberar = this.getAttribute('data-lib') === '1';
+          if(liberar && !confirm('Liberar uma nova contagem para '+r.colaborador+' hoje?\n\n'+
+                                 'A liberação vale para um bloco só.')) return;
+          this.disabled = true;
+          supa.rpc('liberar_contagem', { p_colaborador_id: r.colaborador_id, p_liberar: liberar })
+            .then(function(res){
+              if(res.error){ showToast(limparErro(res.error.message), true); refreshMonitor(); return; }
+              showToast(liberar ? 'Nova contagem liberada para '+r.colaborador+'.'
+                                : 'Liberação de '+r.colaborador+' cancelada.');
+              refreshMonitor();
+            });
+        });
+      });
     });
   };
 
@@ -1438,6 +2115,7 @@
     var limpo = String(codigo).replace(/\D/g,'') || String(codigo);
     fecharScanner();
     if(navigator.vibrate){ try{ navigator.vibrate(60); }catch(e){} }
+    veioDoScanner = true;
     searchInput.value = limpo;
     el('clearBtn').style.display = 'block';
     showToast('Código lido: ' + limpo);
@@ -1456,5 +2134,10 @@
 
 })();
 </script>
+
+<!-- ================= FOLHA DE IMPRESSAO (A4) =================
+     Fica vazio ate alguem clicar em "Imprimir" na aba Relatorio.
+     Nao aparece na tela: so existe dentro do @media print.        -->
+<div id="printArea" aria-hidden="true"></div>
 </body>
 </html>
