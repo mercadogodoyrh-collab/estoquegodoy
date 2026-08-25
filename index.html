@@ -25,15 +25,29 @@
     --deposito: #9A6114; --deposito-dark: #74490F; --deposito-bg: #FAEEDC;
     --danger: #A32626; --danger-bg: #FBE7E7; --ok: var(--brand); --ok-bg: var(--brand-soft);
 
-    /* Sombras em camadas: uma rente ao objeto e uma difusa. Dois tons suaves
-       leem melhor que uma sombra forte, e custam o mesmo. */
-    --shadow-sm: 0 1px 2px rgba(28,31,27,0.05), 0 1px 3px rgba(28,31,27,0.05);
-    --shadow: 0 1px 2px rgba(28,31,27,0.05), 0 8px 20px -12px rgba(28,31,27,0.24);
-    --shadow-lg: 0 4px 8px rgba(28,31,27,0.06), 0 20px 44px -20px rgba(28,31,27,0.34);
+    /* Sombras em camadas: uma rente ao objeto, uma media e uma difusa la
+       embaixo. Varios tons suaves leem melhor que uma sombra forte, e custam
+       o mesmo. Com sombra boa a borda pode ser quase invisivel — e isso que
+       deixa a tela limpa sem os cartoes se perderem no fundo. */
+    --shadow-sm: 0 1px 2px rgba(28,31,27,0.05), 0 3px 8px -4px rgba(28,31,27,0.16);
+    --shadow: 0 1px 2px rgba(28,31,27,0.05), 0 6px 14px -7px rgba(28,31,27,0.20),
+              0 16px 32px -20px rgba(28,31,27,0.24);
+    --shadow-lg: 0 2px 6px rgba(28,31,27,0.06), 0 14px 28px -12px rgba(28,31,27,0.26),
+                 0 34px 60px -32px rgba(28,31,27,0.40);
     /* Vidro: usado so na busca e no topo. backdrop-filter e caro — numa lista
        longa ele derruba o FPS da rolagem em aparelho simples. */
     --vidro: rgba(255,255,255,0.72);
     --vidro-borda: rgba(255,255,255,0.66);
+
+    /* ---- BOTAO ALTO ---------------------------------------------------
+       Todo botao de acao tem PAREDE (a faixa solida embaixo) e CHAO (o halo
+       difuso). Ao tocar, o botao desce exatamente a altura da parede. Para
+       criar uma variante basta redefinir --parede e --halo. */
+    --alto:   5px;
+    --parede: var(--brand-dark);
+    --halo:   rgba(0,83,44,0.42);
+    /* Borda de cartao: quase invisivel de proposito, quem separa e a sombra */
+    --border-suave: #E7EAE1;
 
     --tap: 48px;                       /* alvo minimo de toque */
     --safe-b: env(safe-area-inset-bottom, 0px);
@@ -46,7 +60,7 @@
   body{
     background:
       radial-gradient(1100px 380px at 50% -140px, rgba(0,113,60,0.10), transparent 70%),
-      repeating-linear-gradient(180deg, transparent 0 27px, rgba(227,223,208,0.55) 27px 28px),
+      repeating-linear-gradient(180deg, transparent 0 27px, rgba(227,223,208,0.34) 27px 28px),
       var(--paper);
     background-attachment: fixed, scroll, scroll;
     color:var(--ink); min-height:100vh; min-height:100dvh;
@@ -63,7 +77,8 @@
     backdrop-filter:saturate(140%);
     padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;
     display:flex; align-items:center; justify-content:space-between; gap:10px;
-    box-shadow:0 1px 0 rgba(255,255,255,0.10) inset, 0 6px 22px -10px rgba(0,50,28,0.75); }
+    box-shadow:0 1px 0 rgba(255,255,255,0.10) inset, 0 4px 12px -6px rgba(0,50,28,0.55),
+                0 14px 34px -18px rgba(0,50,28,0.85); }
   .brand{ display:flex; flex-direction:column; gap:1px; min-width:0; }
   .brand .name{ font-weight:800; letter-spacing:0.02em; text-transform:uppercase; font-size:15px;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -76,7 +91,7 @@
   .userbox .who{ text-align:right; line-height:1.25; font-size:11px; color:#A9CDB8; max-width:120px; }
   .userbox .who b{ display:block; color:#fff; font-size:12.5px; white-space:nowrap;
     overflow:hidden; text-overflow:ellipsis; }
-  .btn-logout{ background:rgba(255,255,255,0.14); color:#fff; border:none; border-radius:9px;
+  .btn-logout{ background:rgba(255,255,255,0.16); color:#fff; border:none; border-radius:10px;
     min-height:38px; padding:0 13px; font-size:12.5px; font-weight:700; cursor:pointer; flex:none; }
 
   /* Abas: barra inferior no celular, topo no desktop */
@@ -116,17 +131,17 @@
   .auth-switch{ text-align:center; font-size:13px; color:var(--ink-soft); margin-top:16px; }
   .auth-switch a{ color:var(--brand); font-weight:700; cursor:pointer; text-decoration:underline;
     display:inline-block; padding:8px 4px; }
-  .btn-full{ width:100%; min-height:var(--tap); padding:13px 14px; border-radius:12px; border:none;
+  .btn-full{ width:100%; min-height:var(--tap); padding:13px 14px; border-radius:14px; border:none;
     font-weight:800; font-size:16px; cursor:pointer; background:var(--brand); color:#fff; }
   .btn-full:active{ background:var(--brand-dark); }
   .btn-full:disabled{ opacity:0.55; }
 
   /* ---------- Busca + câmera ---------- */
   .busca-sticky{ position:sticky; top:0; z-index:12; padding:12px 0 8px;
-    background:linear-gradient(var(--paper) 78%, rgba(244,241,232,0)); margin:-16px 0 0; }
+    background:linear-gradient(var(--paper) 78%, rgba(244,241,232,0)); margin:0; }
   /* VIDRO 2 de 2 — a busca fica fixa no topo, entao o desfoque acontece
      numa superficie so, e nao repetido por item de lista. */
-  .search-box{ background:var(--vidro); border:1.5px solid var(--vidro-borda); border-radius:16px;
+  .search-box{ background:var(--vidro); border:1.5px solid var(--vidro-borda); border-radius:18px;
     padding:5px 5px 5px 13px; display:flex; align-items:center; gap:8px;
     backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%);
     box-shadow:var(--shadow), 0 1px 0 rgba(255,255,255,0.9) inset;
@@ -138,8 +153,7 @@
     font-size:16px; padding:12px 2px; color:var(--ink); }
   .clear-btn{ border:none; background:var(--paper-line); color:var(--ink-soft); width:30px; height:30px;
     border-radius:50%; cursor:pointer; font-size:15px; display:none; flex:none; }
-  .scan-btn{ flex:none; width:var(--tap); height:var(--tap); border-radius:12px; border:none; cursor:pointer;
-    box-shadow:0 2px 0 var(--brand-dark), 0 6px 14px -6px rgba(0,113,60,0.5);
+  .scan-btn{ flex:none; width:var(--tap); height:var(--tap); border-radius:13px; border:none; cursor:pointer;
     background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; }
   .scan-btn:active{ background:var(--brand-dark); }
   .search-meta{ font-size:12.5px; color:var(--ink-soft); margin:2px 2px 6px; }
@@ -149,11 +163,10 @@
   /* Sem backdrop-filter aqui de proposito: sao muitos cartoes numa lista
      rolavel. O relevo vem de gradiente + sombra, que o navegador desenha
      uma vez e nao recalcula a cada quadro. */
-  .prod{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border);
-    border-radius:16px; padding:14px; box-shadow:var(--shadow);
-    display:flex; flex-direction:column; gap:11px;
-    transition:transform .14s ease, box-shadow .14s ease; }
-  .prod:active{ transform:scale(0.993); box-shadow:var(--shadow-sm); }
+  /* O cartao nao e clicavel: quem responde ao toque e o botao, e so ele. */
+  .prod{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border-suave);
+    border-radius:18px; padding:15px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:12px; }
   .prod-topo{ display:flex; align-items:flex-start; gap:10px; }
   .prod .cod{ font-size:11px; color:#fff; background:var(--brand-dark); border-radius:6px;
     padding:4px 7px; flex:none; font-weight:800; letter-spacing:0.03em; }
@@ -162,19 +175,19 @@
     gap:10px; align-items:center; }
   .prod .preco{ font-weight:800; color:var(--brand); font-size:13.5px; white-space:nowrap; }
   .btn-contar{ width:100%; min-height:var(--tap); border:none; color:#fff;
-    background:linear-gradient(180deg,#01844A,var(--brand));
-    box-shadow:0 2px 0 var(--brand-dark), 0 8px 18px -8px rgba(0,113,60,0.55);
-    border-radius:11px; font-size:15.5px; font-weight:800; cursor:pointer; letter-spacing:0.02em; }
+    background:linear-gradient(180deg,#01884C,var(--brand));
+    border-radius:13px; font-size:15.5px; font-weight:800; cursor:pointer; letter-spacing:0.02em; }
   .btn-contar:active{ background:var(--brand-dark); }
-  .empty-state{ text-align:center; padding:40px 22px; color:var(--ink-soft); font-size:13.5px; line-height:1.6;
-    background:var(--panel); border:1px dashed var(--border); border-radius:16px; margin-top:4px; }
+  .empty-state{ text-align:center; padding:44px 22px; color:var(--ink-soft); font-size:13.5px; line-height:1.6;
+    background:var(--panel); border:1px dashed var(--border-suave); border-radius:18px; margin-top:4px;
+    box-shadow:var(--shadow-sm); }
   .empty-state .big{ font-size:16px; font-weight:700; color:var(--ink); margin-bottom:8px; }
   .empty-state .ico{ font-size:34px; display:block; margin-bottom:10px; opacity:0.5; }
 
   /* ---------- Modal / bottom sheet ---------- */
   .overlay{ position:fixed; inset:0; background:rgba(16,20,17,0.55); z-index:100;
     display:flex; align-items:flex-end; justify-content:center; }
-  .modal{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); width:100%; max-width:520px; border-radius:22px 22px 0 0; box-shadow:var(--shadow-lg);
+  .modal{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); width:100%; max-width:520px; border-radius:26px 26px 0 0; box-shadow:var(--shadow-lg);
     overflow:hidden; border-top:5px solid var(--brand); max-height:92dvh; overflow-y:auto;
     animation:sobe 0.22s ease-out; padding-bottom:var(--safe-b); }
   @keyframes sobe{ from{ transform:translateY(100%);} to{ transform:translateY(0);} }
@@ -191,7 +204,7 @@
   .qty-field{ margin:12px 0 4px; min-width:0; }
   .qty-field label{ font-size:13px; font-weight:800; display:block; margin-bottom:8px; }
   .qty-input-row{ display:flex; align-items:center; gap:9px; min-width:0; }
-  .qty-input-row button{ width:56px; height:56px; flex:none; border-radius:13px; border:1.5px solid var(--border);
+  .qty-input-row button{ width:56px; height:56px; flex:none; border-radius:15px; border:1.5px solid var(--border);
     background:#fff; font-size:26px; padding:0; cursor:pointer; color:var(--ink); font-weight:700; line-height:1; }
   .qty-input-row button:active{ background:var(--paper-line); }
   .qty-input-row input{ flex:1 1 0; width:0; min-width:0; text-align:center; font-size:26px; font-weight:800;
@@ -199,7 +212,7 @@
     font-family:"SFMono-Regular",Consolas,monospace; }
   .qty-input-row input:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
   .modal-foot{ display:flex; gap:10px; padding:16px 20px calc(18px + var(--safe-b)); }
-  .btn{ flex:1; min-height:var(--tap); padding:13px 14px; border-radius:12px; border:none;
+  .btn{ flex:1; min-height:var(--tap); padding:13px 14px; border-radius:14px; border:none;
     font-weight:800; font-size:15.5px; cursor:pointer; }
   .btn-ghost{ background:var(--paper-line); color:var(--ink); flex:0 0 34%; }
   .btn-primary{ background:var(--brand); color:#fff; }
@@ -207,16 +220,17 @@
   .btn-primary:disabled{ opacity:0.55; }
 
   .toast{ position:fixed; left:12px; right:12px; bottom:calc(16px + var(--safe-b)); background:var(--ink);
-    color:#fff; padding:13px 16px; border-radius:12px; font-size:14px; font-weight:600;
-    box-shadow:0 10px 30px rgba(0,0,0,0.32); opacity:0; transform:translateY(16px);
+    color:#fff; padding:14px 16px; border-radius:15px; font-size:14px; font-weight:600;
+    box-shadow:0 6px 16px -6px rgba(0,0,0,0.45), 0 22px 44px -18px rgba(0,0,0,0.55);
+    opacity:0; transform:translateY(16px);
     transition:all 0.22s ease; z-index:400; display:flex; gap:9px; align-items:center; pointer-events:none; }
   .toast.show{ opacity:1; transform:translateY(0); }
   .toast .dot{ width:9px; height:9px; border-radius:50%; background:#6FE39A; flex:none; }
 
   /* ---------- Painéis admin ---------- */
   .cards-row{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:14px; }
-  .card{ background:linear-gradient(180deg,#FFFFFF,#FBFBF7); border:1px solid var(--border); border-radius:16px;
-    padding:12px 13px; box-shadow:var(--shadow); }
+  .card{ background:linear-gradient(180deg,#FFFFFF,#FBFBF7); border:1px solid var(--border-suave); border-radius:18px;
+    padding:13px 14px; box-shadow:var(--shadow); }
   .card .label{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em;
     color:var(--ink-soft); font-weight:800; line-height:1.3; }
   .card .value{ font-size:23px; font-weight:800; margin-top:3px; }
@@ -224,15 +238,15 @@
   .card.deposito .value{ color:var(--deposito-dark); }
   .card.alerta{ border-color:#EFCFCF; background:var(--danger-bg); }
   .card.alerta .value{ color:var(--danger); }
-  .toolbar{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
-  .btn-sm{ min-height:42px; padding:9px 14px; border-radius:10px; border:1px solid var(--border);
+  .toolbar{ display:flex; gap:8px; row-gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+  .btn-sm{ min-height:42px; padding:9px 14px; border-radius:12px; border:1px solid var(--border-suave);
     background:#fff; font-weight:700; font-size:13px; cursor:pointer; color:var(--ink); }
   .btn-sm.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
   .btn-sm.danger{ color:var(--danger); border-color:#EFCFCF; }
   .btn-sm:disabled{ opacity:0.45; }
   .toolbar input[type=date]{ min-height:42px; padding:8px 11px; border:1px solid var(--border);
     border-radius:10px; font-size:16px; background:#fff; color:var(--ink); }  /* 16px evita o zoom do iOS */
-  .table-wrap{ background:var(--panel); border:1px solid var(--border); border-radius:14px;
+  .table-wrap{ background:var(--panel); border:1px solid var(--border-suave); border-radius:16px;
     overflow:hidden; box-shadow:var(--shadow); }
   .table-scroll{ max-height:66vh; overflow:auto; -webkit-overflow-scrolling:touch; }
   table{ width:100%; border-collapse:collapse; font-size:13px; }
@@ -284,8 +298,8 @@
     box-shadow:0 4px 10px -4px rgba(0,113,60,0.6); }
   .contados-head::after{ content:''; flex:1; height:1px;
     background:linear-gradient(90deg, var(--border), transparent); }
-  .cont-item{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-sm);
-    padding:11px 13px; margin-bottom:8px; display:flex; align-items:center; gap:12px; }
+  .cont-item{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border-suave); border-radius:16px; box-shadow:var(--shadow-sm);
+    padding:12px 14px; margin-bottom:9px; display:flex; align-items:center; gap:12px; }
   .cont-item .txt{ flex:1; min-width:0; }
   .cont-item .nome{ font-size:14px; font-weight:700; line-height:1.3; }
   .cont-item .barras{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
@@ -295,8 +309,8 @@
   .cont-item .qtd span{ font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; }
 
   /* ---------- Bloco de contagem (a "nota" do colaborador) ---------- */
-  .bloco-painel{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border);
-    border-radius:16px; box-shadow:var(--shadow-sm); padding:12px 14px; margin-bottom:10px; }
+  .bloco-painel{ background:linear-gradient(180deg,#FFFFFF,#FCFCF9); border:1px solid var(--border-suave);
+    border-radius:18px; box-shadow:var(--shadow); padding:14px 15px; margin-bottom:12px; }
   .bloco-painel.aberta{ border-color:var(--brand); background:linear-gradient(180deg,#FFFFFF,var(--brand-soft)); }
   .bloco-painel.travada{ border-color:#EFCFCF; background:linear-gradient(180deg,#FFFFFF,var(--danger-bg)); }
   .bp-linha{ display:flex; align-items:center; gap:9px; }
@@ -322,8 +336,9 @@
   .bp-num.venda b{ color:var(--venda-dark); }
   .bp-num.deposito b{ color:var(--deposito-dark); }
 
-  .btn-bloco{ width:100%; min-height:var(--tap); margin-top:10px; border:none; border-radius:12px;
-    font-weight:800; font-size:15.5px; cursor:pointer; background:var(--brand); color:#fff;
+  .btn-bloco{ width:100%; min-height:var(--tap); margin:12px 0 6px; border:none; border-radius:14px;
+    font-weight:800; font-size:16px; cursor:pointer; color:#fff;
+    background:linear-gradient(180deg,#01884C,var(--brand));
     display:flex; align-items:center; justify-content:center; gap:8px; }
   .btn-bloco:active{ background:var(--brand-dark); }
   .btn-bloco:disabled{ opacity:0.55; }
@@ -369,8 +384,8 @@
     letter-spacing:0.03em; padding:7px 10px; cursor:pointer; text-decoration:underline;
     text-underline-offset:3px; }
   .hist-lista{ max-height:52vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-  .hist-bloco{ border:1px solid var(--border); border-radius:14px; background:var(--panel);
-    margin-bottom:9px; overflow:hidden; }
+  .hist-bloco{ border:1px solid var(--border-suave); border-radius:16px; background:var(--panel);
+    margin-bottom:10px; overflow:hidden; box-shadow:var(--shadow-sm); }
   .hist-cab{ display:flex; align-items:center; gap:10px; padding:11px 13px; cursor:pointer; }
   .hist-cab .dia{ font-size:14px; font-weight:800; }
   .hist-cab .hora{ font-size:11.5px; color:var(--ink-soft); }
@@ -404,7 +419,8 @@
   /* ---------- Navegação inferior (admin, no celular) ---------- */
   .bottom-nav{ display:none; position:fixed; left:0; right:0; bottom:0; z-index:40;
     background:var(--vidro); backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%);
-    border-top:1px solid var(--vidro-borda); box-shadow:0 -6px 22px -12px rgba(28,31,27,0.4);
+    border-top:1px solid var(--vidro-borda);
+    box-shadow:0 -2px 6px -3px rgba(28,31,27,0.18), 0 -14px 34px -16px rgba(28,31,27,0.45);
     padding:6px 4px calc(6px + var(--safe-b)); }
   .bottom-nav .tab-btn{ flex:1; flex-direction:column; gap:3px; padding:6px 2px; border-radius:10px;
     color:var(--ink-soft); font-size:10.5px; min-height:52px; justify-content:center; }
@@ -438,6 +454,50 @@
   .scan-erro h3{ margin:0 0 9px; font-size:17px; }
   .scan-erro p{ margin:0 0 18px; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
 
+  /* ============================================================
+     BOTAO ALTO — o relevo de todo botao de acao.
+     Cada botao tem PAREDE (a faixa solida embaixo, --parede) e CHAO (o halo
+     difuso, --halo). Ao tocar, ele DESCE exatamente a altura da parede e a
+     sombra some junto: o dedo afunda o botao em vez de so trocar a cor. Num
+     aparelho que nao vibra, esse e o unico retorno fisico que sobra.
+     Esta secao vem depois das regras de cada botao de proposito — ela e que
+     manda no box-shadow, entao nenhuma regra antiga precisa saber do relevo.
+     ============================================================ */
+  .btn-full, .btn-contar, .btn-bloco, .btn, .scan-btn, .btn-sm,
+  .qty-input-row button, .scan-hud button, .btn-logout{
+    box-shadow: 0 var(--alto) 0 var(--parede),
+                0 calc(var(--alto) + 7px) 20px -9px var(--halo),
+                inset 0 1px 0 rgba(255,255,255,0.20);
+    transition: transform .13s cubic-bezier(.2,.7,.3,1), box-shadow .13s ease; }
+
+  .btn-full:active, .btn-contar:active, .btn-bloco:active, .btn:active,
+  .scan-btn:active, .btn-sm:active, .qty-input-row button:active,
+  .scan-hud button:active, .btn-logout:active{
+    transform: translateY(var(--alto));
+    box-shadow: 0 0 0 var(--parede),
+                0 1px 2px -1px var(--halo),
+                inset 0 2px 6px -3px rgba(0,0,0,0.22); }
+
+  /* Botao desligado fica raso: se nao afunda, nao pode parecer alto. */
+  .btn-full:disabled, .btn-contar:disabled, .btn-bloco:disabled, .btn:disabled,
+  .scan-btn:disabled, .btn-sm:disabled, .btn-contar.bloqueado{
+    box-shadow:none; transform:none; }
+
+  /* Paredes por variante: clara em botao claro, escura em botao escuro. */
+  .btn-ghost{ --parede:#C6CABE; --halo:rgba(28,31,27,0.22); }
+  .btn-sm{ --parede:#D3D7CB; --halo:rgba(28,31,27,0.18); }
+  .btn-sm.primary{ --parede:var(--brand-dark); --halo:rgba(0,83,44,0.40); }
+  .btn-sm.danger{ --parede:#E6C6C6; --halo:rgba(163,38,38,0.20); }
+  .qty-input-row button{ --parede:#D3D7CB; --halo:rgba(28,31,27,0.18); }
+  .btn-bloco.encerrar{ --parede:#000; --halo:rgba(0,0,0,0.45); }
+  /* Parede baixa onde o botao mora dentro de outra caixa apertada */
+  .scan-btn{ --alto:3px; }
+  .btn-logout{ --alto:3px; --parede:rgba(0,0,0,0.24); --halo:rgba(0,0,0,0.35); }
+  .scan-hud button{ --parede:rgba(255,255,255,0.22); --halo:rgba(0,0,0,0.55); }
+
+  /* Foco de teclado — nao aparece no toque, mas salva quem usa leitor USB */
+  button:focus-visible, a:focus-visible{ outline:3px solid var(--brand-dark); outline-offset:2px; }
+
   /* Sem suporte a backdrop-filter (webviews antigas), o vidro vira solido —
      senao o texto fica sobre um fundo translucido e ilegivel. */
   @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))){
@@ -452,6 +512,13 @@
 
   /* ================= CELULAR / RETRATO ================= */
   @media (max-width:760px){
+    /* No celular o dedo manda: alvo maior, menos borda, mais respiro.
+       Quem separa os cartoes e a sombra, nao o traco. */
+    :root{ --tap:50px; }
+    .wrap{ padding:14px 13px 32px; }
+    .results{ gap:12px; }
+    .search-meta{ margin:4px 2px 6px; }
+
     .brand .name .completo{ display:none; }
     .brand .name .curto{ display:inline; }
     .userbox .who{ display:none; }   /* nome + papel ocupavam largura no topo */
