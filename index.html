@@ -124,7 +124,7 @@
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%235B6259' stroke-width='2' fill='none'/></svg>");
     background-repeat:no-repeat; background-position:right 14px center; }
   .field input:focus, .field select:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
-  .field .dica{ font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.45; }
+  .field .dica, .qty-field .dica{ font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.45; }
   .auth-msg{ font-size:13px; line-height:1.5; padding:11px 13px; border-radius:10px; margin-bottom:14px; display:none; }
   .auth-msg.err{ display:block; background:var(--danger-bg); color:var(--danger); border:1px solid #EFCFCF; }
   .auth-msg.ok{ display:block; background:var(--ok-bg); color:var(--brand-dark); border:1px solid #BFE0CC; }
@@ -368,6 +368,11 @@
     border-radius:6px; padding:4px 8px; flex:none; }
   .prod .selo.contado{ background:var(--danger-bg); color:var(--danger); }
   .prod .selo.meu{ background:var(--brand-soft); color:var(--brand-dark); }
+  /* Mesmo selo, so que dentro de uma tabela — o de cima e escopado no cartao
+     de produto e sairia sem estilo nenhum na linha de trocas. */
+  .selo-tag{ display:inline-block; vertical-align:middle; margin-left:6px;
+    font-size:10px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;
+    border-radius:6px; padding:2px 7px; background:var(--danger-bg); color:var(--danger); }
   .btn-contar.bloqueado{ background:var(--paper-line); color:var(--ink-soft); box-shadow:none; cursor:default; }
   .aviso-recontagem{ margin-top:6px; color:var(--deposito-dark); font-weight:700; }
 
@@ -407,6 +412,25 @@
     font-weight:700; font-size:12.5px; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
   .filtros button.ativo{ background:var(--brand); color:#fff; }
   .sg-check{ width:24px; height:24px; accent-color:var(--brand); cursor:pointer; flex:none; }
+  /* Cadastro feito na contagem: valor + unidade lado a lado */
+  .medida-row{ display:flex; gap:8px; align-items:stretch; }
+  .medida-row input{ flex:0 0 38%; min-width:0; }
+  .medida-row .filtros{ flex:1; }
+  .medida-row .filtros button{ font-size:14px; }
+
+  /* Produto cadastrado por colaborador que ainda falta cadastrar no SG */
+  .novos-sg{ background:#FFF7E6; border:1px solid #F0D49A; border-left:5px solid var(--deposito);
+    border-radius:16px; padding:12px 14px; margin-bottom:14px; box-shadow:var(--shadow-sm); }
+  .novos-sg h3{ margin:0 0 3px; font-size:14px; font-weight:800; color:var(--deposito-dark); }
+  .novos-sg .sub{ font-size:12px; color:var(--ink-soft); margin-bottom:8px; }
+  .novo-item{ display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid #F0DFB8; }
+  .novo-item .info{ flex:1; min-width:0; }
+  .novo-item .info b{ display:block; font-size:14px; }
+  .novo-item .info span{ font-size:11.5px; color:var(--ink-soft); }
+  .novo-item .btn-sm{ flex:none; }
+  .selo-tag.novo{ background:#FCE9C4; color:var(--deposito-dark); }
+  tbody tr.cad-novo td{ background:#FFF7E6; }
+  tbody tr.cad-novo{ border-left:5px solid var(--deposito); }
   tbody tr.sg-feito{ opacity:0.5; }
   tbody tr.sg-feito td[data-label="Produto"] b{ text-decoration:line-through; }
   .spinner{ width:17px; height:17px; border-radius:50%; border:2.5px solid rgba(0,0,0,0.12);
@@ -422,8 +446,11 @@
     border-top:1px solid var(--vidro-borda);
     box-shadow:0 -2px 6px -3px rgba(28,31,27,0.18), 0 -14px 34px -16px rgba(28,31,27,0.45);
     padding:6px 4px calc(6px + var(--safe-b)); }
-  .bottom-nav .tab-btn{ flex:1; flex-direction:column; gap:3px; padding:6px 2px; border-radius:10px;
-    color:var(--ink-soft); font-size:10.5px; min-height:52px; justify-content:center; }
+  /* Sao cinco abas: o rotulo encolhe para "Relatório" nao quebrar em duas
+     linhas e desalinhar a fileira inteira num celular estreito. */
+  .bottom-nav .tab-btn{ flex:1; flex-direction:column; gap:3px; padding:6px 1px; border-radius:10px;
+    color:var(--ink-soft); font-size:9.5px; letter-spacing:-.2px; min-height:52px; justify-content:center; }
+  .bottom-nav .tab-btn span{ white-space:nowrap; }
   .bottom-nav .tab-btn.active{ background:var(--brand-soft); color:var(--brand-dark); }
   .bottom-nav .tab-btn svg{ width:21px; height:21px; }
 
@@ -650,6 +677,7 @@
   <div class="tabs" id="tabsBox">
     <button class="tab-btn active" id="tabLancT"  onclick="setView('lancamento')">Contagem</button>
     <button class="tab-btn" id="tabRelT"   onclick="setView('relatorio')"     style="display:none;">Relatório</button>
+    <button class="tab-btn" id="tabTrocasT" onclick="setView('trocas')"       style="display:none;">Trocas</button>
     <button class="tab-btn" id="tabMonT"   onclick="setView('monitoramento')" style="display:none;">Monitoramento</button>
     <button class="tab-btn" id="tabColabT" onclick="setView('colaboradores')" style="display:none;">Colaboradores</button>
   </div>
@@ -747,6 +775,8 @@
       <span class="ico" id="lvIcone">🔍</span>
       <div class="big" id="lvTitulo">—</div>
       <div id="lvTexto">—</div>
+      <button class="btn-contar" id="lvCadastrar" style="display:none;margin-top:14px;"
+              onclick="abrirCadastro()">Cadastrar</button>
     </div>
   </div>
 
@@ -757,6 +787,11 @@
       <div class="card venda"><div class="label">Un. Área de Venda</div><div class="value" id="repVenda">0</div></div>
       <div class="card deposito"><div class="label">Un. Depósito</div><div class="value" id="repDeposito">0</div></div>
       <div class="card alerta"><div class="label">Falta lançar no SG</div><div class="value" id="repSgPend">—</div></div>
+    </div>
+    <div class="novos-sg" id="novosSg" style="display:none;">
+      <h3>🏷️ Produtos novos — cadastrar no SG</h3>
+      <div class="sub">Cadastrados pelos colaboradores durante a contagem. Depois de cadastrar no SG, toque em “Cadastrei”.</div>
+      <div id="novosSgLista"></div>
     </div>
     <div class="toolbar">
       <div class="filtros" id="filtroSg">
@@ -781,6 +816,70 @@
       </div>
     </div>
     <div class="report-empty" id="repEmpty" style="display:none;">Nenhum produto contado ainda.</div>
+  </div>
+
+  <!-- ---- Levantamento de trocas (admin) ---- -->
+  <div id="viewTrocas" style="display:none;">
+    <p class="hint">Cliente desistiu da compra e o produto volta para o estoque: <b>bipe o produto</b>,
+       informe a quantidade e ele entra nesta lista. A lista <b>acumula</b> — no fim da semana é só
+       imprimir o A4 e digitar no SG, depois marcar como lançado.<br>
+       Isto <b>não</b> mexe na contagem de estoque: é um levantamento separado.</p>
+
+    <div class="cards-row">
+      <div class="card"><div class="label">Trocas na lista</div><div class="value" id="trLinhas">0</div></div>
+      <div class="card venda"><div class="label">Unidades devolvidas</div><div class="value" id="trUnidades">0</div></div>
+      <div class="card alerta"><div class="label">Falta lançar no SG</div><div class="value" id="trPend">0</div></div>
+      <div class="card"><div class="label">Produtos distintos</div><div class="value" id="trDistintos">0</div></div>
+    </div>
+
+    <!-- A bipagem e a acao principal desta tela, entao fica no topo. -->
+    <div class="busca-sticky">
+      <div class="search-box">
+        <svg class="lupa" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+        <input id="trocaInput" type="text" inputmode="search" enterkeyhint="search"
+               placeholder="Bipe ou digite: nome, código ou barras…" autocomplete="off">
+        <button class="clear-btn" id="trocaClearBtn" onclick="limparBuscaTroca()" aria-label="Limpar">✕</button>
+        <button class="scan-btn" onclick="abrirScanner('trocas')" aria-label="Ler código de barras">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 8V6.5A2.5 2.5 0 0 1 5.5 4H7"/><path d="M17 4h1.5A2.5 2.5 0 0 1 21 6.5V8"/>
+            <path d="M21 16v1.5a2.5 2.5 0 0 1-2.5 2.5H17"/><path d="M7 20H5.5A2.5 2.5 0 0 1 3 17.5V16"/>
+            <circle cx="12" cy="12" r="3.2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="search-meta" id="trocaMeta"></div>
+    </div>
+    <div class="results" id="trocaResultados"></div>
+
+    <div class="toolbar">
+      <div class="filtros" id="filtroTroca">
+        <button data-f="pendente" class="ativo">Falta no SG</button>
+        <button data-f="feito">Já no SG</button>
+        <button data-f="todos">Todas</button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input type="date" id="trDe"  onchange="refreshTrocas()" aria-label="De">
+      <input type="date" id="trAte" onchange="refreshTrocas()" aria-label="Até">
+      <button class="btn-sm" onclick="trocaSemana()">Últimos 7 dias</button>
+      <button class="btn-sm" onclick="trocaTudo()">Sem limite de data</button>
+    </div>
+    <div class="toolbar">
+      <button class="btn-sm primary" onclick="marcarVisiveisTrocaSg()">✓ Marcar visíveis como lançadas</button>
+      <button class="btn-sm" onclick="imprimirTrocas()">🖨 Imprimir (A4)</button>
+      <button class="btn-sm" onclick="exportTrocasCSV()">⬇ Exportar CSV</button>
+      <button class="btn-sm" onclick="refreshTrocas()">↻ Atualizar</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>SG</th><th>Dia</th><th>Código</th><th>Produto</th><th>Qtd</th><th>Observação</th><th>Registrado por</th><th>Ações</th></tr></thead>
+          <tbody id="trBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="report-empty" id="trEmpty" style="display:none;">Nenhuma troca registrada ainda.</div>
   </div>
 
   <!-- ---- Monitoramento (admin) ---- -->
@@ -832,6 +931,10 @@
   <button class="tab-btn" id="tabRelB" onclick="setView('relatorio')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 14v3M12 10v7M16 7v10"/></svg>
     <span>Relatório</span>
+  </button>
+  <button class="tab-btn" id="tabTrocasB" onclick="setView('trocas')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h13l-3-3M21 16H8l3 3"/></svg>
+    <span>Trocas</span>
   </button>
   <button class="tab-btn" id="tabMonB" onclick="setView('monitoramento')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 8-4-16-3 8H4"/></svg>
@@ -941,6 +1044,79 @@
   </div>
 </div>
 
+<!-- ================= MODAL DE CADASTRO (produto bipado fora do cadastro) ================= -->
+<div class="overlay" id="modalCadastro" style="display:none;">
+  <div class="modal">
+    <div class="puxador"></div>
+    <div class="modal-head">
+      <div class="stage">Cadastrar produto</div>
+      <h2>Produto não cadastrado</h2>
+      <div class="barcode-line mono" id="mcBarras">—</div>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="mcNome">Nome do produto</label>
+        <input id="mcNome" type="text" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;"
+               placeholder="Ex.: IOG DANONE BATIDO C/AVEIA">
+      </div>
+      <div class="field">
+        <label for="mcMedida">Peso ou volume</label>
+        <div class="medida-row">
+          <input id="mcMedida" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 500">
+          <div class="filtros" id="mcUnidade">
+            <button type="button" data-u="G" class="ativo">g</button>
+            <button type="button" data-u="KG">kg</button>
+            <button type="button" data-u="ML">ml</button>
+            <button type="button" data-u="L">L</button>
+          </div>
+        </div>
+        <div class="dica" id="mcPrevia">Aceita fração — digite 1,5 para um litro e meio.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="fecharCadastro()">Cancelar</button>
+      <button class="btn btn-primary" id="btnCadastrar" onclick="confirmarCadastro()">Cadastrar e contar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL DE TROCA (admin) ================= -->
+<div class="overlay" id="modalTroca" style="display:none;">
+  <div class="modal">
+    <div class="puxador"></div>
+    <div class="modal-head">
+      <div class="stage">Levantamento de trocas</div>
+      <h2 id="mtNome">—</h2>
+      <div class="barcode-line mono" id="mtBarcode">—</div>
+      <div class="barcode-line aviso-recontagem" id="mtAvisoSem" style="display:none;">
+        Este código não está no cadastro — digite o nome como ele aparece no SG.</div>
+    </div>
+    <div class="modal-body">
+      <div class="field" id="mtCampoNome" style="display:none;">
+        <label for="mtNomeInput">Nome do produto</label>
+        <input id="mtNomeInput" type="text" autocomplete="off" placeholder="Como aparece no SG">
+      </div>
+      <div class="qty-field">
+        <label>Quantidade devolvida</label>
+        <div class="qty-input-row">
+          <button onclick="stepTroca(-1)" aria-label="Menos">−</button>
+          <input id="mtQtd" type="text" inputmode="decimal" value="1">
+          <button onclick="stepTroca(1)" aria-label="Mais">+</button>
+        </div>
+        <div class="dica">Aceita fração para peso — digite 1,5 para um quilo e meio.</div>
+      </div>
+      <div class="field">
+        <label for="mtObs">Observação (opcional)</label>
+        <input id="mtObs" type="text" autocomplete="off" placeholder="Ex.: desistiu no caixa">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="fecharTroca()">Cancelar</button>
+      <button class="btn btn-primary" id="btnTroca" onclick="confirmarTroca()">Registrar troca</button>
+    </div>
+  </div>
+</div>
+
 <div class="ok-overlay" id="okOverlay" style="display:none;" onclick="fecharOk()">
   <div class="ok-card">
     <div class="ok-circulo">
@@ -969,6 +1145,12 @@
   var DEFAULT_SUPABASE_KEY = "sb_publishable_HaMcgvr_2xmWYotvzetmVA_yscPz2eT";
 
   var supa = null, me = null, currentProduct = null;
+  // O Supabase reemite o evento de sessao sozinho: na renovacao do token e
+  // toda vez que a aba volta ao foco. Guardar quem ja esta logado deixa o
+  // routeSession ignorar esses avisos repetidos — sem isso ele refazia a rota
+  // inteira e jogava o admin de volta na Contagem no meio da leitura do
+  // relatorio, parecendo que a tela pulava do nada.
+  var authUserId = null;
   var authMode = 'login', searchDebounce = null;
   var MAX_RESULTS = 100;
   var nomesCache = [];
@@ -1037,7 +1219,7 @@
 
   function routeSession(session){
     if(!session){
-      me = null;
+      me = null; authUserId = null;
       setConn(false, 'não autenticado');
       el('tabsBox').classList.remove('visivel');
       el('bottomNav').classList.remove('ligado');
@@ -1046,6 +1228,10 @@
       carregarNomes();
       return;
     }
+    // Mesmo usuario que ja esta na tela: e so o token renovando ou a aba
+    // voltando ao foco. Nada mudou, entao a view atual fica onde esta.
+    if(me && authUserId === session.user.id) return;
+    authUserId = session.user.id;
     supa.from('colaboradores').select('id,nome,papel,ativo').eq('user_id', session.user.id).maybeSingle()
       .then(function(res){
         if(res.error || !res.data || !res.data.ativo){
@@ -1061,7 +1247,7 @@
 
         // Abas só existem para o administrador
         el('tabsBox').classList.toggle('visivel', admin);
-        ['tabRelT','tabMonT','tabColabT'].forEach(function(id){
+        ['tabRelT','tabTrocasT','tabMonT','tabColabT'].forEach(function(id){
           el(id).style.display = admin ? 'flex' : 'none';
         });
         el('bottomNav').classList.toggle('ligado', admin);
@@ -1205,7 +1391,7 @@
 
   window.doLogout = function(){
     supa.auth.signOut().then(function(){
-      me = null; setAuthMode('login'); showScreen('auth'); carregarNomes();
+      me = null; authUserId = null; setAuthMode('login'); showScreen('auth'); carregarNomes();
     });
   };
 
@@ -1354,6 +1540,82 @@
       });
   };
 
+  // ---------- Cadastro de produto bipado fora do cadastro ----------
+  // O codigo de barras vem da leitura — ninguem redigita. O nome sai no
+  // padrao do SG ("IOG DANONE 800G"), e o produto fica marcado como novo para
+  // o administrador cadastrar tambem la. Cadastrou, abre a contagem dele.
+  var cadBarras = '', cadUnidade = 'G';
+
+  // Busca que e um codigo de barras (so digitos, tamanho de EAN/GTIN)
+  function barrasDaBusca(){
+    var q = el('searchInput').value.trim();
+    return /^[0-9]{8,14}$/.test(q) ? q : '';
+  }
+
+  function cadMedida(){
+    var v = parseFloat(el('mcMedida').value.trim().replace(/\./g,'').replace(',', '.'));
+    return isFinite(v) && v > 0 ? v : 0;
+  }
+
+  function cadPrevia(){
+    var nome = el('mcNome').value.trim().replace(/\s+/g,' ').toUpperCase(), v = cadMedida();
+    el('mcPrevia').innerHTML = nome && v
+      ? 'Vai ficar: <b>' + escapeHtml(nome + ' ' + String(v).replace('.', ',') + cadUnidade) + '</b>'
+      : 'Aceita fração — digite 1,5 para um litro e meio.';
+  }
+
+  Array.prototype.forEach.call(el('mcUnidade').children, function(b){
+    b.addEventListener('click', function(){
+      cadUnidade = this.getAttribute('data-u');
+      Array.prototype.forEach.call(el('mcUnidade').children, function(x){
+        x.classList.toggle('ativo', x === b);
+      });
+      cadPrevia();
+    });
+  });
+  el('mcNome').addEventListener('input', cadPrevia);
+  el('mcMedida').addEventListener('input', cadPrevia);
+  el('mcNome').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); el('mcMedida').focus(); }
+  });
+  el('mcMedida').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); confirmarCadastro(); }
+  });
+
+  window.abrirCadastro = function(){
+    cadBarras = barrasDaBusca();
+    if(!cadBarras || !blocoAberto()) return;
+    el('mcBarras').textContent = 'Barras: ' + cadBarras;
+    el('mcNome').value = ''; el('mcMedida').value = '';
+    cadPrevia();
+    el('modalCadastro').style.display = 'flex';
+    setTimeout(function(){ el('mcNome').focus(); }, 60);
+  };
+
+  window.fecharCadastro = function(){ el('modalCadastro').style.display = 'none'; };
+
+  window.confirmarCadastro = function(){
+    if(!supa || !cadBarras) return;
+    var nome = el('mcNome').value.trim(), v = cadMedida();
+    if(nome.length < 3){ showToast('Digite o nome do produto.', true); el('mcNome').focus(); return; }
+    if(!v){ showToast('Informe o peso ou o volume.', true); el('mcMedida').focus(); return; }
+    var btn = el('btnCadastrar');
+    btn.disabled = true; btn.textContent = 'Cadastrando…';
+    supa.rpc('cadastrar_produto', { p_codigo_barras: cadBarras, p_nome: nome,
+                                    p_medida_valor: v, p_medida_unidade: cadUnidade })
+      .then(function(res){
+        btn.disabled = false; btn.textContent = 'Cadastrar e contar';
+        if(res.error){ showToast(limparErro(res.error.message), true); return; }
+        var p = res.data && res.data[0];
+        if(!p){ showToast('Não foi possível cadastrar.', true); return; }
+        fecharCadastro();
+        showToast(p.ja_existia ? 'Este código acabou de ser cadastrado por outra pessoa.'
+                               : 'Produto cadastrado.');
+        runSearch();          // a busca pelo codigo ja encontra o produto novo
+        abrirModal(p);
+      });
+  };
+
   // ---------- Confirmação de contagem ----------
   var okTimer = null;
 
@@ -1387,7 +1649,9 @@
   window.fecharOk = function(){
     clearTimeout(okTimer);
     el('okOverlay').style.display = 'none';
-    // Devolve o foco para a busca: o proximo produto ja pode ser digitado
+    // Devolve o foco para a busca da tela em que a pessoa esta: o proximo
+    // produto ja pode ser bipado sem tocar em nada.
+    if(el('viewTrocas').style.display === 'block'){ el('trocaInput').focus(); return; }
     if(!el('searchInput').disabled) el('searchInput').focus();
   };
 
@@ -1478,13 +1742,19 @@
   function atualizarVazio(qtdResultados){
     var caixa = el('lancVazio');
     var buscando = el('searchInput').value.trim().length >= 2;
-    var mostrar = false, ico = '🔍', titulo = '', texto = '';
+    var mostrar = false, ico = '🔍', titulo = '', texto = '', cadastrar = false;
 
     if(buscando){
-      if(qtdResultados === 0){
+      if(qtdResultados === 0 && barrasDaBusca()){
+        // Codigo de barras que o cadastro nao conhece: quem esta com o produto
+        // na mao cadastra ali mesmo e segue contando.
+        mostrar = true; ico = '🏷️'; cadastrar = true;
+        titulo = 'Produto não cadastrado';
+        texto  = 'O código ' + barrasDaBusca() + ' não está no cadastro. Cadastre com o nome e o peso da embalagem para poder contar.';
+      } else if(qtdResultados === 0){
         mostrar = true; ico = '🔍';
         titulo = 'Nada encontrado';
-        texto  = 'Confira o nome ou o código. Se o produto não estiver no cadastro, avise o administrador.';
+        texto  = 'Confira o nome ou o código. Se o produto não estiver no cadastro, bipe o código de barras para cadastrar.';
       }
     } else if(!blocoAberto()){
       mostrar = false;                     // o painel acima ja explica o que fazer
@@ -1495,6 +1765,7 @@
     }
 
     caixa.style.display = mostrar ? 'block' : 'none';
+    el('lvCadastrar').style.display = cadastrar && blocoAberto() ? 'block' : 'none';
     if(!mostrar) return;
     el('lvIcone').textContent  = ico;
     el('lvTitulo').textContent = titulo;
@@ -1672,9 +1943,11 @@
     if(v !== 'lancamento' && (!me || me.papel !== 'admin')) return;
     el('viewLancamento').style.display    = v==='lancamento'    ? 'block':'none';
     el('viewRelatorio').style.display     = v==='relatorio'     ? 'block':'none';
+    el('viewTrocas').style.display        = v==='trocas'        ? 'block':'none';
     el('viewMonitoramento').style.display = v==='monitoramento' ? 'block':'none';
     el('viewColaboradores').style.display = v==='colaboradores' ? 'block':'none';
-    [['lancamento','tabLanc'],['relatorio','tabRel'],['monitoramento','tabMon'],['colaboradores','tabColab']]
+    [['lancamento','tabLanc'],['relatorio','tabRel'],['trocas','tabTrocas'],
+     ['monitoramento','tabMon'],['colaboradores','tabColab']]
       .forEach(function(par){
         var on = v === par[0];
         el(par[1]+'T').classList.toggle('active', on);
@@ -1683,6 +1956,7 @@
     window.scrollTo(0,0);
     if(v==='lancamento'){ runSearch(); refreshBloco(); }
     if(v==='relatorio') refreshReport();
+    if(v==='trocas') abrirTrocas();
     if(v==='monitoramento') refreshMonitor();
     if(v==='colaboradores') refreshColabs();
   };
@@ -1702,7 +1976,42 @@
       if(res.error || !res.data || !res.data.length) return;
       el('repSgPend').textContent = num(res.data[0].sg_pendentes);
     });
+    refreshNovos();
   };
+
+  // Produtos que colaborador cadastrou na contagem e ainda nao existem no SG.
+  // Aparecem mesmo sem contagem lancada — cadastro no SG vem antes.
+  function refreshNovos(){
+    supa.rpc('produtos_novos').then(function(res){
+      if(res.error){ showToast(limparErro(res.error.message), true); return; }
+      var pend = (res.data || []).filter(function(p){ return !p.cadastro_sg; });
+      el('novosSg').style.display = pend.length ? 'block' : 'none';
+      el('novosSgLista').innerHTML = pend.map(function(p){
+        return '<div class="novo-item">' +
+          '<div class="info"><b>' + escapeHtml(p.nome) + '</b>' +
+            '<span class="mono">' + escapeHtml(p.codigo_barras) + '</span>' +
+            '<span> · ' + escapeHtml(p.cadastrado_por || '—') + ' · ' + fmtDate(p.cadastrado_em) +
+            (p.lancado ? ' · contado: ' + num(p.total) : ' · ainda não contado') + '</span></div>' +
+          '<button class="btn-sm primary" data-id="' + p.id + '">Cadastrei</button>' +
+        '</div>';
+      }).join('');
+      el('novosSgLista').querySelectorAll('button').forEach(function(b){
+        b.addEventListener('click', function(){ marcarCadastroSg(parseInt(this.getAttribute('data-id'), 10), this); });
+      });
+    });
+  }
+
+  function marcarCadastroSg(id, btn){
+    var cod = prompt('Código do produto no SG (opcional — deixe em branco para manter "NOVO"):', '');
+    if(cod === null) return;
+    btn.disabled = true;
+    supa.rpc('marcar_cadastro_sg', { p_id: id, p_feito: true, p_codigo: cod.trim() || null }).then(function(res){
+      btn.disabled = false;
+      if(res.error){ showToast(limparErro(res.error.message), true); return; }
+      showToast('Produto marcado como cadastrado no SG.');
+      refreshReport();
+    });
+  }
 
   function listaFiltrada(){
     if(filtroSg === 'pendente') return repCache.filter(function(e){ return !e.sg_lancado; });
@@ -1725,11 +2034,12 @@
 
     var lista = listaFiltrada(), html='';
     lista.forEach(function(e){
-      html += '<tr class="'+(e.sg_lancado ? 'sg-feito' : '')+'">' +
+      html += '<tr class="'+(e.sg_lancado ? 'sg-feito' : '')+(e.cadastro_pendente ? ' cad-novo' : '')+'">' +
         '<td data-label="SG"><input type="checkbox" class="sg-check" data-id="'+e.id+'"'+
           (e.sg_lancado ? ' checked' : '')+' title="Marcar como lançado no SG"></td>' +
         '<td data-label="Código" class="mono">'+escapeHtml(e.codigo)+'</td>' +
-        '<td data-label="Produto"><b>'+escapeHtml(e.nome)+'</b></td>' +
+        '<td data-label="Produto"><b>'+escapeHtml(e.nome)+'</b>' +
+          (e.cadastro_pendente ? '<span class="selo-tag novo">cadastrar no SG</span>' : '')+'</td>' +
         '<td data-label="Barras" class="mono">'+escapeHtml(fmtBarcode(e.codigo_barras))+'</td>' +
         '<td data-label="Venda"><span class="pill venda">'+(e.qtd_venda||0)+'</span></td>' +
         '<td data-label="Depósito"><span class="pill deposito">'+(e.qtd_deposito||0)+'</span></td>' +
@@ -1786,13 +2096,13 @@
     // exata do que ainda precisa ser digitado la.
     var lista = listaFiltrada();
     if(!lista.length){ showToast('Nada visível para exportar.', true); return; }
-    var linhas = [['Codigo','Produto','CodigoBarras','QtdVenda','QtdDeposito','Total','PrecoUnit','ContadoPor','DataHora','LancadoNoSG'].join(';')];
+    var linhas = [['Codigo','Produto','CodigoBarras','QtdVenda','QtdDeposito','Total','PrecoUnit','ContadoPor','DataHora','LancadoNoSG','CadastrarNoSG'].join(';')];
     lista.forEach(function(e){
       linhas.push([ e.codigo, '"'+(e.nome||'').replace(/"/g,'""')+'"', e.codigo_barras||'',
         e.qtd_venda||0, e.qtd_deposito||0, e.total||0,
         e.preco!=null ? Number(e.preco).toFixed(2).replace('.',',') : '',
         '"'+(e.contado_por||'').replace(/"/g,'""')+'"', fmtDate(e.lancado_em),
-        e.sg_lancado ? 'SIM' : 'NAO' ].join(';'));
+        e.sg_lancado ? 'SIM' : 'NAO', e.cadastro_pendente ? 'SIM' : 'NAO' ].join(';'));
     });
     var blob = new Blob(["﻿"+linhas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
     var url = URL.createObjectURL(blob), a = document.createElement('a');
@@ -1966,6 +2276,453 @@
     });
   };
 
+  // ================= LEVANTAMENTO DE TROCAS (admin) =================
+  // Produto que o cliente desistiu de levar e volta para o estoque. E uma
+  // lista propria: nao encosta em produtos nem em contagens. Ela acumula
+  // durante a semana, sai no A4 e so entao e marcada como lancada no SG.
+  var trocasCache = [];
+  var trocaFiltro = 'pendente';    // durante a semana, o que interessa e o que falta
+  var trocaAlvo   = null;          // produto escolhido (ou {sem_cadastro:true})
+  var trocaBusca  = null;          // debounce da busca
+
+  // Quantidade aceita fracao (peso do acougue). O usuario digita com virgula.
+  function trocaNum(v){
+    var n = parseFloat(String(v == null ? '' : v).replace(/\s/g,'').replace(',', '.'));
+    return isFinite(n) ? n : 0;
+  }
+  function trocaFmt(v){
+    var n = trocaNum(v);
+    // Inteiro sai sem casas: "3" e nao "3,000" — o papel fica limpo.
+    return (Math.abs(n - Math.round(n)) < 1e-9)
+      ? String(Math.round(n))
+      : n.toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:3 });
+  }
+  function trocaDiaBr(d){
+    if(!d) return '—';
+    var p = String(d).slice(0,10).split('-');
+    return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : String(d);
+  }
+
+  // Primeira entrada na aba: o periodo padrao e a semana corrente de trabalho.
+  function abrirTrocas(){
+    if(!el('trDe').value && !el('trAte').value && !trocasCache.length) trocaSemana();
+    else refreshTrocas();
+  }
+
+  window.trocaSemana = function(){
+    var hoje = new Date(), de = new Date();
+    de.setDate(de.getDate() - 6);
+    var iso = function(d){ return d.toISOString().slice(0,10); };
+    el('trDe').value  = iso(de);
+    el('trAte').value = iso(hoje);
+    refreshTrocas();
+  };
+  window.trocaTudo = function(){
+    el('trDe').value = ''; el('trAte').value = '';
+    refreshTrocas();
+  };
+
+  window.refreshTrocas = function(){
+    if(!supa || !me) return;
+    el('trBody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
+    supa.rpc('trocas_lista', {
+      p_de:  el('trDe').value  || null,
+      p_ate: el('trAte').value || null,
+      p_pendentes: false           // o filtro do SG e aplicado aqui na tela
+    }).then(function(res){
+      if(res.error){ el('trBody').innerHTML=''; showToast(limparErro(res.error.message), true); return; }
+      trocasCache = res.data || [];
+      renderTrocas();
+    });
+  };
+
+  function trocasFiltradas(){
+    if(trocaFiltro === 'pendente') return trocasCache.filter(function(t){ return !t.sg_lancado; });
+    if(trocaFiltro === 'feito')    return trocasCache.filter(function(t){ return  t.sg_lancado; });
+    return trocasCache;
+  }
+
+  Array.prototype.forEach.call(el('filtroTroca').children, function(b){
+    b.addEventListener('click', function(){
+      trocaFiltro = this.getAttribute('data-f');
+      Array.prototype.forEach.call(el('filtroTroca').children, function(o){
+        o.classList.toggle('ativo', o.getAttribute('data-f') === trocaFiltro);
+      });
+      renderTrocas();
+    });
+  });
+
+  function renderTrocas(){
+    var lista = trocasFiltradas(), html = '', unid = 0, chaves = {};
+    lista.forEach(function(t){
+      unid += trocaNum(t.quantidade);
+      chaves[t.produto_id != null ? 'p'+t.produto_id : 'b'+(t.codigo_barras||t.nome)] = 1;
+      var selo = t.sem_cadastro ? '<span class="selo-tag">sem cadastro</span>' : '';
+      html += '<tr class="'+(t.sg_lancado ? 'sg-feito' : '')+'">' +
+        '<td data-label="SG"><input type="checkbox" class="tr-check" data-id="'+t.id+'"'+
+          (t.sg_lancado ? ' checked' : '')+' title="Marcar como lançada no SG"></td>' +
+        '<td data-label="Dia">'+trocaDiaBr(t.dia)+'</td>' +
+        '<td data-label="Código" class="mono">'+escapeHtml(t.codigo || t.codigo_barras || '—')+'</td>' +
+        '<td data-label="Produto"><b>'+escapeHtml(t.nome)+'</b>'+selo+'</td>' +
+        '<td data-label="Qtd"><b>'+trocaFmt(t.quantidade)+'</b></td>' +
+        '<td data-label="Observação">'+escapeHtml(t.obs || '—')+'</td>' +
+        '<td data-label="Registrado por">'+escapeHtml(t.registrado_por_nome || '—')+'</td>' +
+        '<td data-label="Ações" class="acoes">' +
+          '<button class="btn-sm danger" data-del="'+t.id+'">Excluir</button>' +
+        '</td></tr>';
+    });
+    el('trBody').innerHTML = html;
+
+    el('trLinhas').textContent    = num(lista.length);
+    el('trUnidades').textContent  = trocaFmt(unid);
+    el('trDistintos').textContent = num(Object.keys(chaves).length);
+    el('trPend').textContent      = num(trocasCache.filter(function(t){ return !t.sg_lancado; }).length);
+
+    var vazio = !lista.length;
+    document.querySelector('#viewTrocas .table-wrap').style.display = vazio ? 'none':'block';
+    el('trEmpty').style.display = vazio ? 'block':'none';
+    el('trEmpty').textContent = !trocasCache.length
+      ? 'Nenhuma troca registrada neste período.'
+      : (trocaFiltro === 'pendente' ? 'Tudo deste período já foi lançado no SG.'
+                                    : 'Nenhuma troca lançada no SG neste período.');
+
+    el('trBody').querySelectorAll('.tr-check').forEach(function(chk){
+      chk.addEventListener('change', function(){
+        var self = this, id = parseInt(this.getAttribute('data-id'),10), marcado = this.checked;
+        self.disabled = true;
+        supa.rpc('trocas_marcar_sg', { p_ids:[id], p_lancado:marcado }).then(function(res){
+          self.disabled = false;
+          if(res.error){ self.checked = !marcado; showToast(limparErro(res.error.message), true); return; }
+          var item = trocasCache.filter(function(t){ return t.id === id; })[0];
+          if(item) item.sg_lancado = marcado;
+          renderTrocas();
+        });
+      });
+    });
+
+    el('trBody').querySelectorAll('button[data-del]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = parseInt(this.getAttribute('data-del'),10);
+        var t  = trocasCache.filter(function(x){ return x.id === id; })[0];
+        if(!t) return;
+        if(!confirm('Excluir esta troca?\n\n'+t.nome+' — '+trocaFmt(t.quantidade)+'\n\nEla some do levantamento e da impressão.')) return;
+        supa.rpc('trocas_excluir', { p_id: id }).then(function(res){
+          if(res.error){ showToast(limparErro(res.error.message), true); return; }
+          showToast('Troca excluída.');
+          refreshTrocas();
+        });
+      });
+    });
+  }
+
+  // ---------- Busca de produto para a troca ----------
+  el('trocaInput').addEventListener('input', function(){
+    el('trocaClearBtn').style.display = this.value ? 'block':'none';
+    clearTimeout(trocaBusca);
+    trocaBusca = setTimeout(function(){ buscaTroca(false); }, 220);
+  });
+  el('trocaInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); this.blur(); buscaTroca(true); }
+  });
+  window.limparBuscaTroca = function(){
+    el('trocaInput').value = '';
+    el('trocaClearBtn').style.display = 'none';
+    el('trocaResultados').innerHTML = '';
+    el('trocaMeta').innerHTML = '';
+    el('trocaInput').focus();
+  };
+
+  // direto=true (bipagem ou Enter) abre o modal sozinho quando da um so
+  // produto, e oferece o cadastro manual quando nao da nenhum.
+  function buscaTroca(direto){
+    if(!supa || !me) return;
+    var raw = el('trocaInput').value.trim();
+    if(raw.length < 2){ el('trocaResultados').innerHTML=''; el('trocaMeta').innerHTML=''; return; }
+
+    el('trocaMeta').innerHTML = '<span class="spinner"></span> buscando…';
+    var q = raw.replace(/[%,]/g, '');
+    var isNum = /^[0-9]+$/.test(q);
+    var orFilter = isNum
+      ? 'codigo.eq.'+q+',codigo_barras.ilike.%'+q+'%,nome.ilike.%'+q+'%'
+      : 'nome.ilike.%'+q+'%,codigo_barras.ilike.%'+q+'%';
+
+    supa.from('produtos').select('id,codigo,nome,codigo_barras,preco', {count:'exact'})
+      .or(orFilter).order('nome', {ascending:true}).limit(MAX_RESULTS)
+      .then(function(res){
+        if(res.error){ el('trocaMeta').textContent = 'Erro na busca: '+res.error.message; return; }
+        var lista = res.data || [], total = res.count || lista.length;
+
+        if(!lista.length){
+          el('trocaResultados').innerHTML =
+            '<div class="empty-state" style="display:block;">' +
+              '<span class="ico">📦</span>' +
+              '<div class="big">Fora do cadastro</div>' +
+              '<div>Nada encontrado para <b>'+escapeHtml(raw)+'</b>. Dá para registrar assim mesmo — ' +
+                  'você digita o nome e a linha sai marcada no relatório.</div>' +
+              '<button class="btn-sm primary" id="trSemCad" style="margin-top:12px;">➕ Registrar sem cadastro</button>' +
+            '</div>';
+          el('trocaMeta').textContent = 'Nenhum produto encontrado.';
+          el('trSemCad').addEventListener('click', function(){ abrirTroca(null, raw); });
+          if(direto) abrirTroca(null, raw);
+          return;
+        }
+
+        el('trocaMeta').textContent = total > MAX_RESULTS
+          ? 'Mostrando '+MAX_RESULTS+' de '+num(total)+' — refine a busca.'
+          : num(total) + (total===1 ? ' resultado' : ' resultados');
+
+        var html = '';
+        lista.forEach(function(p, i){
+          html += '<div class="prod">' +
+            '<div class="prod-topo">' +
+              '<span class="cod mono">'+escapeHtml(p.codigo)+'</span>' +
+              '<div class="nome">'+escapeHtml(p.nome)+'</div>' +
+            '</div>' +
+            '<div class="meta"><span class="mono">'+escapeHtml(fmtBarcode(p.codigo_barras))+'</span>' +
+            '<span class="preco">'+fmtMoney(p.preco)+'</span></div>' +
+            '<button class="btn-contar" data-i="'+i+'">Registrar troca</button>' +
+            '</div>';
+        });
+        el('trocaResultados').innerHTML = html;
+        el('trocaResultados').querySelectorAll('.btn-contar').forEach(function(b){
+          b.addEventListener('click', function(){
+            abrirTroca(lista[parseInt(this.getAttribute('data-i'),10)], '');
+          });
+        });
+
+        // Um resultado so, vindo da bipagem: pula a lista e pede a quantidade.
+        if(direto && lista.length === 1) abrirTroca(lista[0], '');
+      });
+  }
+
+  // ---------- Modal da troca ----------
+  function abrirTroca(produto, barrasLidas){
+    trocaAlvo = produto;
+    var sem = !produto;
+    el('mtNome').textContent = sem ? 'Produto sem cadastro' : produto.nome;
+    el('mtBarcode').textContent = sem
+      ? 'Lido: ' + (barrasLidas || '—')
+      : 'Cód: '+produto.codigo+'  ·  Barras: '+fmtBarcode(produto.codigo_barras);
+    el('mtAvisoSem').style.display   = sem ? 'block':'none';
+    el('mtCampoNome').style.display  = sem ? 'block':'none';
+    el('mtNomeInput').value = '';
+    el('mtBarcode').setAttribute('data-barras', sem ? (barrasLidas||'') : (produto.codigo_barras||''));
+    el('mtQtd').value = '1';
+    el('mtObs').value = '';
+    el('modalTroca').style.display = 'flex';
+    setTimeout(function(){ el(sem ? 'mtNomeInput' : 'mtQtd').focus(); }, 120);
+  }
+  window.fecharTroca = function(){ el('modalTroca').style.display='none'; trocaAlvo=null; };
+
+  window.stepTroca = function(d){
+    var e = el('mtQtd');
+    var n = Math.max(0, trocaNum(e.value) + d);
+    e.value = trocaFmt(n);
+  };
+
+  window.confirmarTroca = function(){
+    if(!supa) return;
+    var sem = !trocaAlvo;
+    var qtd = trocaNum(el('mtQtd').value);
+    if(qtd <= 0){ showToast('Informe uma quantidade maior que zero.', true); el('mtQtd').focus(); return; }
+    var nome = sem ? el('mtNomeInput').value.trim() : trocaAlvo.nome;
+    if(sem && !nome){ showToast('Digite o nome do produto.', true); el('mtNomeInput').focus(); return; }
+
+    var btn = el('btnTroca');
+    btn.disabled = true; btn.textContent = 'Salvando…';
+    supa.rpc('trocas_registrar', {
+      p_produto_id:    sem ? null : trocaAlvo.id,
+      p_codigo_barras: el('mtBarcode').getAttribute('data-barras') || '',
+      p_nome:          nome,
+      p_quantidade:    qtd,
+      p_obs:           el('mtObs').value.trim()
+    }).then(function(res){
+      btn.disabled = false; btn.textContent = 'Registrar troca';
+      if(res.error){ showToast(limparErro(res.error.message), true); return; }
+      fecharTroca();
+      limparBuscaTroca();
+      // Data fora do periodo filtrado esconderia a troca recem-criada e
+      // pareceria que nao salvou: o filtro volta para a semana corrente.
+      var hojeIso = new Date().toISOString().slice(0,10);
+      if(el('trAte').value && el('trAte').value < hojeIso) trocaSemana();
+      else refreshTrocas();
+      if(navigator.vibrate){ try{ navigator.vibrate([40,60,40]); }catch(e){} }
+      mostrarOkTroca(nome, qtd);
+    });
+  };
+
+  function mostrarOkTroca(nome, qtd){
+    el('okOverlay').classList.remove('alerta');
+    el('okIconeOk').style.display = 'block';
+    el('okIconeAviso').style.display = 'none';
+    el('okTitulo').textContent = 'Troca registrada';
+    el('okTotalBox').style.display = 'inline-block';
+    el('okDica').textContent = 'toque para continuar';
+    el('okProduto').textContent = nome;
+    el('okTotal').textContent = trocaFmt(qtd);
+    el('okOverlay').style.display = 'flex';
+    clearTimeout(okTimer);
+    okTimer = setTimeout(fecharOk, 2400);
+  }
+
+  // ---------- Fechar a semana ----------
+  window.marcarVisiveisTrocaSg = function(){
+    var lista = trocasFiltradas().filter(function(t){ return !t.sg_lancado; });
+    if(!lista.length){ showToast('Nada visível para marcar.', true); return; }
+    if(!confirm('Marcar as '+lista.length+' trocas visíveis como já lançadas no SG?\n\n'+
+                'Elas continuam guardadas — só saem da lista de pendentes.')) return;
+    supa.rpc('trocas_marcar_sg', { p_ids: lista.map(function(t){ return t.id; }), p_lancado:true })
+      .then(function(res){
+        if(res.error){ showToast(limparErro(res.error.message), true); return; }
+        showToast(num(res.data)+' trocas marcadas como lançadas no SG.');
+        refreshTrocas();
+      });
+  };
+
+  window.exportTrocasCSV = function(){
+    var lista = trocasFiltradas();
+    if(!lista.length){ showToast('Nada visível para exportar.', true); return; }
+    var linhas = [['Dia','Codigo','CodigoBarras','Produto','Quantidade','SemCadastro','Observacao','RegistradoPor','LancadoNoSG'].join(';')];
+    lista.forEach(function(t){
+      linhas.push([ trocaDiaBr(t.dia), t.codigo||'', t.codigo_barras||'',
+        '"'+(t.nome||'').replace(/"/g,'""')+'"',
+        trocaFmt(t.quantidade), t.sem_cadastro ? 'SIM':'NAO',
+        '"'+(t.obs||'').replace(/"/g,'""')+'"',
+        '"'+(t.registrado_por_nome||'').replace(/"/g,'""')+'"',
+        t.sg_lancado ? 'SIM':'NAO' ].join(';'));
+    });
+    var blob = new Blob(["﻿"+linhas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'trocas-'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  };
+
+  // ---------- Impressao A4 das trocas ----------
+  // Mesma folha do relatorio de contagem (duas colunas, mesmas medidas), so
+  // que a coluna de quantidade traz o total devolvido de cada produto.
+  // O papel agrupa por produto: e assim que se digita no SG, uma linha por
+  // item, e nao uma linha por cliente que desistiu.
+  window.imprimirTrocas = function(){
+    var bruto = trocasFiltradas();
+    if(!bruto.length){ showToast('Nada visível para imprimir.', true); return; }
+
+    var mapa = {}, ordem = [];
+    bruto.forEach(function(t){
+      var k = t.produto_id != null ? 'p'+t.produto_id : 'b'+(t.codigo_barras || t.nome);
+      if(!mapa[k]){
+        mapa[k] = { codigo: t.codigo || t.codigo_barras || '—', nome: t.nome,
+                    qtd: 0, sem_cadastro: t.sem_cadastro, feito: true };
+        ordem.push(k);
+      }
+      mapa[k].qtd += trocaNum(t.quantidade);
+      if(!t.sg_lancado) mapa[k].feito = false;
+    });
+    var lista = ordem.map(function(k){ return mapa[k]; })
+                     .sort(function(a,b){ return a.nome.localeCompare(b.nome, 'pt-BR'); });
+
+    var rotulo = trocaFiltro === 'pendente' ? 'Falta lançar no SG'
+               : trocaFiltro === 'feito'    ? 'Já lançado no SG'
+               :                              'Todas as trocas';
+    var de  = el('trDe').value, ate = el('trAte').value;
+    var periodo = (de || ate)
+      ? (trocaDiaBr(de || ate) + ' a ' + trocaDiaBr(ate || de))
+      : 'todo o período';
+
+    var totalUn = 0; lista.forEach(function(e){ totalUn += e.qtd; });
+    var semCad  = lista.filter(function(e){ return e.sem_cadastro; }).length;
+
+    var agora = new Date();
+    var dia   = agora.toLocaleDateString('pt-BR');
+    var hora  = agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+
+    // O aviso de "sem cadastro" vai na FRENTE do nome: como asterisco, ele
+    // sobrevive as reticencias que cortam nome comprido no fim da coluna.
+    function linha(e){
+      return '<div class="pr-lin' + (e.feito ? ' feito' : '') + '">'
+           +   '<span class="pr-cod">' + escapeHtml(e.codigo) + '</span>'
+           +   '<span class="pr-nom">' + (e.sem_cadastro ? '* ' : '') + escapeHtml(e.nome) + '</span>'
+           +   '<span class="pr-qtd">' + trocaFmt(e.qtd) + '</span>'
+           + '</div>';
+    }
+    function coluna(itens){
+      var c = '<div class="pr-col"><div class="pr-cab">'
+            +   '<span class="pr-cod">Código</span>'
+            +   '<span class="pr-nom">Produto</span>'
+            +   '<span class="pr-qtd">Qtd</span>'
+            + '</div>';
+      itens.forEach(function(e){ c += linha(e); });
+      return c + '</div>';
+    }
+
+    var pags = prPaginar(lista.length), h = '';
+    pags.forEach(function(p, idx){
+      var primeira = (idx === 0);
+      h += '<div class="pr-pag">';
+
+      if(primeira){
+        h += '<div class="pr-topo">'
+          +    '<div>'
+          +      '<div class="pr-marca">MERCADO E AÇOUGUE GODOY</div>'
+          +      '<div class="pr-titulo">Levantamento de Trocas — ' + escapeHtml(periodo) + '</div>'
+          +    '</div>'
+          +    '<div class="pr-emissao">'
+          +      'Emitido em <b>' + dia + '</b> às <b>' + hora + '</b><br>'
+          +      'Responsável: <b>' + escapeHtml((me && me.nome) || '—') + '</b><br>'
+          +      'Filtro: <b>' + rotulo + '</b> · <b>' + num(bruto.length) + '</b> registro(s)'
+          +    '</div>'
+          +  '</div>'
+          +  '<div class="pr-cards">'
+          +    '<div class="pr-card"><div class="r">Produtos</div><div class="v">' + num(lista.length) + '</div></div>'
+          +    '<div class="pr-card venda"><div class="r">Unidades a devolver</div><div class="v">' + trocaFmt(totalUn) + '</div></div>'
+          +    '<div class="pr-card"><div class="r">Registros</div><div class="v">' + num(bruto.length) + '</div></div>'
+          +    '<div class="pr-card alerta"><div class="r">Sem cadastro</div><div class="v">' + num(semCad) + '</div></div>'
+          +  '</div>';
+      } else {
+        h += '<div class="pr-topo mini">'
+          +    '<div>'
+          +      '<div class="pr-marca">MERCADO E AÇOUGUE GODOY</div>'
+          +      '<div class="pr-titulo">Trocas · ' + escapeHtml(periodo) + ' · ' + rotulo + ' (continuação)</div>'
+          +    '</div>'
+          +    '<div class="pr-emissao"><b>' + num(lista.length) + '</b> produtos no total</div>'
+          +  '</div>';
+      }
+
+      var itens = lista.slice(p.ini, p.fim);
+      var corte = Math.ceil(itens.length / 2);
+      h += '<div class="pr-cols">' + coluna(itens.slice(0, corte)) + coluna(itens.slice(corte)) + '</div>';
+
+      if(p.ultima){
+        h += '<div class="pr-fecho">'
+          +    '<div class="pr-totais">'
+          +      '<span>TOTAL — ' + num(lista.length) + ' produto(s)</span>'
+          +      '<span>' + trocaFmt(totalUn) + ' unidades</span>'
+          +    '</div>'
+          +    '<div class="pr-assina">'
+          +      '<div>Conferido por</div><div>Lançado no SG por</div><div>Visto do responsável</div>'
+          +    '</div>'
+          +  '</div>';
+      }
+
+      h += '<div class="pr-rodape">'
+        +    '<span>Levantamento de Trocas — Mercado e Açougue Godoy · gerado em ' + dia + ' ' + hora
+        +      (semCad ? ' · <b>*</b> produto sem cadastro no sistema' : '') + '</span>'
+        +    '<span>Página ' + (idx+1) + ' de ' + pags.length + '</span>'
+        +  '</div>'
+        + '</div>';
+    });
+
+    el('printArea').innerHTML = h;
+
+    var titleOrig = document.title;
+    document.title = 'Trocas — ' + agora.toISOString().slice(0,10);
+    var restaurar = function(){ document.title = titleOrig; };
+    window.addEventListener('afterprint', function once(){
+      window.removeEventListener('afterprint', once); restaurar();
+    });
+    setTimeout(function(){ window.print(); setTimeout(restaurar, 1500); }, 60);
+  };
+
   // ---------- Monitoramento (admin) ----------
   var monCache = [];
   window.monHoje = function(){ el('monData').value=''; refreshMonitor(); };
@@ -2088,7 +2845,12 @@
     el('scanErro').style.display = 'block';
   }
 
-  window.abrirScanner = function(){
+  // O mesmo leitor serve a duas telas. 'alvo' diz para onde o codigo lido vai:
+  // a busca da contagem (padrao) ou o levantamento de trocas.
+  var scanAlvo = 'lancamento';
+
+  window.abrirScanner = function(alvo){
+    scanAlvo = (alvo === 'trocas') ? 'trocas' : 'lancamento';
     el('scannerShell').style.display='flex';
     el('scanErro').style.display='none';
     el('scanFrame').style.display='block';
@@ -2224,6 +2986,17 @@
     var limpo = String(codigo).replace(/\D/g,'') || String(codigo);
     fecharScanner();
     if(navigator.vibrate){ try{ navigator.vibrate(60); }catch(e){} }
+
+    if(scanAlvo === 'trocas'){
+      el('trocaInput').value = limpo;
+      el('trocaClearBtn').style.display = 'block';
+      showToast('Código lido: ' + limpo);
+      // Bipou na tela de trocas: o proximo passo e sempre a quantidade, entao
+      // a busca ja abre o modal sozinha em vez de parar numa lista de um item.
+      buscaTroca(true);
+      return;
+    }
+
     veioDoScanner = true;
     searchInput.value = limpo;
     el('clearBtn').style.display = 'block';
