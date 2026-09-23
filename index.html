@@ -697,9 +697,13 @@
     </div>
     <div class="auth-body">
       <div class="auth-msg" id="authMsg"></div>
-      <div class="field">
+      <div class="field" id="fieldSelNome">
         <label for="selNome">Colaborador</label>
         <select id="selNome"><option value="">carregando…</option></select>
+      </div>
+      <div class="field" id="fieldNovoNome" style="display:none;">
+        <label for="inNovoNome">Seu nome completo</label>
+        <input id="inNovoNome" type="text" autocomplete="name" maxlength="60" placeholder="Ex.: Maria da Silva">
       </div>
       <div class="field" id="fieldCodigo" style="display:none;">
         <label for="inCodigo">Código de administrador</label>
@@ -717,6 +721,7 @@
       </div>
       <button class="btn-full" id="btnAuth" onclick="submitAuth()">Entrar</button>
       <div class="auth-switch" id="authSwitch"></div>
+      <div class="auth-switch" id="authCadastro" style="margin-top:8px;"></div>
     </div>
   </div>
 </div>
@@ -909,8 +914,8 @@
 
   <!-- ---- Colaboradores (admin) ---- -->
   <div id="viewColaboradores" style="display:none;">
-    <p class="hint">O nome já vem cadastrado. Entregue o <b>código de primeiro acesso</b> a cada pessoa —
-       ela escolhe o próprio nome, digita o código e cria a senha. O código some daqui assim que a senha for criada.</p>
+    <p class="hint">Quem não está na lista pode se cadastrar na tela de entrada, em <b>“Cadastre-se”</b>, com nome e senha.
+       O cadastro aparece aqui como <b>aguardando aprovação</b> e a pessoa só entra depois que você tocar em <b>Aprovar</b>.</p>
     <div class="toolbar"><button class="btn-sm" onclick="refreshColabs()">↻ Atualizar</button></div>
     <div class="table-wrap">
       <table>
@@ -1256,6 +1261,7 @@
         setConn(true, admin ? 'administrador' : 'pronto para contar');
         showScreen('app');
         setView('lancamento');
+        if(admin) avisarPendentes();
       });
   }
 
@@ -1326,20 +1332,26 @@
   window.setAuthMode = function(mode){
     authMode = mode;
     authMsg('');
-    var p = mode === 'primeiro';
-    el('authStage').textContent    = p ? 'Primeiro acesso' : 'Acesso';
-    el('authTitle').textContent    = p ? 'Criar minha senha' : 'Entrar';
-    el('authSubtitle').textContent = p
-      ? 'Escolha seu nome e crie a sua senha. Você só faz isso uma vez.'
+    var p = mode === 'primeiro', cad = mode === 'cadastro', nova = p || cad;
+    el('authStage').textContent    = cad ? 'Novo cadastro' : p ? 'Primeiro acesso' : 'Acesso';
+    el('authTitle').textContent    = cad ? 'Cadastre-se' : p ? 'Criar minha senha' : 'Entrar';
+    el('authSubtitle').textContent = cad
+      ? 'Digite seu nome e crie uma senha. Você entra depois que o administrador aprovar.'
+      : p ? 'Escolha seu nome e crie a sua senha. Você só faz isso uma vez.'
       : 'Escolha seu nome e digite sua senha.';
-    el('fieldSenha2').style.display = p ? 'block':'none';
-    el('lblSenha').textContent = p ? 'Crie uma senha (mínimo 6 caracteres)' : 'Senha';
-    el('inSenha').setAttribute('autocomplete', p ? 'new-password' : 'current-password');
-    el('btnAuth').textContent = p ? 'Criar senha e entrar' : 'Entrar';
-    el('authSwitch').innerHTML = p
-      ? 'Já tem senha? <a onclick="setAuthMode(\'login\')">Entrar</a>'
-      : 'Primeiro acesso? <a onclick="setAuthMode(\'primeiro\')">Criar minha senha</a>';
-    el('inSenha').value=''; el('inSenha2').value=''; el('inCodigo').value='';
+    el('fieldSelNome').style.display = cad ? 'none':'block';
+    el('fieldNovoNome').style.display = cad ? 'block':'none';
+    el('fieldSenha2').style.display = nova ? 'block':'none';
+    el('lblSenha').textContent = nova ? 'Crie uma senha (mínimo 6 caracteres)' : 'Senha';
+    el('inSenha').setAttribute('autocomplete', nova ? 'new-password' : 'current-password');
+    el('btnAuth').textContent = cad ? 'Enviar cadastro' : p ? 'Criar senha e entrar' : 'Entrar';
+    el('authSwitch').innerHTML = mode === 'login'
+      ? 'Primeiro acesso? <a onclick="setAuthMode(\'primeiro\')">Criar minha senha</a>'
+      : 'Já tem senha? <a onclick="setAuthMode(\'login\')">Entrar</a>';
+    el('authCadastro').innerHTML = cad ? ''
+      : 'Não está na lista? <a onclick="setAuthMode(\'cadastro\')">Cadastre-se</a>';
+    el('inSenha').value=''; el('inSenha2').value=''; el('inCodigo').value=''; el('inNovoNome').value='';
+    if(cad){ el('fieldCodigo').style.display = 'none'; return; }
     preencherSelect();
   };
 
@@ -1347,6 +1359,21 @@
     var sel = el('selNome'), login = sel.value;
     var nome = sel.selectedOptions.length ? sel.selectedOptions[0].getAttribute('data-nome') : '';
     var senha = el('inSenha').value, btn = el('btnAuth');
+
+    if(authMode === 'cadastro'){
+      var novoNome = el('inNovoNome').value.trim();
+      if(novoNome.length < 3){ authMsg('Digite seu nome completo.'); return; }
+      if(senha.length < 6){ authMsg('A senha precisa ter ao menos 6 caracteres.'); return; }
+      if(senha !== el('inSenha2').value){ authMsg('As duas senhas não conferem.'); return; }
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      supa.rpc('solicitar_cadastro', { p_nome:novoNome, p_senha:senha }).then(function(res){
+        btn.disabled = false; btn.textContent = 'Enviar cadastro';
+        if(res.error){ authMsg(limparErro(res.error.message)); return; }
+        setAuthMode('login');
+        authMsg('Cadastro enviado! Assim que o administrador aprovar, seu nome aparece na lista. Entre com a senha que você criou.', 'ok');
+      });
+      return;
+    }
 
     if(!login){ authMsg('Selecione seu nome.'); return; }
     if(!senha){ authMsg('Digite a senha.'); return; }
@@ -1395,7 +1422,7 @@
     });
   };
 
-  ['inSenha','inSenha2','inCodigo'].forEach(function(id){
+  ['inSenha','inSenha2','inCodigo','inNovoNome'].forEach(function(id){
     el(id).addEventListener('keydown', function(e){ if(e.key === 'Enter') submitAuth(); });
   });
   el('selNome').addEventListener('change', function(){ authMsg(''); ajustarCampoCodigo(); });
@@ -2788,6 +2815,16 @@
   // ---------- Colaboradores (admin) ----------
   var colabCache = [];
 
+  // Autocadastro fica parado ate o admin aprovar; avisa ao entrar.
+  function avisarPendentes(){
+    supa.rpc('listar_colaboradores').then(function(res){
+      if(res.error) return;
+      var n = (res.data || []).filter(function(c){ return !c.aprovado; }).length;
+      if(n) showToast(n === 1 ? '1 cadastro aguardando aprovação — veja em Colaboradores.'
+                              : n+' cadastros aguardando aprovação — veja em Colaboradores.');
+    });
+  }
+
   window.refreshColabs = function(){
     el('colabBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
     supa.rpc('listar_colaboradores').then(function(res){
@@ -2801,6 +2838,19 @@
     var html = '';
     colabCache.forEach(function(c, i){
       var eu = me && c.id === me.id;
+      if(!c.aprovado){
+        html += '<tr>' +
+          '<td data-label="Nome"><b>'+escapeHtml(c.nome)+'</b> <span class="pill nao">aguardando aprovação</span></td>' +
+          '<td data-label="Papel"><span class="pill neutro">'+escapeHtml(c.papel)+'</span></td>' +
+          '<td data-label="Senha"><span class="pill ok">criada</span></td>' +
+          '<td data-label="Código 1º acesso">—</td>' +
+          '<td data-label="Situação"><span class="pill nao">pendente</span></td>' +
+          '<td data-label="Ações" class="acoes">' +
+            '<button class="btn-sm" data-act="aprovar" data-i="'+i+'">Aprovar</button>' +
+            '<button class="btn-sm" data-act="recusar" data-i="'+i+'">Recusar</button>' +
+          '</td></tr>';
+        return;
+      }
       html += '<tr>' +
         '<td data-label="Nome"><b>'+escapeHtml(c.nome)+'</b>'+(eu?' <span class="pill neutro">você</span>':'')+'</td>' +
         '<td data-label="Papel"><span class="pill '+(c.papel==='admin'?'admin':'neutro')+'">'+escapeHtml(c.papel)+'</span></td>' +
@@ -2817,7 +2867,17 @@
     el('colabBody').querySelectorAll('button[data-act]').forEach(function(btn){
       btn.addEventListener('click', function(){
         var c = colabCache[parseInt(this.getAttribute('data-i'),10)];
-        if(this.getAttribute('data-act') === 'reset'){
+        var act = this.getAttribute('data-act');
+        if(act === 'aprovar' || act === 'recusar'){
+          if(act === 'recusar' && !confirm('Recusar o cadastro de '+c.nome+'?\n\nO pedido é apagado e a pessoa não consegue entrar.')) return;
+          supa.rpc(act === 'aprovar' ? 'aprovar_cadastro' : 'recusar_cadastro', { p_id: c.id }).then(function(res){
+            if(res.error){ showToast(limparErro(res.error.message), true); return; }
+            showToast(act === 'aprovar' ? c.nome+' aprovado. Já pode entrar com a senha que criou.' : 'Cadastro de '+c.nome+' recusado.');
+            refreshColabs();
+          });
+          return;
+        }
+        if(act === 'reset'){
           if(!confirm('Resetar a senha de '+c.nome+'?\n\nA senha atual deixa de funcionar e um novo código de primeiro acesso é gerado.')) return;
           supa.rpc('resetar_senha', { p_id: c.id }).then(function(res){
             if(res.error){ showToast(limparErro(res.error.message), true); return; }
