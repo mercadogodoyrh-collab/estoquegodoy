@@ -421,7 +421,10 @@
   /* Produto cadastrado por colaborador que ainda falta cadastrar no SG */
   .novos-sg{ background:#FFF7E6; border:1px solid #F0D49A; border-left:5px solid var(--deposito);
     border-radius:16px; padding:12px 14px; margin-bottom:14px; box-shadow:var(--shadow-sm); }
-  .novos-sg h3{ margin:0 0 3px; font-size:14px; font-weight:800; color:var(--deposito-dark); }
+  .novos-sg summary{ cursor:pointer; min-height:44px; padding:10px 0; font-size:14px; font-weight:800; color:var(--deposito-dark); }
+  .novos-sg summary:focus-visible{ outline:2px solid var(--deposito-dark); outline-offset:4px; border-radius:4px; }
+  .novos-sg[open] summary{ margin-bottom:8px; }
+  #novosSgTotal{ white-space:nowrap; }
   .novos-sg .sub{ font-size:12px; color:var(--ink-soft); margin-bottom:8px; }
   .novo-item{ display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid #F0DFB8; }
   .novo-item .info{ flex:1; min-width:0; }
@@ -662,6 +665,13 @@
     .pr-rodape{ height:6mm; box-sizing:border-box; margin-top:auto; padding-top:2mm; border-top:0.5pt solid #CCC;
                 font-size:6.8pt; color:#666; display:flex; justify-content:space-between; }
   }
+  .etapa-botoes{ display:flex; flex-wrap:wrap; gap:8px; }
+  .etapa-botoes button{ flex:1; min-height:48px; }
+  .etapa-item{ display:flex; align-items:center; gap:10px; padding:12px 0; border-top:1px solid var(--border); }
+  .etapa-item > div{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .etapa-item .hint{ margin:5px 0 0; }
+  .etapa-item > .etapa-acoes{ flex:0 0 38%; display:flex; flex-direction:column; gap:4px; }
+  .etapa-item button{ min-height:44px; white-space:normal; }
 </style>
 </head>
 <body>
@@ -748,6 +758,14 @@
         <button class="bp-link" onclick="abrirHistorico()">🕘 Ver meus lançamentos anteriores</button>
       </div>
     </div>
+    <section class="bloco-painel" id="etapasPainel" style="display:none;" aria-label="Etapas da contagem">
+      <div class="etapa-botoes">
+        <button class="btn-sm primary" id="etapaVenda" onclick="mudarEtapa('venda')" aria-pressed="true">1. Área de venda</button>
+        <button class="btn-sm" id="etapaDeposito" onclick="mudarEtapa('deposito')" aria-pressed="false">2. Depósito (0)</button>
+      </div>
+      <p class="hint" id="etapaTexto"></p>
+      <div id="etapaLista"></div>
+    </section>
     <div class="busca-sticky">
       <div class="search-box">
         <svg class="lupa" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
@@ -793,11 +811,11 @@
       <div class="card deposito"><div class="label">Un. Depósito</div><div class="value" id="repDeposito">0</div></div>
       <div class="card alerta"><div class="label">Falta lançar no SG</div><div class="value" id="repSgPend">—</div></div>
     </div>
-    <div class="novos-sg" id="novosSg" style="display:none;">
-      <h3>🏷️ Produtos novos — cadastrar no SG</h3>
+    <details class="novos-sg" id="novosSg" style="display:none;">
+      <summary>🏷️ Produtos novos — cadastrar no SG <span id="novosSgTotal"></span></summary>
       <div class="sub">Cadastrados pelos colaboradores durante a contagem. Depois de cadastrar no SG, toque em “Cadastrei”.</div>
       <div id="novosSgLista"></div>
-    </div>
+    </details>
     <div class="toolbar">
       <div class="filtros" id="filtroSg">
         <button data-f="pendente" class="ativo">Falta no SG</button>
@@ -809,9 +827,11 @@
       <button class="btn-sm primary" onclick="marcarVisiveisSg()">✓ Marcar visíveis como lançados</button>
       <button class="btn-sm" onclick="imprimirRelatorio()">🖨 Imprimir (A4)</button>
       <button class="btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
+      <button class="btn-sm" onclick="exportAHK()">⬇ Baixar AHK para SG</button>
       <button class="btn-sm" onclick="refreshReport()">↻ Atualizar</button>
       <button class="btn-sm danger" onclick="clearReport()">🗑 Limpar contagem</button>
     </div>
+    <p class="hint">AHK para SG: usa os produtos do filtro selecionado e o total contado (venda + depósito). Abra o arquivo com AutoHotkey v2. F7: códigos · F8: quantidades · F9: parar. Após conferir no SG, marque os produtos como lançados.</p>
     <div class="table-wrap">
       <div class="table-scroll">
         <table>
@@ -1017,14 +1037,14 @@
   <div class="modal">
     <div class="puxador"></div>
     <div class="modal-head">
-      <div class="stage">Lançar contagem</div>
+      <div class="stage" id="mvEtapa">Contar área de venda</div>
       <h2 id="mvNome">—</h2>
       <div class="barcode-line mono" id="mvBarcode">—</div>
       <div class="barcode-line aviso-recontagem" id="mvAviso" style="display:none;">Você já lançou este produto nesta contagem — confirmando, vale o novo número.</div>
     </div>
     <div class="modal-body">
-      <div class="qty-grid">
-        <div class="qty-field">
+      <div class="qty-grid" style="grid-template-columns:1fr;">
+        <div class="qty-field" id="campoVenda">
           <label style="color:var(--venda-dark);">● Área de Venda</label>
           <div class="qty-input-row">
             <button onclick="stepQty('venda',-1)" aria-label="Menos">−</button>
@@ -1032,7 +1052,7 @@
             <button onclick="stepQty('venda',1)" aria-label="Mais">+</button>
           </div>
         </div>
-        <div class="qty-field">
+        <div class="qty-field" id="campoDeposito">
           <label style="color:var(--deposito-dark);">● Depósito</label>
           <div class="qty-input-row">
             <button onclick="stepQty('deposito',-1)" aria-label="Menos">−</button>
@@ -1224,6 +1244,8 @@
 
   function routeSession(session){
     if(!session){
+      el('modalLancamento').style.display = 'none'; currentProduct = null;
+      bloco = null; meusItens = {}; etapaContagem = 'venda'; etapaChaveAtual = '';
       me = null; authUserId = null;
       setConn(false, 'não autenticado');
       el('tabsBox').classList.remove('visivel');
@@ -1447,7 +1469,7 @@
   };
 
   function runSearch(){
-    if(!supa || !me) return;
+    if(!supa || !me || etapaContagem === 'deposito') return;
     var raw = searchInput.value.trim();
     var lista = el('resultsList'), meta = el('searchMeta');
 
@@ -1501,6 +1523,7 @@
   }
 
   function renderResults(list){
+    if(etapaContagem === 'deposito') return;
     var lista = el('resultsList');
     if(!list.length){ lista.innerHTML = ''; return; }
     var html = '';
@@ -1531,41 +1554,182 @@
   }
 
   // ---------- Modal de contagem ----------
-  function abrirModal(p){
-    currentProduct = p;
-    // Produto que ja esta na contagem aberta reabre com o que foi lancado: e
-    // assim que se conserta um numero errado — contando de novo, sem sair da
-    // contagem. Depois que ela fecha, o produto nao volta mais.
-    var meu = meuItem(p.id);
-    el('qtyVenda').value    = meu ? (meu.qtd_venda||0)    : 0;
-    el('qtyDeposito').value = meu ? (meu.qtd_deposito||0) : 0;
-    el('mvNome').textContent = p.nome;
-    el('mvBarcode').textContent = 'Cód: '+p.codigo+'  ·  Barras: '+fmtBarcode(p.codigo_barras);
-    el('mvAviso').style.display = meu ? 'block' : 'none';
-    el('modalLancamento').style.display = 'flex';
+  // Rascunhos locais: isolados por servidor, colaborador e bloco aberto.
+  // Uma venda pendente nunca e enviada com deposito zero ao relatorio.
+  var etapaContagem = 'venda', etapaChaveAtual = '', salvandoEtapa = false;
+  function chaveEtapas(){
+    if(!me || !blocoAberto()) return null;
+    return 'estoque-etapas-v1:' + DEFAULT_SUPABASE_URL + ':' + me.id + ':' + bloco.bloco_id;
   }
-  window.closeModals = function(){ el('modalLancamento').style.display='none'; currentProduct=null; };
-  window.stepQty = function(which, d){
-    var e = el(which==='venda' ? 'qtyVenda' : 'qtyDeposito');
-    e.value = Math.max(0, (parseInt(e.value,10)||0) + d);
+  function lerEtapas(chave){
+    chave = chave || chaveEtapas();
+    if(!chave) return {};
+    var texto = window.localStorage.getItem(chave);
+    var dados = texto ? JSON.parse(texto) : {};
+    if(!dados || typeof dados !== 'object' || Array.isArray(dados)) throw Error('Rascunho inválido.');
+    Object.keys(dados).forEach(function(id){
+      var d = dados[id];
+      if(!d || !d.produto || String(d.produto.id) !== id || !Number.isSafeInteger(d.venda) || d.venda < 0 ||
+        (d.deposito !== null && (!Number.isSafeInteger(d.deposito) || d.deposito < 0))) throw Error('Rascunho inválido.');
+    });
+    return dados;
+  }
+  function gravarEtapas(dados, chave){
+    chave = chave || chaveEtapas();
+    if(!chave) throw Error('Abra uma contagem antes de salvar.');
+    var texto = JSON.stringify(dados);
+    // Nao usa o fallback em memoria: so confirma depois de gravar no aparelho.
+    window.localStorage.setItem(chave, texto);
+    if(window.localStorage.getItem(chave) !== texto) throw Error('Não foi possível conferir o salvamento.');
+  }
+  function avisoEtapas(){
+    showToast('Não foi possível acessar os itens salvos neste aparelho. Não limpe os dados do navegador; tente novamente.', true);
+  }
+  function temItensPendentes(){
+    try{ return Object.keys(lerEtapas()).length > 0; }catch(e){ return true; }
+  }
+  function pendenciaEtapas(){
+    if(salvandoEtapa){ showToast('Aguarde o salvamento terminar.', true); return true; }
+    try{
+      var total = Object.keys(lerEtapas()).length;
+      if(total){
+        showToast('Conclua os ' + total + ' itens pendentes no depósito antes de finalizar.', true);
+        mudarEtapa('deposito'); return true;
+      }
+      return false;
+    }catch(e){ avisoEtapas(); return true; }
+  }
+  window.mudarEtapa = function(etapa){
+    if(salvandoEtapa || !blocoAberto()) return;
+    etapaContagem = etapa === 'deposito' ? 'deposito' : 'venda';
+    el('searchInput').value = ''; el('clearBtn').style.display = 'none';
+    el('resultsList').innerHTML = ''; el('searchMeta').innerHTML = '';
+    renderEtapas();
+    if(etapaContagem === 'venda') runSearch();
+  };
+  window.retirarPendente = function(id){
+    if(salvandoEtapa) return;
+    try{
+      var dados = lerEtapas(), d = dados[id];
+      if(!d || !confirm('Retirar "' + d.produto.nome + '" desta fila? As quantidades salvas apenas neste aparelho serão descartadas. Isso não altera lançamentos já enviados.')) return;
+      delete dados[id]; gravarEtapas(dados); renderEtapas();
+    }catch(e){ avisoEtapas(); }
+  };
+  function renderEtapas(){
+    var chave = chaveEtapas(), painel = el('etapasPainel');
+    painel.style.display = chave ? 'block' : 'none';
+    if(chave !== etapaChaveAtual){ etapaChaveAtual = chave; etapaContagem = 'venda'; }
+    var deposito = etapaContagem === 'deposito' && !!chave;
+    document.querySelector('#viewLancamento .busca-sticky').style.display = deposito ? 'none' : '';
+    if(!chave) return;
+    el('etapaVenda').classList.toggle('primary', !deposito);
+    el('etapaDeposito').classList.toggle('primary', deposito);
+    el('etapaVenda').setAttribute('aria-pressed', String(!deposito));
+    el('etapaDeposito').setAttribute('aria-pressed', String(deposito));
+    el('etapaVenda').disabled = el('etapaDeposito').disabled = salvandoEtapa;
+    el('etapaTexto').textContent = deposito
+      ? 'Conte estes mesmos produtos no depósito. Se não houver unidades, informe 0 e confirme.'
+      : 'Conte vários produtos aqui e depois vá uma única vez ao depósito. Os pendentes ficam salvos neste celular e navegador.';
+    if(deposito){ el('blocoContados').style.display='none'; el('lancVazio').style.display='none'; }
+    try{
+      var dados = lerEtapas(), ids = Object.keys(dados);
+      el('etapaDeposito').textContent = '2. Depósito (' + ids.length + ')';
+      el('etapaLista').innerHTML = ids.length ? ids.map(function(id){
+        var d = dados[id];
+        return '<div class="etapa-item"><div><b>' + escapeHtml(d.produto.nome) + '</b><div class="hint">Cód: ' + escapeHtml(d.produto.codigo || 'NOVO') + ' · Venda: ' + d.venda +
+          (d.deposito === null ? ' · Falta depósito' : ' · Depósito: ' + d.deposito + ' · Falta enviar') + '</div></div>' +
+          '<div class="etapa-acoes"><button class="btn-sm" data-etapa-id="' + escapeHtml(id) + '"' + (salvandoEtapa ? ' disabled' : '') + '>' + (deposito ? (d.deposito === null ? 'Contar depósito' : 'Revisar e enviar') : 'Editar venda') + '</button>' +
+          '<button class="bp-link" data-retirar-id="' + escapeHtml(id) + '"' + (salvandoEtapa ? ' disabled' : '') + '>Retirar</button></div></div>';
+      }).join('') : '<p class="hint">' + (deposito ? 'Nenhum item pendente. Volte à área de venda para contar mais produtos ou finalize a contagem.' : 'Os produtos salvos na área de venda aparecerão aqui.') + '</p>';
+      el('etapaLista').querySelectorAll('[data-etapa-id]').forEach(function(btn){
+        btn.addEventListener('click',function(){ abrirModal(dados[this.getAttribute('data-etapa-id')].produto); });
+      });
+      el('etapaLista').querySelectorAll('[data-retirar-id]').forEach(function(btn){
+        btn.addEventListener('click',function(){ retirarPendente(this.getAttribute('data-retirar-id')); });
+      });
+      if(ids.length) el('bpTexto').textContent = ids.length + ' produto(s) aguardando conclusão no depósito. Os números abaixo mostram os itens já enviados.';
+      else el('bpTexto').textContent = bloco.itens ? 'Ao terminar, finalize para fechar a contagem.' : 'Busque ou bipe o primeiro produto.';
+    }catch(e){
+      el('etapaLista').textContent = 'Não foi possível ler os itens salvos neste aparelho. Tente novamente sem apagar os dados do navegador.';
+    }
+  }
+  function abrirModal(p){
+    if(!blocoAberto() || salvandoEtapa) return;
+    var d;
+    try{ d = lerEtapas()[p.id]; }catch(e){ avisoEtapas(); return; }
+    if(etapaContagem === 'deposito' && !d){ showToast('Conte primeiro este produto na área de venda.', true); return; }
+    currentProduct = p;
+    var meu = meuItem(p.id);
+    el('qtyVenda').value = d ? d.venda : (meu ? meu.qtd_venda : '');
+    el('qtyDeposito').value = d && d.deposito !== null ? d.deposito : '';
+    el('campoVenda').style.display = etapaContagem === 'venda' ? 'block' : 'none';
+    el('campoDeposito').style.display = etapaContagem === 'deposito' ? 'block' : 'none';
+    el('mvEtapa').textContent = etapaContagem === 'venda' ? '1. Contar área de venda' : '2. Contar depósito';
+    el('mvNome').textContent = p.nome;
+    el('mvBarcode').textContent = 'Cód: ' + p.codigo + ' · Barras: ' + fmtBarcode(p.codigo_barras);
+    el('mvAviso').style.display = 'block';
+    el('mvAviso').textContent = etapaContagem === 'venda'
+      ? 'Salve a venda agora. Este produto ficará pendente até contar o depósito.'
+      : 'Área de venda salva: ' + d.venda + '. Informe 0 se não houver unidades no depósito.';
+    el('btnConfirm').disabled = false;
+    el('btnConfirm').textContent = etapaContagem === 'venda' ? 'Salvar venda' : 'Concluir produto';
+    el('modalLancamento').style.display = 'flex';
+    setTimeout(function(){ el(etapaContagem === 'venda' ? 'qtyVenda' : 'qtyDeposito').focus(); },50);
+  }
+  window.closeModals = function(){
+    if(salvandoEtapa) return;
+    el('modalLancamento').style.display = 'none'; currentProduct = null;
+  };
+  window.stepQty = function(which,d){
+    var campo = el(which === 'venda' ? 'qtyVenda' : 'qtyDeposito');
+    campo.value = Math.max(0, (Number(campo.value)||0) + d);
+  };
+  window.confirmLaunch = async function(){
+    if(!currentProduct || !supa || !blocoAberto() || salvandoEtapa) return;
+    var texto = el(etapaContagem === 'venda' ? 'qtyVenda' : 'qtyDeposito').value.trim();
+    var quantidade = Number(texto);
+    if(texto === '' || !Number.isSafeInteger(quantidade) || quantidade < 0){
+      showToast('Informe uma quantidade inteira, inclusive 0 quando não houver unidades.', true); return;
+    }
+    var chave = chaveEtapas(), produto = currentProduct, dados, d;
+    try{
+      dados = lerEtapas(chave);
+      if(etapaContagem === 'venda'){
+        dados[produto.id] = {produto:{id:produto.id,nome:produto.nome,codigo:produto.codigo,codigo_barras:produto.codigo_barras},venda:quantidade,deposito:null};
+        gravarEtapas(dados,chave);
+        closeModals(); renderEtapas();
+        el('searchInput').value=''; el('clearBtn').style.display='none'; runSearch();
+        showToast('Venda salva. Conte o próximo produto ou vá para a etapa Depósito.');
+        return;
+      }
+      d = dados[produto.id];
+      if(!d){ showToast('A venda deste produto não está salva. Volte à área de venda.',true); return; }
+      d.deposito = quantidade;
+      gravarEtapas(dados,chave);
+    }catch(e){ avisoEtapas(); return; }
+    salvandoEtapa = true;
+    el('btnConfirm').disabled = true; el('btnConfirm').textContent = 'Enviando…';
+    try{
+      var res = await supa.rpc('lancar_contagem', {p_produto_id:produto.id,p_venda:d.venda,p_deposito:d.deposito});
+      if(res.error) throw res.error;
+      var atuais = lerEtapas(chave);
+      // Nao apaga uma edicao mais recente feita em outra aba.
+      if(JSON.stringify(atuais[produto.id]) === JSON.stringify(d)){
+        delete atuais[produto.id]; gravarEtapas(atuais,chave);
+      }
+      salvandoEtapa = false;
+      if(chave !== chaveEtapas()) return;
+      closeModals(); renderEtapas(); refreshBloco();
+      showToast('Produto concluído: venda ' + d.venda + ' + depósito ' + d.deposito + '.');
+    }catch(e){
+      salvandoEtapa = false;
+      if(chave !== chaveEtapas()) return;
+      el('btnConfirm').disabled = false; el('btnConfirm').textContent = 'Tentar enviar novamente';
+      showToast('As quantidades estão salvas neste aparelho. Não foi possível concluir o envio: ' + limparErro(e.message || 'verifique a conexão'),true);
+      renderEtapas();
+    }
   };
 
-  window.confirmLaunch = function(){
-    if(!currentProduct || !supa) return;
-    var qv = Math.max(0, parseInt(el('qtyVenda').value,10) || 0);
-    var qd = Math.max(0, parseInt(el('qtyDeposito').value,10) || 0);
-    var btn = el('btnConfirm');
-    btn.disabled = true; btn.textContent = 'Salvando…';
-    supa.rpc('lancar_contagem', { p_produto_id: currentProduct.id, p_venda: qv, p_deposito: qd })
-      .then(function(res){
-        btn.disabled = false; btn.textContent = 'Confirmar';
-        if(res.error){ showToast(limparErro(res.error.message), true); return; }
-        var nome = currentProduct.nome;
-        closeModals(); runSearch(); refreshBloco();
-        if(navigator.vibrate){ try{ navigator.vibrate([40,60,40]); }catch(e){} }
-        mostrarOk(nome, qv + qd);
-      });
-  };
 
   // ---------- Cadastro de produto bipado fora do cadastro ----------
   // O codigo de barras vem da leitura — ninguem redigita. O nome sai no
@@ -1762,6 +1926,7 @@
       busca.value = ''; el('clearBtn').style.display = 'none'; runSearch();
     }
     atualizarVazio();
+    renderEtapas();
   }
 
   // O que aparece embaixo da busca quando nao ha resultado nem lista: sem isso
@@ -1785,12 +1950,13 @@
       }
     } else if(!blocoAberto()){
       mostrar = false;                     // o painel acima ja explica o que fazer
-    } else if(!bloco.itens){
+    } else if(!bloco.itens && !temItensPendentes()){
       mostrar = true; ico = '📦';
       titulo = 'Contagem vazia';
       texto  = 'Busque o produto pelo nome ou código, ou toque no leitor para bipar o código de barras.';
     }
 
+    if(etapaContagem === 'deposito') mostrar = false;
     caixa.style.display = mostrar ? 'block' : 'none';
     el('lvCadastrar').style.display = cadastrar && blocoAberto() ? 'block' : 'none';
     if(!mostrar) return;
@@ -1813,7 +1979,7 @@
 
   // ---------- Finalizar: o "tem certeza?" com o resumo do bloco ----------
   window.abrirFinalizar = function(){
-    if(!blocoAberto()) return;
+    if(!blocoAberto() || pendenciaEtapas()) return;
     var temItens = bloco.itens > 0;
 
     el('mfItens').textContent    = num(bloco.itens);
@@ -1847,6 +2013,7 @@
   window.fecharFinalizar = function(){ el('modalFinalizar').style.display = 'none'; };
 
   window.confirmarFinalizar = function(){
+    if(!blocoAberto() || pendenciaEtapas()) return;
     var btn = el('btnFinalizar'), rotulo = btn.textContent;
     btn.disabled = true; btn.textContent = 'Finalizando…';
     supa.rpc('finalizar_contagem').then(function(res){
@@ -1877,7 +2044,7 @@
     // A busca a esconde, mas os itens sao carregados de qualquer jeito: e deles
     // que sai o meusItens, usado para marcar "você contou" nos resultados.
     var buscando = el('searchInput').value.trim().length >= 2;
-    caixa.style.display = buscando ? 'none' : 'block';
+    caixa.style.display = (buscando || etapaContagem === 'deposito') ? 'none' : 'block';
     el('contadosQtd').textContent = num(bloco.itens);
 
     supa.rpc('bloco_itens', { p_bloco_id: bloco.bloco_id }).then(function(res){
@@ -1992,18 +2159,50 @@
   var repCache = [];
   var filtroSg = 'pendente';   // o padrao e mostrar o que falta digitar no SG
 
-  window.refreshReport = function(){
-    el('repBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando…</td></tr>';
-    supa.rpc('relatorio_contagem').then(function(res){
-      if(res.error){ el('repBody').innerHTML=''; showToast(limparErro(res.error.message), true); return; }
-      repCache = res.data || [];
-      renderReport();
-    });
-    supa.rpc('resumo_contagem').then(function(res){
-      if(res.error || !res.data || !res.data.length) return;
-      el('repSgPend').textContent = num(res.data[0].sg_pendentes);
-    });
+  var repRequisicao = 0;
+  var repCarregando = false;
+
+  // A API limita cada resposta. Busca paginas com ordem estavel e publica
+  // o cache somente depois de receber a lista inteira.
+  async function carregarContagemCompleta(ativa){
+    var itens = [], inicio = 0, tamanho = 500;
+    while(ativa()){
+      var res = await supa.rpc('relatorio_contagem')
+        .order('nome', {ascending:true}).order('id', {ascending:true})
+        .range(inicio, inicio + tamanho - 1);
+      if(!ativa()) return null;
+      if(res.error) throw res.error;
+      var pagina = res.data || [];
+      itens = itens.concat(pagina);
+      if(pagina.length < tamanho) return itens;
+      inicio += pagina.length;
+    }
+    return null;
+  }
+
+  window.refreshReport = async function(){
+    var requisicao = ++repRequisicao;
+    repCarregando = true;
+    repCache = [];
+    ['repTotal','repVenda','repDeposito','repSgPend'].forEach(function(id){ el(id).textContent = '…'; });
+    document.querySelector('#viewRelatorio .table-wrap').style.display = 'block';
+    el('repEmpty').style.display = 'none';
+    el('repBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;"><span class="spinner"></span> carregando contagem completa…</td></tr>';
     refreshNovos();
+    try{
+      var dados = await carregarContagemCompleta(function(){ return requisicao === repRequisicao; });
+      if(requisicao !== repRequisicao) return;
+      repCache = dados;
+      repCarregando = false;
+      renderReport();
+    } catch(erro){
+      if(requisicao !== repRequisicao) return;
+      repCarregando = false;
+      repCache = [];
+      ['repTotal','repVenda','repDeposito','repSgPend'].forEach(function(id){ el(id).textContent = '—'; });
+      el('repBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;">Não foi possível carregar a contagem completa. Clique em Atualizar para tentar novamente.</td></tr>';
+      showToast(limparErro(erro.message || 'Falha ao carregar a contagem.'), true);
+    }
   };
 
   // Produtos que colaborador cadastrou na contagem e ainda nao existem no SG.
@@ -2013,6 +2212,7 @@
       if(res.error){ showToast(limparErro(res.error.message), true); return; }
       var pend = (res.data || []).filter(function(p){ return !p.cadastro_sg; });
       el('novosSg').style.display = pend.length ? 'block' : 'none';
+      el('novosSgTotal').textContent = '(' + pend.length + ')';
       el('novosSgLista').innerHTML = pend.map(function(p){
         return '<div class="novo-item">' +
           '<div class="info"><b>' + escapeHtml(p.nome) + '</b>' +
@@ -2055,6 +2255,7 @@
   };
 
   function renderReport(){
+    if(repCarregando) return;
     // Os totais somam a contagem inteira, nao so o que esta filtrado
     var tv=0, td=0;
     repCache.forEach(function(e){ tv += (e.qtd_venda||0); td += (e.qtd_deposito||0); });
@@ -2136,6 +2337,51 @@
     a.href = url; a.download = 'contagem-estoque-'+new Date().toISOString().slice(0,10)+'.csv';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  };
+
+
+  // Exportacao usa o mesmo total e filtro do relatorio impresso.
+  var modeloAhkContagem = "#Requires AutoHotkey v2.0\n#SingleInstance Force\n\n; ===== AJUSTES =====\nDelayTecla := 40     ; ms entre cada tecla digitada\nDelayEnter := 350    ; pausa depois de cada Enter (aumente se o SG perder teclas)\nDelayPrompt := 700   ; espera o SG responder (mensagem/campo) antes de cada Enter\nDelayProximo := 1200 ; ETAPA 2: pausa depois de lançar a quantidade, antes de digitar o próximo código\nEnters6Dig := 1      ; ETAPA 1: Enters após código com 6 dígitos\nEntersCurto := 2     ; ETAPA 1: Enters após código com menos de 6 dígitos\n\n; ===== LISTA (codigo;qtd) - gerada pelo sistema =====\n; Produtos sem codigo valido foram informados na exportacao.\nLista := \"\n(\n__ITENS_CONTAGEM__\n)\"\n\nParar := false\n\n; F7 = ETAPA 1 (listagem do levantamento: só os códigos)\n; F8 = ETAPA 2 (digitar quantidades: código, Enter, qtd, Enter)\n; F9 = parar\nF9:: {\n    global Parar\n    Parar := true\n}\n\nF7:: Lancar(1)\nF8:: Lancar(2)\n\nLancar(etapa) {\n    global Parar, Lista, DelayTecla, DelayEnter, DelayPrompt, DelayProximo, Enters6Dig, EntersCurto\n    Parar := false\n    SetKeyDelay DelayTecla, DelayTecla\n    pulados := \"\"\n    feitos := 0\n\n    MsgBox \"ETAPA \" etapa \": deixe o cursor no campo CÓDIGO da tela correspondente do SG.`n`nClique OK e aguarde 3 segundos.`n(F9 para parar)\"\n    Sleep 3000\n\n    for linha in StrSplit(Lista, \"`n\", \"`r\") {\n        if Parar\n            break\n        linha := Trim(linha)\n        if (linha = \"\")\n            continue\n        p := StrSplit(linha, \";\")\n        cod := Trim(p[1]), qtd := Trim(p[2])\n\n        if !RegExMatch(cod, \"^\\d+$\") {\n            pulados .= linha \"`n\"\n            continue\n        }\n\n        SendEvent cod\n        if (etapa = 1) {\n            ; 6 dígitos: o \"Deseja adicionar\" aparece sozinho -> 1 Enter\n            ; menos de 6: Enter, aparece o \"Deseja adicionar\", Enter de novo\n            Sleep DelayPrompt\n            n := (StrLen(cod) >= 6) ? Enters6Dig : EntersCurto\n            Loop n {\n                SendEvent \"{Enter}\"\n                Sleep DelayPrompt\n            }\n        } else {\n            Sleep DelayPrompt\n            SendEvent \"{Enter}\"\n            Sleep DelayPrompt\n            SendEvent qtd\n            SendEvent \"{Enter}\"\n            Sleep DelayProximo\n        }\n        feitos++\n    }\n\n    msg := (Parar ? \"Interrompido. \" : \"Concluído. \") feitos \" itens lançados.\"\n    if (pulados != \"\")\n        msg .= \"`n`nPULADOS (lance manualmente):`n\" pulados\n    MsgBox msg\n}\n";
+
+  function prepararAhkContagem(lista){
+    var linhas = [], pendencias = [];
+    lista.forEach(function(e){
+      var codigo = String(e.codigo == null ? '' : e.codigo).trim();
+      var raw = e.total;
+      var total = Number(raw);
+      var motivo = e.cadastro_pendente ? 'cadastro pendente no SG'
+        : !/^\d+$/.test(codigo) ? 'código SG ausente ou inválido'
+        : (raw == null || String(raw).trim() === '' || !Number.isSafeInteger(total) || total < 0)
+          ? 'quantidade inválida' : '';
+      if(motivo){
+        pendencias.push((e.nome || 'Produto sem nome') + ' | Código: ' + (codigo || 'sem código') + ' | Total: ' + String(raw == null ? '' : raw) + ' | ' + motivo);
+      } else {
+        linhas.push(codigo + ';' + total);
+      }
+    });
+    // Somente digitos e separadores controlados entram no codigo executavel.
+    var script = modeloAhkContagem.replace('__ITENS_CONTAGEM__', linhas.join('\n'));
+    return {script:script, quantidade:linhas.length, pendencias:pendencias};
+  }
+
+  window.exportAHK = function(){
+    var lista = listaFiltrada();
+    if(!lista.length){ showToast('Nada visível para exportar.', true); return; }
+    var resultado = prepararAhkContagem(lista);
+    if(!resultado.quantidade){
+      alert('Nenhum produto pode ser lançado automaticamente. Confira as pendências:\n\n' + resultado.pendencias.join('\n'));
+      return;
+    }
+    if(resultado.pendencias.length && !confirm(resultado.pendencias.length + ' produto(s) precisam de lançamento manual e ficarão fora da macro:\n\n' + resultado.pendencias.join('\n') + '\n\nBaixar o AHK com os ' + resultado.quantidade + ' produtos válidos?')) return;
+    if(lista.some(function(e){ return e.sg_lancado; }) && !confirm('O filtro atual inclui produtos já marcados como lançados no SG. Gerar o script mesmo assim?')) return;
+    var blob = new Blob(['\uFEFF' + resultado.script.replace(/\r?\n/g, '\r\n')], {type:'text/plain;charset=utf-8'});
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    var hoje = new Date();
+    var data = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0') + '-' + String(hoje.getDate()).padStart(2,'0');
+    a.href = url; a.download = 'lancar_contagem_SG-' + data + '-' + filtroSg + '.ahk';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    showToast('AHK gerado com ' + resultado.quantidade + ' produtos. F7: códigos · F8: quantidades · F9: parar.');
   };
 
   // ---------- Impressao A4 do relatorio ----------
