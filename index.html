@@ -97,7 +97,15 @@
   /* Abas: barra inferior no celular, topo no desktop */
   /* display controlado SO por CSS. Estilo inline vence media query e foi
      exatamente isso que quebrou o layout no celular. */
-  .tabs{ display:none; gap:4px; background:rgba(255,255,255,0.10); padding:4px; border-radius:11px; }
+  .tabs{ display:none; flex-wrap:wrap; gap:4px; background:rgba(255,255,255,0.10); padding:4px; border-radius:11px; }
+  .consulta-dot{ display:inline-block; width:13px; height:13px; border-radius:50%; background:var(--danger); flex:none; }
+  .consulta-dot.contado{ background:var(--brand); }
+  .consulta-legenda{ display:flex; flex-wrap:wrap; gap:16px; margin:16px 0; font-size:13px; }
+  .consulta-legenda span{ display:flex; align-items:center; gap:7px; }
+  .consulta-produto{ display:flex; align-items:center; gap:14px; }
+  .consulta-produto > div{ min-width:0; flex:1; overflow-wrap:anywhere; }
+  .consulta-filtros{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:12px 0; }
+  .consulta-filtros select{ padding:10px; border:1px solid var(--border); border-radius:10px; font-size:16px; }
   .tab-btn{ border:none; background:transparent; color:#C4DDCD; padding:9px 14px; border-radius:8px;
     font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:7px; }
   .tab-btn.active{ background:#fff; color:var(--brand-dark); }
@@ -707,6 +715,7 @@
   </div>
   <div class="tabs" id="tabsBox">
     <button class="tab-btn active" id="tabLancT"  onclick="setView('lancamento')">Contagem</button>
+    <button class="tab-btn" id="tabConsultaT" onclick="setView('contados')" style="display:none;">Produtos contados</button>
     <button class="tab-btn" id="tabRelT"   onclick="setView('relatorio')"     style="display:none;">Relatório</button>
     <button class="tab-btn" id="tabTrocasT" onclick="setView('trocas')"       style="display:none;">Trocas</button>
     <button class="tab-btn" id="tabMonT"   onclick="setView('monitoramento')" style="display:none;">Monitoramento</button>
@@ -825,6 +834,29 @@
   </div>
 
   <!-- ---- Relatório (admin) ---- -->
+  <div id="viewConsulta" style="display:none;">
+    <h2>Produtos contados</h2>
+    <p class="hint">Consulte a situação da contagem. A bolinha verde indica que o produto foi contado; o lançamento no SG é conferido no Relatório.</p>
+    <div class="search-box">
+      <input id="consultaBusca" aria-label="Buscar produtos contados ou não contados" placeholder="Nome, código ou barras…" type="search">
+    </div>
+    <div class="consulta-filtros">
+      <select id="consultaFiltro" aria-label="Situação da contagem">
+        <option value="todos">Todos os produtos</option>
+        <option value="contados">Já contados</option>
+        <option value="pendentes">Não contados</option>
+      </select>
+      <button class="btn-sm" onclick="carregarConsulta(0)">Atualizar</button>
+    </div>
+    <div class="consulta-legenda"><span><i class="consulta-dot contado" aria-hidden="true"></i>Já contado</span><span><i class="consulta-dot" aria-hidden="true"></i>Não contado</span></div>
+    <p class="search-meta" id="consultaMeta" role="status" aria-live="polite"></p>
+    <div class="results" id="consultaLista"></div>
+    <div class="consulta-filtros">
+      <button class="btn-sm" id="consultaAnterior" onclick="carregarConsulta(consultaPagina - 1)" disabled>Anterior</button>
+      <span id="consultaPaginaTexto"></span>
+      <button class="btn-sm" id="consultaProxima" onclick="carregarConsulta(consultaPagina + 1)" disabled>Próxima</button>
+    </div>
+  </div>
   <div id="viewRelatorio" style="display:none;">
     <div class="cards-row">
       <div class="card"><div class="label">Produtos contados</div><div class="value" id="repTotal">0</div></div>
@@ -973,6 +1005,10 @@
   <button class="tab-btn active" id="tabLancB" onclick="setView('lancamento')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
     <span>Contagem</span>
+  </button>
+  <button class="tab-btn" id="tabConsultaB" onclick="setView('contados')" aria-label="Produtos contados">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m7 12 3 3 7-7"/></svg>
+    <span>Contados</span>
   </button>
   <button class="tab-btn" id="tabRelB" onclick="setView('relatorio')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 14v3M12 10v7M16 7v10"/></svg>
@@ -1295,7 +1331,7 @@
 
         // Abas só existem para o administrador
         el('tabsBox').classList.toggle('visivel', admin);
-        ['tabRelT','tabTrocasT','tabMonT','tabColabT'].forEach(function(id){
+        ['tabConsultaT','tabRelT','tabTrocasT','tabMonT','tabColabT'].forEach(function(id){
           el(id).style.display = admin ? 'flex' : 'none';
         });
         el('bottomNav').classList.toggle('ligado', admin);
@@ -2157,11 +2193,12 @@
   window.setView = function(v){
     if(v !== 'lancamento' && (!me || me.papel !== 'admin')) return;
     el('viewLancamento').style.display    = v==='lancamento'    ? 'block':'none';
+    el('viewConsulta').style.display      = v==='contados'      ? 'block':'none';
     el('viewRelatorio').style.display     = v==='relatorio'     ? 'block':'none';
     el('viewTrocas').style.display        = v==='trocas'        ? 'block':'none';
     el('viewMonitoramento').style.display = v==='monitoramento' ? 'block':'none';
     el('viewColaboradores').style.display = v==='colaboradores' ? 'block':'none';
-    [['lancamento','tabLanc'],['relatorio','tabRel'],['trocas','tabTrocas'],
+    [['lancamento','tabLanc'],['contados','tabConsulta'],['relatorio','tabRel'],['trocas','tabTrocas'],
      ['monitoramento','tabMon'],['colaboradores','tabColab']]
       .forEach(function(par){
         var on = v === par[0];
@@ -2171,9 +2208,67 @@
     window.scrollTo(0,0);
     if(v==='lancamento'){ runSearch(); refreshBloco(); }
     if(v==='relatorio') refreshReport();
+    if(v==='contados') carregarConsulta(0);
     if(v==='trocas') abrirTrocas();
     if(v==='monitoramento') refreshMonitor();
     if(v==='colaboradores') refreshColabs();
+  };
+
+  // ---------- Consulta de produtos (sem quantidades) ----------
+  window.consultaPagina = 0;
+  var consultaRequisicao = 0, consultaTimer = null;
+  el('consultaBusca').addEventListener('input', function(){
+    ++consultaRequisicao;
+    clearTimeout(consultaTimer);
+    consultaTimer = setTimeout(function(){ carregarConsulta(0); }, 220);
+  });
+  el('consultaBusca').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); carregarConsulta(0); }
+  });
+  el('consultaFiltro').addEventListener('change', function(){ carregarConsulta(0); });
+  window.carregarConsulta = async function(pagina){
+    if(!supa || !me || me.papel !== 'admin') return;
+    clearTimeout(consultaTimer);
+    var req = ++consultaRequisicao, tamanho = 50;
+    pagina = Math.max(0, pagina || 0);
+    var lista = el('consultaLista'), meta = el('consultaMeta');
+    lista.innerHTML = '';
+    meta.textContent = 'Consultando produtos…';
+    el('consultaAnterior').disabled = true;
+    el('consultaProxima').disabled = true;
+    el('consultaPaginaTexto').textContent = '';
+    try{
+      var query = supa.from('produtos').select('id,codigo,nome,codigo_barras,lancado', {count:'exact'});
+      var filtro = el('consultaFiltro').value;
+      if(filtro === 'contados') query = query.eq('lancado', true);
+      if(filtro === 'pendentes') query = query.or('lancado.eq.false,lancado.is.null');
+      var q = el('consultaBusca').value.trim().replace(/[%,()."\\]/g, '');
+      if(q){
+        var termos = 'nome.ilike.%'+q+'%,codigo_barras.ilike.%'+q+'%';
+        if(/^[0-9]+$/.test(q)) termos += ',codigo.eq.'+q;
+        query = query.or(termos);
+      }
+      var res = await query.order('nome', {ascending:true}).order('id', {ascending:true})
+        .range(pagina * tamanho, (pagina + 1) * tamanho - 1);
+      if(req !== consultaRequisicao) return;
+      if(res.error) throw res.error;
+      var dados = res.data || [], total = res.count == null ? dados.length : res.count;
+      if(pagina > 0 && !dados.length){ carregarConsulta(0); return; }
+      window.consultaPagina = pagina;
+      meta.textContent = total ? 'Mostrando '+num(pagina*tamanho+1)+' a '+num(pagina*tamanho+dados.length)+' de '+num(total)+' produtos.' : 'Nenhum produto encontrado.';
+      lista.innerHTML = dados.map(function(p){
+        var status = p.lancado ? 'Já contado' : 'Não contado';
+        return '<div class="prod"><div class="consulta-produto"><div><div class="nome">'+escapeHtml(String(p.nome || ''))+'</div>'+
+          '<div class="hint">Cód: '+escapeHtml(String(p.codigo == null ? '—' : p.codigo))+' · Barras: '+escapeHtml(String(p.codigo_barras || '—'))+'</div></div>'+
+          '<span class="consulta-dot'+(p.lancado ? ' contado' : '')+'" role="img" aria-label="'+status+'" title="'+status+'"></span></div></div>';
+      }).join('');
+      el('consultaPaginaTexto').textContent = total ? 'Página '+(pagina+1)+' de '+Math.ceil(total/tamanho) : '';
+      el('consultaAnterior').disabled = pagina === 0;
+      el('consultaProxima').disabled = (pagina+1)*tamanho >= total;
+    }catch(erro){
+      if(req !== consultaRequisicao) return;
+      meta.textContent = 'Não foi possível consultar os produtos. Toque em Atualizar para tentar novamente.';
+    }
   };
 
   // ---------- Relatório (admin) ----------
