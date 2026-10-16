@@ -1740,7 +1740,7 @@ body{background:radial-gradient(ellipse at 8% 16%,#c4e9dd 0,transparent 48%),rad
     el('etapaDeposito').setAttribute('aria-pressed', String(deposito));
     el('etapaVenda').disabled = el('etapaDeposito').disabled = salvandoEtapa;
     el('etapaTexto').textContent = deposito
-      ? 'Conte estes mesmos produtos no depósito. Se não houver unidades, informe 0 e confirme.'
+      ? 'Conte estes mesmos produtos no depósito. Se deixar a quantidade em branco, pediremos sua confirmação para registrar 0.'
       : 'Busque um produto e salve a quantidade. Depois, conte o depósito. Os pendentes ficam neste aparelho.';
     if(deposito){ el('blocoContados').style.display='none'; el('lancVazio').style.display='none'; }
     try{
@@ -1785,7 +1785,7 @@ body{background:radial-gradient(ellipse at 8% 16%,#c4e9dd 0,transparent 48%),rad
     el('mvAviso').style.display = 'block';
     el('mvAviso').textContent = etapaContagem === 'venda'
       ? 'Salve a venda agora. Este produto ficará pendente até contar o depósito.'
-      : 'Área de venda salva: ' + d.venda + '. Informe 0 se não houver unidades no depósito.';
+      : 'Área de venda salva: ' + d.venda + '. Se deixar o depósito em branco, confirme o registro automático de 0 ao concluir.';
     el('btnConfirm').disabled = false;
     el('btnConfirm').textContent = etapaContagem === 'venda' ? 'Salvar venda' : 'Concluir produto';
     el('modalLancamento').style.display = 'flex';
@@ -1801,7 +1801,17 @@ body{background:radial-gradient(ellipse at 8% 16%,#c4e9dd 0,transparent 48%),rad
   };
   window.confirmLaunch = async function(){
     if(!currentProduct || !supa || !blocoAberto() || salvandoEtapa) return;
-    var texto = el(etapaContagem === 'venda' ? 'qtyVenda' : 'qtyDeposito').value.trim();
+    var campo = el(etapaContagem === 'venda' ? 'qtyVenda' : 'qtyDeposito');
+    if(campo.validity.badInput){
+      showToast('Informe uma quantidade inteira válida.', true); campo.focus(); return;
+    }
+    var texto = campo.value.trim();
+    if(etapaContagem === 'deposito' && texto === ''){
+      if(!confirm('Nenhuma quantidade foi informada para o depósito. Deseja registrar 0 automaticamente?')){
+        campo.focus(); return;
+      }
+      campo.value = '0'; texto = '0';
+    }
     var quantidade = Number(texto);
     if(texto === '' || !Number.isSafeInteger(quantidade) || quantidade < 0){
       showToast('Informe uma quantidade inteira, inclusive 0 quando não houver unidades.', true); return;
