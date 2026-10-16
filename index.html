@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#00532C">
+<meta name="theme-color" content="#eef5f2">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Contagem de Estoque — Mercado e Açougue Godoy</title>
@@ -701,6 +701,34 @@
     .etapa-item > .etapa-acoes{ flex-direction:row; align-items:center; }
     .etapa-acoes .btn-sm{ flex:1; }
   }
+
+@media screen {
+:root{--brand:#087b60;--brand-dark:#075b48;--brand-soft:#e2f3ec;--paper:#eef5f2;--ink:#193b35;--ink-soft:#536e68;--panel:rgba(255,255,255,.8);--border:#d5e4de;--paper-line:#dce8e2;--shadow:0 8px 32px -20px #284f4a55;--shadow-lg:0 24px 70px -30px #23483c66;--alto:0px;--top-h:76px}
+body{background:radial-gradient(ellipse at 8% 16%,#c4e9dd 0,transparent 48%),radial-gradient(ellipse at 90% 35%,#d9e1f5 0,transparent 45%),radial-gradient(ellipse at 55% 95%,#e9edcf 0,transparent 50%),#f1f6f3;background-attachment:fixed;letter-spacing:-.015em}
+.topbar{position:sticky;min-height:76px;padding:14px 28px;flex-wrap:wrap;background:rgba(250,255,252,.74);color:var(--ink);border-bottom:1px solid #ffffffdd;backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);box-shadow:0 4px 24px #335e4e08}
+.brand .name{font-size:13px;letter-spacing:.05em}.brand .sub{color:var(--ink-soft);font-size:10px;margin-top:5px}.userbox .who,.userbox .who b{color:var(--ink)}
+.btn-logout{color:var(--ink);background:#ffffff9c;min-height:44px;border:1px solid #fff}.tabs{background:#dcebe47a;border-radius:16px}.tab-btn{color:var(--ink-soft);font-weight:600;min-height:44px}.tab-btn.active{border-radius:12px;box-shadow:0 2px 8px #193b3510}
+.wrap{max-width:1080px;padding:34px 24px 64px}.page-intro{display:flex;align-items:center;justify-content:space-between;margin:0 0 28px}.eyebrow{font-size:10px;letter-spacing:.16em;font-weight:750;color:var(--brand)}.page-intro h1{font-size:36px;letter-spacing:-.055em;margin:8px 0}.page-intro p{color:var(--ink-soft);margin:0;font-size:14px}.intro-symbol{display:grid;place-items:center;width:64px;height:64px;background:#ffffff88;border:1px solid white;border-radius:22px;font-size:38px;color:var(--brand);box-shadow:var(--shadow)}
+.auth-wrap{max-width:440px;padding-top:46px}.auth-welcome{text-align:center;margin-bottom:28px}.app-mark{display:inline-grid;place-items:center;width:62px;height:62px;background:linear-gradient(140deg,#269f80,#075b48);border:1px solid #ffffff99;border-radius:21px;color:white;font-size:32px;font-weight:750;box-shadow:0 12px 32px #087b6030}.auth-welcome h1{font-size:34px;line-height:1.12;letter-spacing:-.055em;margin:20px 0 12px}.auth-welcome p{font-size:14px;color:var(--ink-soft);line-height:1.6}
+.auth-card,.bloco-painel,.card,.modal,.table-wrap,.novos-sg{background:linear-gradient(125deg,#ffffffd9,#ffffff9c);border:1px solid #ffffffed;border-radius:24px;box-shadow:var(--shadow)}.auth-card,.modal{backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}.auth-head{padding:26px 26px 4px}.auth-body{padding:20px 26px 28px}.auth-head h2{font-size:24px;letter-spacing:-.04em}
+.bloco-painel{padding:22px;margin-bottom:16px;border-top:1px solid white}.bloco-painel.aberta{border-color:#ffffff}.bp-stage{font-size:13px;letter-spacing:0;text-transform:none}.bp-texto{font-size:14px;line-height:1.6}.bp-hora{font-size:12px}.bp-acoes{margin-top:10px}.bp-link{color:var(--ink-soft);min-height:44px}.bp-nums{gap:10px}.bp-num{background:#ffffff70;border:1px solid #ffffffa8;border-radius:16px}.bp-num b{letter-spacing:-.04em}
+.btn-full,.btn-contar,.btn-bloco,.btn,.scan-btn,.btn-sm,.qty-input-row button,.btn-logout{box-shadow:0 2px 5px #183d3510;transform:none;transition:background .15s,box-shadow .15s;min-height:46px;border-radius:14px}.btn-full:active,.btn-contar:active,.btn-bloco:active,.btn:active,.scan-btn:active,.btn-sm:active,.qty-input-row button:active,.btn-logout:active{transform:none;box-shadow:inset 0 2px 5px #183d3520}.btn-full,.btn-primary,.btn-contar:not(.bloqueado),.btn-bloco:not(.encerrar){background:linear-gradient(135deg,#0c8969,#08634f);color:white}.btn-bloco.encerrar{background:#e6f1eb;color:var(--brand-dark);border:1px solid #c9dfd3;font-size:14px}.btn-sm{background:#ffffffaa;border:1px solid #dce8e2}.btn-sm.primary{background:var(--brand);color:white}.btn-sm.danger{background:#fff0ee;color:var(--danger)}button:disabled{cursor:not-allowed;opacity:.55}
+#etapasPainel{padding:8px;margin-bottom:18px;border-radius:22px}.etapa-botoes{gap:6px;padding:0;margin-bottom:0;background:#dfece666;border-radius:16px}.etapa-botoes button{border:none;box-shadow:none;min-height:48px;font-size:14px;background:transparent;color:var(--ink-soft)}.etapa-botoes button.primary{background:#fff;color:var(--brand-dark);box-shadow:0 3px 12px #15382a12}#etapaTexto{padding:14px 12px;font-size:13px;line-height:1.55;background:transparent}#filaPendentes{margin:0 12px 8px}#filaResumo{cursor:pointer;padding:12px 0;font-size:13px;font-weight:650;color:var(--brand-dark);min-height:44px}#etapaLista{margin-top:0}.etapa-item{padding:16px 0;gap:16px}.etapa-item .hint{font-size:12px}.etapa-item>div>b{font-size:14px}.etapa-acoes .bp-link{font-size:12px}
+.busca-sticky{top:var(--top-h);padding:6px 0 12px;background:transparent}.search-box{min-height:64px;border-radius:20px;border:1px solid white;background:#ffffffcf;box-shadow:0 6px 24px #254c3710}.search-box input{font-size:16px}.scan-btn{width:50px;min-height:50px;border-radius:15px}.search-meta{font-size:12px;padding:5px 4px}.results{gap:12px}.prod{background:#ffffffc9;border:1px solid #ffffff;border-radius:20px;box-shadow:var(--shadow);padding:20px}.prod .nome{font-size:16px;line-height:1.45}.prod .cod{background:#eef4f1;color:var(--ink-soft);border:none}.prod .meta{font-size:12px}.prod .btn-contar{font-size:14px}.selo{font-size:10px}.contados{background:#ffffff70;border:1px solid white;border-radius:22px;padding:18px}.empty-state{border:1px dashed #9fbeb0;border-radius:24px;background:#ffffff40;padding:34px 24px;margin-top:12px;color:var(--ink-soft)}.empty-state .big{color:var(--ink);font-size:20px}.empty-state .ico{font-size:30px}
+.field input,.field select{background:#ffffffb8;border:1px solid #cedfd6;border-radius:13px}.overlay{background:#173e354f;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.modal{background:#f7fcf9f2;border-radius:28px;max-height:90dvh}.modal-head h2{letter-spacing:-.035em;line-height:1.3}.modal-head,.modal-body,.modal-foot{padding-left:24px;padding-right:24px}.modal-foot{border-top:1px solid #dce8e2;background:transparent;gap:12px}.qty-input-row input{background:white;border-radius:16px;font-size:36px;font-weight:700;min-width:0}.qty-input-row button{background:#e8f2ed;color:var(--brand-dark);border:1px solid white}.aviso-recontagem{background:#e5f1eb;color:var(--brand-dark);border-radius:12px;padding:12px!important;line-height:1.5}.hint{border-radius:12px}.bottom-nav{background:#f8fffbdf;border:1px solid white;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:22px 22px 0 0;box-shadow:0 -4px 30px #23483c10}.bottom-nav .tab-btn{min-width:0;font-size:9px}.bottom-nav .tab-btn span{white-space:normal}.toast{border-radius:16px;max-width:calc(100vw - 28px)}
+:focus-visible{outline:3px solid #248d73;outline-offset:3px}#searchInput:disabled{opacity:.7}summary:focus-visible{border-radius:8px}
+@media(min-width:761px){.topbar{gap:12px}.tabs{order:3;width:100%;justify-content:center}.wrap{max-width:1000px}.bloco-painel .btn-bloco{width:auto;min-width:220px}.results{grid-template-columns:repeat(2,minmax(0,1fr))}.modal{width:520px}.busca-sticky{position:static}}
+@media(max-width:760px){:root{--top-h:70px}.topbar{min-height:70px;padding:12px 16px}.wrap{padding:24px 16px 42px}.page-intro{margin-bottom:22px}.page-intro h1{font-size:30px}.intro-symbol{width:52px;height:52px;font-size:30px;border-radius:18px}.bloco-painel{padding:18px}.auth-wrap{padding-top:28px}.auth-welcome h1{font-size:30px}.auth-card{border-radius:24px}.userbox .who{display:block;max-width:110px}.userbox .who span{display:none}.userbox .who b{font-size:11px}.brand .name{font-size:11px}.modal{border-radius:26px 26px 0 0;max-height:92dvh}.modal-foot{padding-bottom:calc(18px + var(--safe-b))}.medida-row{flex-wrap:wrap}.medida-row input{flex-basis:100%}.medida-row .filtros{width:100%;display:flex}.medida-row .filtros button{flex:1;min-height:44px}.cards-row{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap.com-nav{padding-bottom:calc(var(--nav-h) + 38px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@supports not (backdrop-filter:blur(1px)){.topbar,.search-box,.auth-card,.modal,.bottom-nav{background:#f5faf7}}
+
+}
+
+@media screen {
+.dc-entry{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:16px 20px;margin:0 0 20px;text-align:left;border:1px solid #fff;background:linear-gradient(110deg,#fff7d8d9,#ffffffaa);border-radius:20px;color:var(--ink);box-shadow:var(--shadow);cursor:pointer}.dc-entry strong{display:block;font-size:16px}.dc-entry small{display:block;margin-top:5px;color:var(--ink-soft);font-size:12px}.dc-entry>span:last-child{font-size:24px;color:#947013}.dc-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 12px}.dc-heading h2{font-size:21px;margin:0}.dc-legend{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.dc-badge{display:inline-block;padding:8px 12px;border-radius:12px;font-size:12px;font-weight:700}.dc-amarelo{background:#fff0b0;color:#705100}.dc-laranja{background:#ffe0bd;color:#8b3a00}.dc-vermelho{background:#ffe0e0;color:#a32030}.dc-vencido{background:#8d2136;color:#fff}.dc-card{background:#ffffffc9;border:1px solid white;border-radius:20px;padding:18px;margin:12px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center}.dc-card h3{margin:0 0 8px;font-size:16px;overflow-wrap:anywhere}.dc-card p{margin:6px 0;font-size:12px;color:var(--ink-soft);overflow-wrap:anywhere}.dc-date{display:flex;flex-direction:column;gap:5px;min-width:145px;text-align:center;font-size:17px}.dc-date small{font-size:12px}.dc-card .dc-actions{grid-column:1/-1;display:flex;justify-content:flex-end}.dc-pagination{display:flex;gap:12px;align-items:center;justify-content:center;margin:20px 0}.dc-product{padding:16px;background:#edf6f0;border-radius:16px;margin-bottom:20px}.dc-product strong{display:block;font-size:18px;line-height:1.4}.dc-product small{display:block;margin-top:8px;color:var(--ink-soft)}#dcFeedback{line-height:1.6;min-height:24px}#dcSearchResults:empty{display:none}
+@media(max-width:520px){.dc-card{grid-template-columns:1fr}.dc-date{flex-direction:row;justify-content:space-between;align-items:center}.dc-entry{padding:16px}.dc-heading h2{font-size:18px}}
+
+}
 </style>
 </head>
 <body>
@@ -729,7 +757,7 @@
 
 <!-- ================= AUTENTICAÇÃO ================= -->
 <div class="auth-wrap" id="viewAuth" style="display:none;">
-  <div class="auth-card">
+  <div class="auth-welcome"><span class="app-mark" aria-hidden="true">G</span><h1>Estoque em dia.<br>Rotina mais leve.</h1><p>Seu espaço para uma contagem simples e organizada.</p></div><div class="auth-card">
     <div class="auth-head">
       <div class="stage" id="authStage">Acesso</div>
       <h2 id="authTitle">Entrar</h2>
@@ -771,6 +799,8 @@
 
   <!-- ---- Contagem ---- -->
   <div id="viewLancamento">
+    <div class="page-intro"><div><span class="eyebrow">GODOY · ESTOQUE</span><h1>Vamos contar?</h1><p>Um produto por vez. Tudo no lugar.</p></div><span class="intro-symbol" aria-hidden="true">▦</span></div>
+    <button class="dc-entry" onclick="setView('datascurtas')"><span><strong>Datas curtas</strong><small>Registre vencimento e quantidade dos produtos</small></span><span aria-hidden="true">↗</span></button>
     <!-- Bloco de contagem: enquanto nao houver um aberto, a busca fica travada -->
     <div class="bloco-painel" id="blocoPainel" style="display:none;">
       <div class="bp-linha">
@@ -794,13 +824,13 @@
         <button class="btn-sm" id="etapaDeposito" onclick="mudarEtapa('deposito')" aria-pressed="false">2. Depósito (0)</button>
       </div>
       <p class="hint" id="etapaTexto"></p>
-      <div id="etapaLista"></div>
+      <details id="filaPendentes"><summary id="filaResumo">Produtos aguardando depósito</summary><div id="etapaLista"></div></details>
     </section>
     <div class="busca-sticky">
       <div class="search-box">
         <svg class="lupa" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
         <input id="searchInput" type="text" inputmode="search" enterkeyhint="search"
-               placeholder="Nome, código ou barras…" autocomplete="off" disabled>
+               placeholder="Nome, código ou barras…" aria-label="Buscar produto para contar" autocomplete="off" disabled>
         <button class="clear-btn" id="clearBtn" onclick="clearSearch()" aria-label="Limpar">✕</button>
         <button class="scan-btn" id="scanBtn" onclick="abrirScanner()" aria-label="Ler código de barras">
           <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -833,6 +863,18 @@
     </div>
   </div>
 
+  <section id="viewDatasCurtas" style="display:none;" aria-label="Datas curtas">
+    <button class="btn-sm" onclick="setView('lancamento')">← Voltar à contagem</button>
+    <div class="page-intro" style="margin-top:24px;"><div><span class="eyebrow">CUIDADO COM O ESTOQUE</span><h1>Datas curtas</h1><p>Registre hoje. Aproveite o prazo.</p></div></div>
+    <p class="hint">Leia o código de barras, escolha o produto e informe o vencimento e a quantidade de unidades. Cada data é um registro separado.</p>
+    <div class="search-box"><input id="dcSearch" type="search" placeholder="Nome, código ou barras…" autocomplete="off" aria-label="Buscar produto para datas curtas"><button class="scan-btn" onclick="abrirScanner('datascurtas')" aria-label="Ler código de barras para datas curtas"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5M8 7v10M12 7v10M16 7v10"/></svg></button></div>
+    <p id="dcSearchStatus" class="search-meta" role="status" aria-live="polite"></p><div id="dcSearchResults" class="results"></div>
+    <div class="dc-heading"><h2 id="dcListTitle">Vencimentos registrados</h2><button class="btn-sm" onclick="dcRefresh()">Atualizar</button></div>
+    <p class="hint" id="dcListHint"></p>
+    <div class="dc-legend" aria-label="Prioridade por dias restantes"><span class="dc-badge dc-amarelo">31–45 dias</span><span class="dc-badge dc-laranja">16–30 dias</span><span class="dc-badge dc-vermelho">0–15 dias</span><span class="dc-badge dc-vencido">Vencido</span></div>
+    <p class="search-meta" id="dcListStatus" role="status" aria-live="polite"></p><div id="dcList"></div>
+    <div id="dcPagination" class="dc-pagination" style="display:none;"><button id="dcPrev" class="btn-sm">Anterior</button><span id="dcPageLabel"></span><button id="dcNext" class="btn-sm">Próxima</button></div>
+  </section>
   <!-- ---- Relatório (admin) ---- -->
   <div id="viewConsulta" style="display:none;">
     <h2>Produtos contados</h2>
@@ -1105,7 +1147,7 @@
           <label style="color:var(--venda-dark);">● Área de Venda</label>
           <div class="qty-input-row">
             <button onclick="stepQty('venda',-1)" aria-label="Menos">−</button>
-            <input id="qtyVenda" type="number" min="0" value="0" inputmode="numeric" pattern="[0-9]*">
+            <input id="qtyVenda" aria-label="Quantidade na área de venda" type="number" min="0" step="1" value="0" inputmode="numeric" pattern="[0-9]*">
             <button onclick="stepQty('venda',1)" aria-label="Mais">+</button>
           </div>
         </div>
@@ -1113,7 +1155,7 @@
           <label style="color:var(--deposito-dark);">● Depósito</label>
           <div class="qty-input-row">
             <button onclick="stepQty('deposito',-1)" aria-label="Menos">−</button>
-            <input id="qtyDeposito" type="number" min="0" value="0" inputmode="numeric" pattern="[0-9]*">
+            <input id="qtyDeposito" aria-label="Quantidade no depósito" type="number" min="0" step="1" value="0" inputmode="numeric" pattern="[0-9]*">
             <button onclick="stepQty('deposito',1)" aria-label="Mais">+</button>
           </div>
         </div>
@@ -1126,6 +1168,11 @@
   </div>
 </div>
 
+<div class="overlay" id="modalDataCurta" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="dcModalTitle">
+ <div class="modal"><div class="puxador"></div><div class="modal-head"><div class="stage">Datas curtas</div><h2 id="dcModalTitle">Quando vence?</h2></div>
+ <div class="modal-body"><div class="dc-product"><strong id="dcProductName"></strong><small id="dcProductCode"></small></div><div class="field"><label for="dcExpiry">Vencimento da embalagem</label><input type="date" id="dcExpiry" required min="2000-01-01"><div class="dica">Até 45 dias a partir de hoje. Confira dia, mês e ano.</div></div><div class="field"><label for="dcQuantity">Quantidade com este vencimento</label><input id="dcQuantity" type="number" inputmode="numeric" min="1" max="2147483647" step="1" required placeholder="Ex.: 12"><div class="dica">Conte somente as unidades que vencem nesta data. Informe o total; reenviar não soma quantidades.</div></div><p id="dcFeedback" role="status" aria-live="polite"></p></div>
+ <div class="modal-foot"><button class="btn btn-ghost" onclick="dcClose()">Cancelar</button><button class="btn btn-primary" id="dcSave" onclick="dcSave()">Salvar vencimento</button></div></div>
+</div>
 <!-- ================= MODAL DE CADASTRO (produto bipado fora do cadastro) ================= -->
 <div class="overlay" id="modalCadastro" style="display:none;">
   <div class="modal">
@@ -1252,7 +1299,7 @@
     var hoje = h.getFullYear()+'-'+('0'+(h.getMonth()+1)).slice(-2)+'-'+('0'+h.getDate()).slice(-2);
     return (String(d) === hoje ? 'Hoje · ' : '') + p[2]+'/'+p[1]+'/'+p[0];
   }
-  function escapeHtml(s){ return (s||"").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escapeHtml(s){ return String(s == null ? "" : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function num(v){ return (v||0).toLocaleString('pt-BR'); }
 
   // Contextos que bloqueiam localStorage (aba anonima, webview de app) fariam
@@ -1287,8 +1334,8 @@
       supa = window.supabase.createClient(url, key, {
         auth: { storage: store, persistSession: true, autoRefreshToken: true }
       });
-    }catch(e){ setConn(false, 'erro de configuração'); return; }
-    supa.auth.onAuthStateChange(function(_e, s){ routeSession(s); });
+    }catch(e){ setConn(false, 'sem conexão'); showScreen('auth'); authMsg('Não foi possível conectar. Confira a internet e recarregue a página.', 'err'); return; }
+    supa.auth.onAuthStateChange(function(_e, s){ setTimeout(function(){ routeSession(s); }, 0); });
     supa.auth.getSession().then(function(r){ routeSession(r.data ? r.data.session : null); });
   })();
 
@@ -1301,6 +1348,9 @@
 
   function routeSession(session){
     if(!session){
+      dcVersion++;dcListVersion++;dcProduct=null;dcToday=null;
+      el('dcList').innerHTML='';el('dcSearchResults').innerHTML='';
+      document.querySelectorAll('.overlay').forEach(function(o){ o.style.display='none'; });
       el('modalLancamento').style.display = 'none'; currentProduct = null;
       bloco = null; meusItens = {}; etapaContagem = 'venda'; etapaChaveAtual = '';
       me = null; authUserId = null;
@@ -1318,6 +1368,7 @@
     authUserId = session.user.id;
     supa.from('colaboradores').select('id,nome,papel,ativo').eq('user_id', session.user.id).maybeSingle()
       .then(function(res){
+        if(authUserId !== session.user.id) return;
         if(res.error || !res.data || !res.data.ativo){
           setConn(false, 'acesso não liberado');
           showToast(res.error ? ('Erro: '+res.error.message) : 'Seu acesso está inativo. Fale com o administrador.', true);
@@ -1511,6 +1562,7 @@
   });
 
   // ---------- Busca ----------
+  var searchVersion = 0, trocaVersion = 0;
   var searchInput = el('searchInput'), clearBtn = el('clearBtn');
   searchInput.addEventListener('input', function(){
     clearBtn.style.display = searchInput.value ? 'block' : 'none';
@@ -1526,7 +1578,9 @@
   };
 
   function runSearch(){
-    if(!supa || !me || etapaContagem === 'deposito') return;
+    var version = ++searchVersion;
+    clearTimeout(searchDebounce);
+    if(!supa || !me || !blocoAberto() || etapaContagem === 'deposito') return;
     var raw = searchInput.value.trim();
     var lista = el('resultsList'), meta = el('searchMeta');
 
@@ -1542,7 +1596,7 @@
     el('blocoContados').style.display = 'none';
 
     meta.innerHTML = '<span class="spinner"></span> buscando…';
-    var q = raw.replace(/[%,]/g, '');
+    var q = raw.replace(/[%,()."\\_*]/g, ' ').trim();
     var isNum = /^[0-9]+$/.test(q);
     var orFilter = isNum
       ? 'codigo.eq.'+q+',codigo_barras.ilike.%'+q+'%,nome.ilike.%'+q+'%'
@@ -1556,6 +1610,7 @@
       .or(orFilter)
       .order('lancado', {ascending:true}).order('nome', {ascending:true}).limit(MAX_RESULTS)
       .then(function(res){
+        if(version !== searchVersion || searchInput.value.trim() !== raw || !me || !blocoAberto() || etapaContagem !== 'venda') return;
         if(res.error){ meta.textContent = 'Erro na busca: ' + res.error.message; return; }
         var total = res.count || res.data.length;
         meta.textContent = total === 0 ? 'Nenhum produto encontrado.'
@@ -1686,10 +1741,13 @@
     el('etapaVenda').disabled = el('etapaDeposito').disabled = salvandoEtapa;
     el('etapaTexto').textContent = deposito
       ? 'Conte estes mesmos produtos no depósito. Se não houver unidades, informe 0 e confirme.'
-      : 'Conte vários produtos aqui e depois vá uma única vez ao depósito. Os pendentes ficam salvos neste celular e navegador.';
+      : 'Busque um produto e salve a quantidade. Depois, conte o depósito. Os pendentes ficam neste aparelho.';
     if(deposito){ el('blocoContados').style.display='none'; el('lancVazio').style.display='none'; }
     try{
       var dados = lerEtapas(), ids = Object.keys(dados);
+      el('filaPendentes').open = deposito;
+      el('filaPendentes').style.display = ids.length || deposito ? 'block' : 'none';
+      el('filaResumo').textContent = ids.length + ' produto(s) aguardando depósito';
       el('etapaDeposito').textContent = '2. Depósito (' + ids.length + ')';
       el('etapaLista').innerHTML = ids.length ? ids.map(function(id){
         var d = dados[id];
@@ -1792,7 +1850,7 @@
   // O codigo de barras vem da leitura — ninguem redigita. O nome sai no
   // padrao do SG ("IOG DANONE 800G"), e o produto fica marcado como novo para
   // o administrador cadastrar tambem la. Cadastrou, abre a contagem dele.
-  var cadBarras = '', cadUnidade = 'G';
+  var cadBarras = '', cadUnidade = 'G', cadastrando = false;
 
   // Busca que e um codigo de barras (so digitos, tamanho de EAN/GTIN)
   function barrasDaBusca(){
@@ -1801,8 +1859,10 @@
   }
 
   function cadMedida(){
-    var v = parseFloat(el('mcMedida').value.trim().replace(/\./g,'').replace(',', '.'));
-    return isFinite(v) && v > 0 ? v : 0;
+    var texto = el('mcMedida').value.trim();
+    if(!/^\d+(?:[.,]\d{1,6})?$/.test(texto)) return 0;
+    var v = Number(texto.replace(',', '.'));
+    return Number.isFinite(v) && v > 0 && v <= 999999999 ? v : 0;
   }
 
   function cadPrevia(){
@@ -1832,7 +1892,7 @@
 
   window.abrirCadastro = function(){
     cadBarras = barrasDaBusca();
-    if(!cadBarras || !blocoAberto()) return;
+    if(!cadBarras || !blocoAberto() || cadastrando) return;
     el('mcBarras').textContent = 'Barras: ' + cadBarras;
     el('mcNome').value = ''; el('mcMedida').value = '';
     cadPrevia();
@@ -1840,27 +1900,38 @@
     setTimeout(function(){ el('mcNome').focus(); }, 60);
   };
 
-  window.fecharCadastro = function(){ el('modalCadastro').style.display = 'none'; };
+  window.fecharCadastro = function(){ if(!cadastrando) el('modalCadastro').style.display = 'none'; };
 
   window.confirmarCadastro = function(){
-    if(!supa || !cadBarras) return;
-    var nome = el('mcNome').value.trim(), v = cadMedida();
+    if(!supa || !cadBarras || !blocoAberto() || cadastrando) return;
+    var nome = el('mcNome').value.trim().replace(/\s+/g,' ').toUpperCase(), v = cadMedida();
     if(nome.length < 3){ showToast('Digite o nome do produto.', true); el('mcNome').focus(); return; }
-    if(!v){ showToast('Informe o peso ou o volume.', true); el('mcMedida').focus(); return; }
+    if(!v){ showToast('Informe uma medida válida, como 30 ou 1,5. Não use separador de milhar.', true); el('mcMedida').focus(); return; }
     var btn = el('btnCadastrar');
+    cadastrando = true;
     btn.disabled = true; btn.textContent = 'Cadastrando…';
+    // A função do banco usa trim_scale: remove apenas zeros decimais, preservando 30, 300 e 500.
+    var nomeEsperado = nome + ' ' + String(v).replace('.', ',') + cadUnidade;
     supa.rpc('cadastrar_produto', { p_codigo_barras: cadBarras, p_nome: nome,
                                     p_medida_valor: v, p_medida_unidade: cadUnidade })
       .then(function(res){
+        cadastrando = false;
         btn.disabled = false; btn.textContent = 'Cadastrar e contar';
         if(res.error){ showToast(limparErro(res.error.message), true); return; }
         var p = res.data && res.data[0];
         if(!p){ showToast('Não foi possível cadastrar.', true); return; }
+        if(!p.ja_existia && p.nome !== nomeEsperado){
+          showToast('O servidor devolveu um nome diferente: ' + p.nome + '. Peça ao administrador para conferir o cadastro antes de contar.', true);
+          runSearch(); return;
+        }
         fecharCadastro();
         showToast(p.ja_existia ? 'Este código acabou de ser cadastrado por outra pessoa.'
                                : 'Produto cadastrado.');
         runSearch();          // a busca pelo codigo ja encontra o produto novo
         abrirModal(p);
+      }).catch(function(){
+        cadastrando = false; btn.disabled = false; btn.textContent = 'Cadastrar e contar';
+        showToast('A conexão falhou. Busque o código novamente para conferir se o cadastro foi salvo.', true);
       });
   };
 
@@ -2189,9 +2260,104 @@
     toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
   }
 
+  // Datas calculadas pelo servidor no fuso de São Paulo, sem depender do relógio do aparelho.
+  var dcProduct=null,dcSaving=false,dcVersion=0,dcListVersion=0,dcTimer=null,dcPage=0,dcToday=null;
+  function dcVisible(){return !!me && el('viewDatasCurtas').style.display==='block';}
+  function dcDate(value){return value.split('-').reverse().join('/');}
+  function dcDays(value){return Math.round((Date.parse(value+'T12:00:00Z')-Date.parse(dcToday+'T12:00:00Z'))/86400000);}
+  function dcDeadline(days){return days<0 ? 'Vencido há '+Math.abs(days)+' dia(s)' : days===0 ? 'Vence hoje' : days===1 ? 'Vence amanhã' : 'Vence em '+days+' dias';}
+  function dcPreview(){
+    var value=el('dcExpiry').value,days=value&&dcToday?dcDays(value):null;
+    el('dcFeedback').textContent=days===null?'Confira a data impressa na embalagem.':days>45?'Fora do prazo: registre vencimentos de até 45 dias.':dcDeadline(days)+(days<0?'. Separe o produto e avise o administrador.':'');
+    el('dcFeedback').className=days===null?'hint':'dc-badge dc-'+(days<0?'vencido':days<=15?'vermelho':days<=30?'laranja':'amarelo');
+  }
+  window.dcRefresh=async function(page){
+    if(!dcVisible()) return;
+    var version=++dcListVersion,user=me.id;
+    el('dcListStatus').textContent='Atualizando vencimentos…';
+    try{
+      var res=await supa.rpc('listar_datas_curtas',{p_pagina:page==null?dcPage:page});
+      if(version!==dcListVersion || !dcVisible() || me.id!==user) return;
+      if(res.error) throw res.error;
+      var data=res.data;dcToday=data.hoje;dcPage=data.pagina;
+      el('dcListTitle').textContent=data.admin?'Prioridades para ofertas':'Meus registros';
+      el('dcListHint').textContent=data.admin?'Vencimentos mais próximos primeiro. Os vencidos precisam ser retirados da venda.':'Seus registros são enviados ao administrador. Produtos repetidos com a mesma data entram uma única vez na lista.';
+      el('dcListStatus').textContent=data.total?data.total+' registro(s) em acompanhamento · atualizado agora.':'Nenhuma data curta pendente.';
+      el('dcList').innerHTML=data.itens.map(function(p){
+        return '<article class="dc-card"><div><h3>'+escapeHtml(p.nome)+'</h3><p class="dc-quantity"><strong>'+num(p.quantidade)+' unidade(s)</strong> com este vencimento</p><p>Cód. '+escapeHtml(p.codigo)+' · '+escapeHtml(p.codigo_barras||'Sem barras')+'</p>'+(data.admin?'<p>Preço cadastrado: '+fmtMoney(p.preco)+' · Registrado por '+escapeHtml(p.registrado_por)+'</p>':'')+'</div><div class="dc-badge dc-date dc-'+p.faixa+'"><span>'+dcDate(p.vencimento)+'</span><small>'+dcDeadline(p.dias)+'</small></div>'+(data.admin?'<div class="dc-actions"><button class="btn-sm" data-dc-resolve="'+escapeHtml(p.id)+'">Marcar como resolvido</button></div>':'')+'</article>';
+      }).join('');
+      el('dcPrev').disabled=dcPage===0;el('dcNext').disabled=(dcPage+1)*50>=data.total;
+      el('dcPageLabel').textContent=data.total?'Página '+(dcPage+1)+' de '+Math.ceil(data.total/50):'';
+      el('dcPagination').style.display=data.total>50?'flex':'none';
+      el('dcList').querySelectorAll('[data-dc-resolve]').forEach(function(b){b.addEventListener('click',async function(){
+        if(!confirm('Este lote já foi vendido, retirado ou tratado? Ele sairá da lista de pendências.'))return;
+        b.disabled=true;
+        try{var r=await supa.rpc('resolver_data_curta',{p_id:b.getAttribute('data-dc-resolve')});if(r.error)throw r.error;dcRefresh();}
+        catch(e){showToast('Não foi possível resolver: '+limparErro(e.message||'verifique a conexão'),true);b.disabled=false;}
+      });});
+      dcPreview();
+    }catch(e){if(version===dcListVersion&&dcVisible())el('dcListStatus').textContent='Não foi possível atualizar. Toque em Atualizar para tentar novamente.';}
+  };
+  window.dcSearch=async function(direct){
+    clearTimeout(dcTimer);var version=++dcVersion;
+    var raw=el('dcSearch').value.trim();el('dcSearchResults').innerHTML='';
+    if(!me || !dcVisible() || raw.length<2){el('dcSearchStatus').textContent='';return;}
+    var user=me.id,q=raw.replace(/[%,()."\\_*]/g,' ').trim();
+    if(!q){el('dcSearchStatus').textContent='Digite um nome ou código válido.';return;}
+    el('dcSearchStatus').textContent='Buscando produto…';
+    try{
+      var query=supa.from('produtos').select('id,codigo,nome,codigo_barras,preco');
+      // Bipagem precisa ser exata: não escolher um produto por coincidência parcial.
+      if(direct && /^[0-9]{6,14}$/.test(raw))query=query.eq('codigo_barras',raw);
+      else query=query.or('nome.ilike.%'+q+'%,codigo_barras.ilike.%'+q+'%'+(/^[0-9]+$/.test(q)?',codigo.eq.'+q:''));
+      var res=await query.order('nome').limit(50);
+      if(version!==dcVersion || !dcVisible() || me.id!==user || raw!==el('dcSearch').value.trim())return;
+      if(res.error)throw res.error;
+      var list=res.data||[];
+      el('dcSearchStatus').textContent=list.length?(list.length===50?'Até 50 resultados. Refine a busca.':'Escolha o produto para informar o vencimento.'):'Produto não encontrado. Confira o código ou peça ao administrador para cadastrá-lo.';
+      el('dcSearchResults').innerHTML=list.map(function(p,i){return '<article class="prod"><div class="nome">'+escapeHtml(p.nome)+'</div><p class="hint">'+escapeHtml(p.codigo)+' · '+escapeHtml(p.codigo_barras||'Sem barras')+'</p><button class="btn-contar" data-dc-product="'+i+'">Informar vencimento</button></article>';}).join('');
+      el('dcSearchResults').querySelectorAll('[data-dc-product]').forEach(function(b){b.addEventListener('click',function(){dcOpen(list[Number(b.getAttribute('data-dc-product'))]);});});
+      if(direct&&list.length===1)dcOpen(list[0]);
+    }catch(e){if(version===dcVersion&&dcVisible())el('dcSearchStatus').textContent='Erro na busca. Confira a conexão e tente novamente.';}
+  };
+  function dcOpen(product){
+    if(dcSaving)return;dcProduct=product;
+    el('dcProductName').textContent=product.nome;el('dcProductCode').textContent='Cód. '+product.codigo+' · '+(product.codigo_barras||'Sem barras');
+    el('dcQuantity').value='';el('dcExpiry').value='';el('dcExpiry').min='2000-01-01';
+    el('dcSave').disabled=false;el('dcSave').textContent='Salvar vencimento';dcPreview();
+    el('modalDataCurta').style.display='flex';setTimeout(function(){el('dcExpiry').focus();},50);
+  }
+  window.dcClose=function(){if(dcSaving)return;el('modalDataCurta').style.display='none';dcProduct=null;};
+  window.dcSave=async function(){
+    if(dcSaving||!dcProduct||!me)return;
+    var date=el('dcExpiry').value;
+    if(!date || !el('dcExpiry').checkValidity()){showToast('Informe a data de vencimento completa.',true);return;}
+    if(dcToday&&dcDays(date)>45){showToast('Registre vencimentos de até 45 dias.',true);return;}
+    var quantidade=Number(el('dcQuantity').value);
+    if(!Number.isSafeInteger(quantidade)||quantidade<=0||quantidade>2147483647){showToast('Informe a quantidade inteira de unidades, maior que zero.',true);el('dcQuantity').focus();return;}
+    dcSaving=true;el('dcSave').disabled=true;el('dcSave').textContent='Salvando…';var user=me.id;
+    try{
+      var res=await supa.rpc('registrar_data_curta',{p_produto_id:dcProduct.id,p_vencimento:date,p_quantidade:quantidade});if(res.error)throw res.error;
+      dcSaving=false;if(!me||me.id!==user)return;dcClose();
+      showToast(res.data.novo?'Vencimento enviado ao administrador.':'Já registrado: '+num(res.data.quantidade)+' unidade(s) com este vencimento. A quantidade não foi somada nem alterada.');
+      el('dcSearch').value='';dcSearch(false);dcRefresh(0);el('dcSearch').focus();
+    }catch(e){dcSaving=false;if(!me||me.id!==user)return;el('dcSave').disabled=false;el('dcSave').textContent='Tentar salvar novamente';showToast('Não foi possível confirmar: '+limparErro(e.message||'verifique a conexão')+'. Você pode tentar novamente sem duplicar o registro.',true);}
+  };
+  el('dcSearch').addEventListener('input',function(){++dcVersion;clearTimeout(dcTimer);dcTimer=setTimeout(function(){dcSearch(false);},220);});
+  el('dcSearch').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();dcSearch(true);}});
+  el('dcExpiry').addEventListener('input',dcPreview);
+  el('dcExpiry').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();el('dcQuantity').focus();}});
+  el('dcQuantity').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();dcSave();}});
+  el('dcPrev').addEventListener('click',function(){dcRefresh(dcPage-1);});el('dcNext').addEventListener('click',function(){dcRefresh(dcPage+1);});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden&&dcVisible())dcRefresh();});
+  setInterval(function(){if(!document.hidden&&dcVisible()&&!dcSaving)dcRefresh();},60000);
+
   // ---------- Views ----------
   window.setView = function(v){
-    if(v !== 'lancamento' && (!me || me.papel !== 'admin')) return;
+    if(!me || (v !== 'lancamento' && v !== 'datascurtas' && me.papel !== 'admin')) return;
+    dcVersion++;dcListVersion++;
+    el('viewDatasCurtas').style.display = v==='datascurtas' ? 'block':'none';
+    if(v==='datascurtas'){el('dcSearch').value='';el('dcSearchResults').innerHTML='';el('dcSearchStatus').textContent='';dcRefresh(0);}
     el('viewLancamento').style.display    = v==='lancamento'    ? 'block':'none';
     el('viewConsulta').style.display      = v==='contados'      ? 'block':'none';
     el('viewRelatorio').style.display     = v==='relatorio'     ? 'block':'none';
@@ -2201,7 +2367,7 @@
     [['lancamento','tabLanc'],['contados','tabConsulta'],['relatorio','tabRel'],['trocas','tabTrocas'],
      ['monitoramento','tabMon'],['colaboradores','tabColab']]
       .forEach(function(par){
-        var on = v === par[0];
+        var on = v === par[0] || (v==='datascurtas' && par[0]==='lancamento');
         el(par[1]+'T').classList.toggle('active', on);
         el(par[1]+'B').classList.toggle('active', on);
       });
@@ -2814,6 +2980,7 @@
     if(e.key === 'Enter'){ e.preventDefault(); this.blur(); buscaTroca(true); }
   });
   window.limparBuscaTroca = function(){
+    trocaVersion++;
     el('trocaInput').value = '';
     el('trocaClearBtn').style.display = 'none';
     el('trocaResultados').innerHTML = '';
@@ -2824,12 +2991,13 @@
   // direto=true (bipagem ou Enter) abre o modal sozinho quando da um so
   // produto, e oferece o cadastro manual quando nao da nenhum.
   function buscaTroca(direto){
+    var version = ++trocaVersion;
     if(!supa || !me) return;
     var raw = el('trocaInput').value.trim();
     if(raw.length < 2){ el('trocaResultados').innerHTML=''; el('trocaMeta').innerHTML=''; return; }
 
     el('trocaMeta').innerHTML = '<span class="spinner"></span> buscando…';
-    var q = raw.replace(/[%,]/g, '');
+    var q = raw.replace(/[%,()."\\_*]/g, ' ').trim();
     var isNum = /^[0-9]+$/.test(q);
     var orFilter = isNum
       ? 'codigo.eq.'+q+',codigo_barras.ilike.%'+q+'%,nome.ilike.%'+q+'%'
@@ -2838,6 +3006,7 @@
     supa.from('produtos').select('id,codigo,nome,codigo_barras,preco', {count:'exact'})
       .or(orFilter).order('nome', {ascending:true}).limit(MAX_RESULTS)
       .then(function(res){
+        if(version !== trocaVersion || el('trocaInput').value.trim() !== raw || !me) return;
         if(res.error){ el('trocaMeta').textContent = 'Erro na busca: '+res.error.message; return; }
         var lista = res.data || [], total = res.count || lista.length;
 
@@ -3272,7 +3441,7 @@
   var scanAlvo = 'lancamento';
 
   window.abrirScanner = function(alvo){
-    scanAlvo = (alvo === 'trocas') ? 'trocas' : 'lancamento';
+    scanAlvo = alvo==='datascurtas' ? 'datascurtas' : (alvo === 'trocas') ? 'trocas' : 'lancamento';
     el('scannerShell').style.display='flex';
     el('scanErro').style.display='none';
     el('scanFrame').style.display='block';
@@ -3409,6 +3578,7 @@
     fecharScanner();
     if(navigator.vibrate){ try{ navigator.vibrate(60); }catch(e){} }
 
+    if(scanAlvo === 'datascurtas'){el('dcSearch').value=limpo;dcSearch(true);return;}
     if(scanAlvo === 'trocas'){
       el('trocaInput').value = limpo;
       el('trocaClearBtn').style.display = 'block';
