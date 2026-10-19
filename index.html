@@ -902,6 +902,19 @@ body{background:linear-gradient(135deg,#edf5f0,#f0f3f7);background-attachment:sc
     <p id="dcSearchStatus" class="search-meta" role="status" aria-live="polite"></p><div id="dcSearchResults" class="results"></div>
     <div class="dc-heading"><h2 id="dcListTitle">Vencimentos registrados</h2><button class="btn-sm" onclick="dcRefresh()">Atualizar</button></div>
     <p class="hint" id="dcListHint"></p>
+    <details class="dc-report" style="margin:14px 0;padding:14px;border:1px solid #dce6e1;border-radius:12px;background:#fff">
+      <summary style="cursor:pointer;font-weight:700">Relatório de datas curtas · PDF</summary>
+      <p class="hint">Escolha quais lotes incluir. Campos em branco não aplicam filtro. O relatório considera todas as páginas da lista.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px">
+        <label style="flex:1;min-width:160px">Quantidade maior que<input id="dcReportQty" type="number" min="0" step="1" placeholder="Ex.: 15" style="width:100%;box-sizing:border-box"></label>
+        <label style="flex:1;min-width:160px">Mais de quantos dias até vencer?<input id="dcReportDays" type="number" min="0" step="1" placeholder="Ex.: 7" style="width:100%;box-sizing:border-box"></label>
+        <label style="flex:1;min-width:160px">Até quantos dias? (opcional)<input id="dcReportMax" type="number" min="0" max="45" step="1" placeholder="Ex.: 15" style="width:100%;box-sizing:border-box"></label>
+      </div>
+      <p class="hint">Exemplo: maior que 15 unidades e mais de 7 dias inclui lotes com 16 unidades ou mais e pelo menos 8 dias até vencer.</p>
+      <button id="dcReportBtn" class="btn-sm" onclick="dcReport()">Visualizar relatório / PDF</button>
+      <p id="dcReportStatus" class="hint" role="status" aria-live="polite"></p>
+    </details>
+
     <div class="dc-legend" aria-label="Prioridade por dias restantes"><span class="dc-badge dc-amarelo">31–45 dias</span><span class="dc-badge dc-laranja">16–30 dias</span><span class="dc-badge dc-vermelho">0–15 dias</span><span class="dc-badge dc-vencido">Vencido</span></div>
     <p class="search-meta" id="dcListStatus" role="status" aria-live="polite"></p><div id="dcList"></div>
     <div id="dcPagination" class="dc-pagination" style="display:none;"><button id="dcPrev" class="btn-sm">Anterior</button><span id="dcPageLabel"></span><button id="dcNext" class="btn-sm">Próxima</button></div>
@@ -2339,6 +2352,61 @@ body{background:linear-gradient(135deg,#edf5f0,#f0f3f7);background-attachment:sc
     }catch(e){if(version===dcListVersion&&dcVisible())el('dcListStatus').textContent='Não foi possível atualizar. Toque em Atualizar para tentar novamente.';}
     finally{dcFetching--;}
   };
+  // Relatorio usa todas as paginas autorizadas, independentemente da pagina da lista.
+  var dcReportBusy=false;
+  window.dcReport=async function(){
+    if(!me || dcReportBusy)return;
+    var minQty=el('dcReportQty').value.trim(),minDays=el('dcReportDays').value.trim(),maxDays=el('dcReportMax').value.trim();
+    function valid(v){return v==='' || (/^\d+$/.test(v)&&Number.isSafeInteger(Number(v)));}
+    if(!valid(minQty)||!valid(minDays)||!valid(maxDays)||(maxDays!==''&&Number(maxDays)>45)){
+      el('dcReportStatus').textContent='Informe números inteiros positivos ou zero. O prazo máximo é 45 dias.';return;
+    }
+    if(minDays!==''&&maxDays!==''&&Number(minDays)>=Number(maxDays)){
+      el('dcReportStatus').textContent='O limite máximo de dias deve ser maior que o limite mínimo.';return;
+    }
+    var win=window.open('','_blank');
+    if(!win){el('dcReportStatus').textContent='Permita abrir uma nova aba para visualizar o relatório.';return;}
+    win.document.write('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Preparando relatório</title><p>Carregando todos os vencimentos…</p></html>');win.document.close();
+    dcReportBusy=true;el('dcReportBtn').disabled=true;
+    var user=me.id,items=[],today=null,total=null,seen=new Set();
+    try{
+      for(var page=0;;page++){
+        if(win.closed)throw new Error('Prévia fechada.');
+        var res=await supa.rpc('listar_datas_curtas',{p_pagina:page});
+        if(!me||me.id!==user)throw new Error('A sessão mudou. Entre novamente para gerar o relatório.');
+        if(res.error)throw res.error;
+        var data=res.data;
+        if(!data||!Array.isArray(data.itens))throw new Error('Resposta incompleta do banco.');
+        if(total===null){total=data.total;today=data.hoje;}
+        if(data.total!==total||data.hoje!==today||data.pagina!==page)throw new Error('A lista mudou durante a leitura. Gere o relatório novamente.');
+        data.itens.forEach(function(p){if(seen.has(String(p.id)))throw new Error('A lista mudou durante a leitura. Tente novamente.');seen.add(String(p.id));items.push(p);});
+        el('dcReportStatus').textContent='Preparando relatório: '+items.length+' de '+total+' registros.';
+        if(items.length>=total)break;
+        if(!data.itens.length||page>=1999)throw new Error('Não foi possível carregar a lista completa.');
+      }
+      if(items.length!==total)throw new Error('Lista incompleta. Tente novamente.');
+      var filtered=items.filter(function(p){return (minQty===''||Number(p.quantidade)>Number(minQty))&&(minDays===''||Number(p.dias)>Number(minDays))&&(maxDays===''||Number(p.dias)<=Number(maxDays));});
+      filtered.sort(function(a,b){return Number(a.dias)-Number(b.dias)||String(a.nome).localeCompare(String(b.nome),'pt-BR')||String(a.id).localeCompare(String(b.id));});
+      var filters=[];
+      if(minQty!=='')filters.push('Quantidade maior que '+minQty+' unidades');
+      if(minDays!=='')filters.push('Mais de '+minDays+' dias até vencer');
+      if(maxDays!=='')filters.push('Até '+maxDays+' dias até vencer');
+      if(!filters.length)filters.push('Todos os registros pendentes de datas curtas');
+      var units=filtered.reduce(function(sum,p){return sum+Number(p.quantidade);},0);
+      var html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Datas curtas - '+escapeHtml(today)+'</title><style>body{font:14px Arial,sans-serif;color:#182b26;margin:24px;line-height:1.45}h1{font-size:24px;margin-bottom:4px}.meta{color:#52635d}table{border-collapse:collapse;width:100%;margin-top:20px}th,td{text-align:left;padding:9px 7px;border-bottom:1px solid #d6dfdb}th{background:#edf3ef;font-size:12px}td:nth-child(n+3){white-space:nowrap}.red{color:#a32121}.orange{color:#985500}.yellow{color:#786000}.tools{background:#eef5f1;padding:14px;border-radius:10px}button{padding:12px 18px;border:0;border-radius:8px;background:#087f62;color:white;cursor:pointer}thead{display:table-header-group}tr{break-inside:avoid}@page{size:A4 portrait;margin:14mm}@media print{body{margin:0;font-size:10pt}.tools{display:none}h1{font-size:18pt}th,td{padding:6px}thead{display:table-header-group}}@media(max-width:600px){body{margin:12px}.table-wrap{overflow:auto}}</style></head><body><div class="tools"><button onclick="window.print()">Imprimir / Salvar em PDF</button><p>Na janela de impressão, escolha “Salvar como PDF”. Para mudar os filtros, volte à aba do estoque e gere outra prévia.</p></div><h1>Datas curtas — Mercado Godoy</h1><p class="meta">Data de referência: '+escapeHtml(dcDate(today))+' · '+filtered.length+' lote(s) · '+num(units)+' unidade(s)</p><p>'+escapeHtml(filters.join(' · '))+'</p><p class="meta">Quantidade por produto e vencimento. Prazos menores primeiro. Produtos vencidos devem ser retirados da venda.</p>';
+      if(filtered.length){
+        html+='<div class="table-wrap"><table><thead><tr><th>Código interno</th><th>Produto</th><th>Quantidade</th><th>Vencimento</th><th>Prazo</th></tr></thead><tbody>'+filtered.map(function(p){var color=p.dias<=15?'red':p.dias<=30?'orange':'yellow';return '<tr><td>'+escapeHtml(p.codigo)+'</td><td>'+escapeHtml(p.nome)+'</td><td>'+num(p.quantidade)+'</td><td>'+escapeHtml(dcDate(p.vencimento))+'</td><td class="'+color+'">'+escapeHtml(dcDeadline(Number(p.dias)))+'</td></tr>';}).join('')+'</tbody></table></div>';
+      }else{html+='<p><strong>Nenhum produto atende aos filtros escolhidos.</strong></p>';}
+      html+='</body></html>';
+      if(win.closed)throw new Error('Prévia fechada.');
+      win.document.open();win.document.write(html);win.document.close();
+      el('dcReportStatus').textContent=filtered.length+' lote(s) e '+num(units)+' unidade(s) na prévia. Use “Imprimir / Salvar em PDF”.';
+    }catch(e){
+      el('dcReportStatus').textContent='Relatório não gerado: '+(e.message||'verifique a conexão e tente novamente.');
+      if(!win.closed){win.document.body.textContent='Não foi possível gerar o relatório completo. Volte à aba do estoque e tente novamente.';}
+    }finally{dcReportBusy=false;el('dcReportBtn').disabled=false;}
+  };
+
   // One delegated listener replaces one listener per row on every refresh.
   el('dcList').addEventListener('click',async function(e){
     var b=e.target.closest('[data-dc-resolve]');
